@@ -3,7 +3,7 @@ import AdminListedProductCard from '../components/AdminListedProductCard'
 
 const AdminSideProducts = () => {
     return (
-        <div className="flex-1 min-h-screen bg-[#060606] text-neutral-200 p-4 sm:p-6 lg:p-10 flex flex-col gap-6 font-sans antialiased select-none">
+        <div className="flex-1 bg-[#060606] text-neutral-200 p-4 sm:p-6 lg:p-10 flex flex-col gap-6 font-sans antialiased select-none">
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900 pb-5">
                 <div className="flex flex-col gap-0.5">
@@ -55,7 +55,7 @@ const AdminSideProducts = () => {
                 </div>
             </div>
 
-            <div className="flex-1 w-full flex flex-col gap-3 mt-1">
+            <div className="flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design">
                 <AdminListedProductCard />
                 <AdminListedProductCard />
                 <AdminListedProductCard />

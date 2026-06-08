@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom'
 
 const AdminShowUsersPage = () => {
     return (
-        <div className="flex-1 flex flex-col gap-5 p-5 bg-[#060606] min-h-screen text-neutral-200 font-sans antialiased select-none ">
+        <div className="flex-1 flex flex-col gap-5 p-5 bg-[#060606] text-neutral-200 font-sans antialiased select-none ">
             
             <div className="flex flex-col w-full pl-1 border-b border-neutral-900 pb-4">
                 <h2 className="text-xl font-bold tracking-tight text-neutral-100">

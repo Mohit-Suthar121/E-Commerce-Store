@@ -37,7 +37,7 @@ const AdminOrdersPage = () => {
     }
 
     return (
-        <div className="flex-1 flex flex-col gap-5 p-6 sm:p-8 bg-[#060606] min-h-screen text-neutral-200 font-sans antialiased select-none overflow-x-auto">
+        <div className="flex-1 flex flex-col gap-5 p-6 sm:p-8 bg-[#060606] text-neutral-200 font-sans antialiased select-none overflow-x-auto">
             
             <div className="flex flex-col gap-0.5 border-b border-neutral-900 pb-4">
                 <h2 className="font-bold text-neutral-500 tracking-widest text-[11px] uppercase">

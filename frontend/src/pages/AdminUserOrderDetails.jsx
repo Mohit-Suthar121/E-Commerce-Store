@@ -3,7 +3,7 @@ import OrdersCard from '../components/OrdersCard'
 
 const AdminUserOrderDetails = () => {
   return (
-    <div className='flex-1 p-10 flex flex-col gap-5 border' >
+    <div className='flex-1 p-10 flex flex-col gap-5 border min-h-0 ' >
 
         <div className="order-text w-full flex gap-2 items-center">
             <button className="go-back-button p-2 border rounded-xl">
@@ -11,8 +11,10 @@ const AdminUserOrderDetails = () => {
             </button>
             <div className="font-bold text-xs uppercase tracking-widest">orders</div>
         </div>
-        <div className="orders-container flex flex-1 flex-col gap-2 overflow-y-auto w-full">
-            <OrdersCard/>
+        <div className="orders-container flex flex-1 flex-col gap-2 overflow-y-auto w-full items-center border min-h-0">
+            <OrdersCard />
+            <OrdersCard />
+            <OrdersCard />
         </div>
 
     </div>

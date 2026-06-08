@@ -2,7 +2,7 @@ import React from 'react'
 
 const OrderedProductCard = () => {
     return (
-        <div className='w-full max-w-2xl rounded-lg flex gap-4 items-center group cursor-pointer' >
+        <div className='w-full max-w-2xl rounded-lg flex gap-4 items-center group cursor-pointer ' >
 
             <div className="image w-20 h-20 rounded-lg  shrink-0 group-hover:scale-105 transition-all duration-300 cursor-pointer">
                 <img className='w-full rounded-lg' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5FyhKFiRoCdmrxbS5CDkACBhuak_CQjnhKg&s" alt="" />

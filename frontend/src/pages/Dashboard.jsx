@@ -7,14 +7,14 @@ const Dashboard = () => {
   
 
     return (
-        <div className='w-full min-h-screen flex flex-col '>
+        <div className='w-full flex flex-1 flex-col min-h-0 '>
             <Navbar />
 
-            <div className="main-content flex flex-1">
+            <div className="main-content flex flex-1 min-h-0">
                 <DashBoardSideBar/>
                 <Outlet/>
-
             </div>
+            
         </div>
     )
 }

@@ -13,10 +13,11 @@ import ProductsIconFilled from '../icons/ProductsIconFilled';
 import UsersIconFilled from '../icons/UsersIconFilled';
 import OrdersIconFilled from '../icons/OrdersIconFilled';
 
+
 const DashBoardSideBar = () => {
+
     const [activeButton, setActiveButton] = useState("");
     const location = useLocation();
-
     const [sideBarContent, setSideBarContent] = useState([
         { text: "Dashboard", componentIcon: DashboardIcon, componentIconFilled: DashboardIconFilled, path: "sales" },
         { text: "Add Product", componentIcon: AddProductIcon, componentIconFilled: AddProductIconFilled, path: "add-product" },
@@ -26,7 +27,7 @@ const DashBoardSideBar = () => {
     ]);
 
     return (
-        <div className="hidden left-section w-1/3 max-w-xs md:flex flex-col gap-6 p-6 bg-[#0b0b0b] border-r border-neutral-900 flex-1 font-sans antialiased select-none">
+        <div className="hidden left-section w-1/3 max-w-xs md:flex flex-col gap-6 p-6 bg-[#0b0b0b] border-r border-neutral-900 font-sans antialiased select-none">
 
             <div className="flex items-center gap-2.5 px-2 pb-2 border-b border-neutral-900/60">
                 <div className="w-5 h-5 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">

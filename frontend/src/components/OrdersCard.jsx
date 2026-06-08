@@ -3,7 +3,7 @@ import OrderedProductCard from './OrderedProductCard'
 
 const OrdersCard = () => {
     return (
-        <div className='p-4 flex flex-col gap-3  rounded-2xl bg-[#0b0b0b] border border-neutral-900 shadow-xl w-full max-w-xl '>
+        <div className={`p-4 flex flex-col gap-3  rounded-2xl bg-[#0b0b0b] border border-neutral-900 shadow-xl w-full max-w-3xl `}>
 
             <div className="order-id-and-amount flex justify-between items-center border-b border-neutral-900 pb-2 ">
                 <div className="order-id flex gap-2 ">
