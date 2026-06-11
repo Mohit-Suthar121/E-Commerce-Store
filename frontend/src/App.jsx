@@ -18,6 +18,8 @@ import AdminShowUsersPage from './pages/AdminShowUsersPage'
 import AdminOrdersPage from './pages/AdminOrdersPage'
 import AdminEditUserInfo from './pages/AdminEditUserInfo'
 import AdminUserOrderDetails from './pages/AdminUserOrderDetails'
+import Signup from './pages/Signup'
+import Verify from './pages/Verify'
 
 function App() {
 
@@ -31,6 +33,8 @@ function App() {
         <Route path='/checkout' element={<Checkout />} />
         <Route path='/order-success' element={<OrderSuccess />} />
         <Route path='/login' element={<Login />} />
+        <Route path='/signup' element={<Signup />} />
+        <Route path='/verify' element={<Verify/>} />
 
 
         <Route path='/dashboard' element={<Dashboard />}>

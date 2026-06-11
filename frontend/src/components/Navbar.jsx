@@ -12,7 +12,7 @@ const Navbar = () => {
     const location = useLocation();
 
     return (
-        <div className="w-full h-16 sm:h-20 border-b border-neutral-900 bg-[#060606]/90 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 flex items-center select-none font-sans antialiased shrink-0">
+        <div className="w-full h-16 sm:h-20 border-b border-neutral-900 bg-[#060606]/90 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 flex items-center select-none font-sans antialiased shrink-0 ">
             
             <div className="left-right flex w-full justify-between items-center">
 
@@ -76,7 +76,7 @@ const Navbar = () => {
 
             <div
                 onClick={() => { setShowMenu(false) }}
-                className={`hamburger-section-overlay fixed inset-0 z-40 w-screen h-screen bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${showMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                className={`hamburger-section-overlay fixed inset-0 z-40 h-screen bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${showMenu ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
             />
 
             <div className={`fixed top-0 z-50 w-full max-w-xs h-screen bg-[#0b0b0b] border-r border-neutral-900 pt-20 transition-all duration-300 shadow-2xl ${showMenu ? "left-0" : "-left-full"}`} >

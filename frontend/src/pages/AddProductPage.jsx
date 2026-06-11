@@ -6,6 +6,7 @@ const AddProductPage = () => {
   const [images, setImages] = useState(0);
   return (
     <div className="overflow-wrapper w-full overflow-y-auto scrollbar-design">
+      
       <div className="w-full flex-1 bg-[#060606] flex justify-center p-4 sm:p-6 lg:p-10 select-none font-sans antialiased ">
 
         <div className="w-full max-w-3xl bg-[#0b0b0b] border border-neutral-900 rounded-2xl p-6 sm:p-8 flex flex-col gap-6 shadow-2xl">

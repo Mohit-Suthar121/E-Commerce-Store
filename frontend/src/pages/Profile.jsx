@@ -9,7 +9,7 @@ const Profile = () => {
         <div className="w-full min-h-screen bg-[#060606] text-neutral-200 flex flex-col font-sans selection:bg-emerald-500/30 ">
             <Navbar />
 
-            <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 flex flex-col gap-8">
+            <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 flex flex-col gap-8 ">
 
                 <div className="flex justify-center">
                     <div className="bg-neutral-900/60 p-1 rounded-xl border border-neutral-800/80 flex items-center gap-1">
@@ -23,7 +23,7 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {showButton == "profile" && <div className="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-8 lg:gap-12 mt-4">
+                {showButton == "profile" && <div className="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-8 lg:gap-12 mt-4 ">
 
                     <div className="flex flex-col items-center gap-4 shrink-0">
                         <div className="relative group w-28 h-28 rounded-full border border-neutral-800 p-1 bg-neutral-900/30 overflow-hidden shadow-inner">
@@ -125,16 +125,9 @@ const Profile = () => {
 
                 </div>}
 
-                <div className="order-card-wrapper w-full flex justify-center ">
-
+                <div className="order-card-wrapper w-full flex justify-center">
                     {showButton == "orders" && orderCount > 0 && <OrdersCard/>}
                 </div>
-
-
-
-
-
-
 
             </main>
         </div>

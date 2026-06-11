@@ -16,7 +16,6 @@ const OrdersCard = () => {
 
             </div>
 
-            {/* <div className="seperator-line w-full h-0 border border-neutral-500"/> */}
 
             <div className="username-email-and-paid flex gap-2 justify-between items-center border border-neutral-900 rounded-lg p-3">
                 <div className="username-and-email flex flex-col gap-1 ">
@@ -36,7 +35,6 @@ const OrdersCard = () => {
                     <span className="amount-text text-[11px] font-semibold text-neutral-500 uppercase tracking-widest"> total Amount</span>
                     <span className="amount-number text-base font-bold text-white tracking-tight">₹28,500.34</span>
                 </div>
-                {/* <div className="paid-status px-2 py-1 rounded-lg bg-green-600 text-white flex justify-center items-center">paid</div> */}
 
             </div>
 
@@ -45,10 +43,11 @@ const OrdersCard = () => {
 
             <div className="products flex flex-col gap-2">
                 <div className="products-heading">Products:</div>
-                <div className="items flex flex-col gap-4 p-4 max-h-60 overflow-y-auto scrollbar-design">
-                    <OrderedProductCard />
-                    <OrderedProductCard />
-                </div>
+                    <div className="w-full flex flex-col gap-4 p-4 max-h-60 overflow-y-auto scrollbar-design">
+                        <OrderedProductCard />
+                        <OrderedProductCard />
+                        <OrderedProductCard />
+                    </div>
             </div>
 
 
