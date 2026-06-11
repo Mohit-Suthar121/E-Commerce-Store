@@ -45,9 +45,7 @@ const Verify = () => {
 
 
 
-
-
-
+    
     return (
         <div className="w-full min-h-screen flex justify-center items-center bg-[#060606] p-4 font-sans antialiased select-none" >
             <div className="main-card w-full max-w-md flex flex-col gap-6 p-6 sm:p-8 bg-[#0b0b0b] border border-neutral-900 rounded-2xl shadow-2xl text-center">

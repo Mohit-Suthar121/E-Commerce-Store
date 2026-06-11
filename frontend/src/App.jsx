@@ -26,9 +26,9 @@ function App() {
   return (
     <MainLayout>
       <Routes>
+        <Route path='/' element={<Home />} />
         <Route path='/products' element={<Products />} />
         <Route path='/cart' element={<Cart />} />
-        <Route path='/' element={<Home />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/checkout' element={<Checkout />} />
         <Route path='/order-success' element={<OrderSuccess />} />
