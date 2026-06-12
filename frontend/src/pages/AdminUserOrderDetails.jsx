@@ -3,9 +3,10 @@ import OrdersCard from '../components/OrdersCard'
 import { Link } from 'react-router-dom'
 const AdminUserOrderDetails = () => {
   return (
-    <div className="flex-1 p-6 sm:p-10 flex flex-col gap-6  bg-[#060606] text-neutral-200 font-sans antialiased select-none">
+    <div className="flex-1 p-6 sm:p-10 flex flex-col gap-6  bg-[#060606] text-neutral-200 font-sans antialiased select-none ">
 
       <div className="order-text w-full flex gap-3.5 items-center border-b border-neutral-900 pb-4">
+
         <Link
           to="/dashboard/users"
           className="go-back-button p-2 border border-neutral-800 rounded-xl bg-neutral-950/60 text-neutral-400 hover:text-neutral-100 hover:bg-neutral-900 hover:border-neutral-700 transition-all duration-150 cursor-pointer active:scale-[0.96] flex items-center justify-center shrink-0 shadow-sm"

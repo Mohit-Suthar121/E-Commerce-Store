@@ -20,6 +20,7 @@ import AdminEditUserInfo from './pages/AdminEditUserInfo'
 import AdminUserOrderDetails from './pages/AdminUserOrderDetails'
 import Signup from './pages/Signup'
 import Verify from './pages/Verify'
+import ProductDetailPage from './pages/ProductDetailPage'
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/products' element={<Products />} />
+        <Route path='products/:id' element={<ProductDetailPage />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/checkout' element={<Checkout />} />
@@ -42,6 +44,7 @@ function App() {
           <Route path='sales' element={<SalesPage />} />
           <Route path='add-product' element={<AddProductPage />} />
           <Route path='products' element={<AdminSideProducts />} />
+          
 
           <Route path='users' element={<AdminShowUsersPage />}/>
           <Route path='users/orders/:userId' element={<AdminUserOrderDetails />} />
@@ -49,6 +52,7 @@ function App() {
           <Route path='orders' element={<AdminOrdersPage />} />
 
         </Route>
+
       </Routes>
     </MainLayout>
 
