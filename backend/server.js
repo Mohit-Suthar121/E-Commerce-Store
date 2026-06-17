@@ -1,37 +1,23 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
-import mongoose from 'mongoose';
+import mongoose, { connect } from 'mongoose';
+import { connectDb } from './config/connectDb.js';
+import { authRoute } from './routes/auth.js';
+
 const app = express();
 const port = 3000;
-console.log("MONGO_URI:", process.env.MONGO_URI) 
-app.use(cors())
-
+connectDb();
+app.use(cors());
+app.use(express.json());
+app.use('/api/auth',authRoute)
 
 app.get('/', (req, res) => {
     console.log("We've just hit a get request") 
-    res.json({
-        name: "rohan das",
-        age: 23
-    })
+    res.send("hello world")
 })
 
+app.listen(port,(req,res)=>{
+    console.log("the app is listening on the port: ",port)
+})
 
-const startServer = async () => {
-    try {
-        if (!process.env.MONGO_URI) {
-            throw new Error("MONGO_URI is missing from your enviorment variables")
-        } 
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("the connection with the database has been successfull!!")
-
-        app.listen(port, () => {
-            console.log("Example app listening on port: localhost:", port)
-        })
-
-    } catch (error) {
-        console.error("Internal Server Error: ", error) 
-    } 
-}
-
-startServer();
