@@ -1,13 +1,37 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { API } from '../api/axiosInstance';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/auth.store';
+
 
 const Signup = () => {
 
     const { register, handleSubmit, watch, formState: { errors } } = useForm()
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const setEmail = useAuthStore((state)=>state.setEmail);
+    
 
-    const onSubmit = (data) => {
-        console.log("The form was just submitted!")
-        console.log("The data is: ",data)
+    const onSubmit = async (data) => {
+        console.log("i'm running again")
+        try {
+            setIsLoading(true);
+            const finalPayload = {
+                name: `${data.firstName} ${data.lastName}`.trim(),
+                email: data.email,
+                password: data.password
+            }
+            const response = await API.post('/auth/register', finalPayload);
+            setEmail(data.email);
+            console.log("The response after filling the registration form is: ", response);
+            navigate("/verify");
+
+        } catch (error) {
+            console.error("Internal server error", error.response?.data || error.message);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -35,13 +59,13 @@ const Signup = () => {
                                 </label>
                                 <input
                                     {...register("firstName", {
-                                        setValueAs:(v)=>v.trim(),
+                                        setValueAs: (v) => v.trim(),
                                         required: "First name is required"
                                     })}
                                     type="text"
                                     className={`h-11 px-4 rounded-xl text-sm bg-neutral-950 border text-white placeholder-neutral-600 focus:ring-4 transition-all duration-200 outline-none w-full ${errors.firstName
-                                            ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/10"
-                                            : "border-neutral-900 focus:border-emerald-500/80 focus:ring-emerald-500/5"
+                                        ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/10"
+                                        : "border-neutral-900 focus:border-emerald-500/80 focus:ring-emerald-500/5"
                                         }`}
                                     placeholder="eg. John"
                                 />
@@ -56,8 +80,8 @@ const Signup = () => {
                                     Last Name
                                 </label>
                                 <input
-                                    {...register("lastName",{
-                                        setValueAs:(v)=>v.trim()
+                                    {...register("lastName", {
+                                        setValueAs: (v) => v.trim()
                                     })}
                                     type="text"
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
@@ -72,11 +96,11 @@ const Signup = () => {
                             </label>
                             <input
                                 {...register("email", {
-                                    setValueAs:(v)=>v.trim(),
+                                    setValueAs: (v) => v.trim(),
                                     required: {
                                         value: true,
                                         message: "email is required",
-                                        
+
                                     },
                                     pattern: {
                                         value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -85,8 +109,8 @@ const Signup = () => {
                                 })}
                                 type="email"
                                 className={`h-11 px-4 rounded-xl text-sm bg-neutral-950 border text-white placeholder-neutral-600 focus:ring-4 transition-all duration-200 outline-none w-full ${errors.email
-                                        ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/10"
-                                        : "border-neutral-900 focus:border-emerald-500/80 focus:ring-emerald-500/5"
+                                    ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/10"
+                                    : "border-neutral-900 focus:border-emerald-500/80 focus:ring-emerald-500/5"
                                     }`}
                                 placeholder="eg. ankit@gmail.com"
                             />
@@ -129,8 +153,8 @@ const Signup = () => {
                                 })}
                                 type="password"
                                 className={`h-11 px-4 rounded-xl text-sm bg-neutral-950 border text-white placeholder-neutral-600 focus:ring-4 transition-all duration-200 outline-none w-full ${errors.password
-                                        ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/10"
-                                        : "border-neutral-900 focus:border-emerald-500/80 focus:ring-emerald-500/5"
+                                    ? "border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/10"
+                                    : "border-neutral-900 focus:border-emerald-500/80 focus:ring-emerald-500/5"
                                     }`}
                                 placeholder="••••••••"
                             />
@@ -138,8 +162,8 @@ const Signup = () => {
                     </div>
 
 
-                    <button type='submit' className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold transition-colors duration-200 mt-2 cursor-pointer active:scale-[0.99]">
-                        Signup
+                    <button disabled={isLoading} type='submit' className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold transition-colors duration-200 mt-2 cursor-pointer active:scale-[0.99] disabled:brightness-50">
+                        {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : "Signup"}
                     </button>
 
                 </form>

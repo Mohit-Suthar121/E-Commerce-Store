@@ -1,5 +1,5 @@
 import React from 'react'
-
+import { Link } from 'react-router-dom'
 const Login = () => {
   return (
     <div className='w-full min-h-screen bg-[#060606] text-neutral-200 flex justify-center items-center  px-4 font-sans select-none' >
@@ -81,9 +81,11 @@ const Login = () => {
 
         <div className="flex gap-1.5 items-center justify-center text-xs text-neutral-500 font-medium">
           <span>Don't have an account?</span>
+          <Link to={"/register"}  >
           <button className="font-semibold text-neutral-300 hover:text-white hover:underline cursor-pointer transition-colors">
             Sign up
           </button>
+          </Link>
         </div>
 
       </div>

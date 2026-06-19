@@ -1,20 +1,51 @@
 import React, { useEffect, useRef, useState } from 'react'
 import PaymentSuccessIcon from '../icons/PaymentSuccessIcon'
+import { API } from '../api/axiosInstance';
+import { useAuthStore } from '../store/auth.store';
+import { notifyFailure, notifySuccess } from '../utils/Toastify';
+
 
 const Verify = () => {
     const [otp, setOtp] = useState(["", "", "", ""]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
     const inputRefs = useRef([]);
+    const email = useAuthStore((state) => state.email);
+
 
     const handleChange = (e, index) => {
         const value = e.target.value;
         if (index >= otp.length || !/^\d*$/.test(value)) return;
-
-        setOtp(
-            (prev) => prev.map((_, i) => i === index ? e.target.value : _)
-        )
-
+        const newOtp = otp.map((digit, i) => i === index ? e.target.value : digit)
+        setOtp(newOtp)
         if (index <= otp.length - 2) inputRefs.current[index + 1].focus();
+        if (index === otp.length - 1) onSubmit(newOtp);
+
+    }
+
+    const onSubmit = async (enteredOtp) => {
+        const otpToSend = enteredOtp.join("");
+        if (otpToSend.length < 4) return;
+        if (!email) {
+            console.error("Email not found!");
+            return;
+        }
+        try {
+            setIsLoading(true);
+
+            const data = {
+                email,
+                otp: otpToSend
+            }
+            const response = await API.post('/auth/verify', data);
+            console.log("The response after enter the otp is:", response.data)
+            notifySuccess("User Verified SuccessFully!");
+        } catch (error) {
+            console.error("Internal server Error: ", error?.response?.data || error.message);
+            notifyFailure(error.response?.data?.message);
+        } finally {
+            setIsLoading(false);
+        }
 
     }
 
@@ -23,10 +54,10 @@ const Verify = () => {
 
         if (e.key === "Backspace") {
             e.preventDefault();
-            if (e.target.value === "" && index>0){
-                setOtp(prev=>prev.map((_,i)=>i+1===index?"":_));
-                 inputRefs.current[index - 1].focus(); 
-                }
+            if (e.target.value === "" && index > 0) {
+                setOtp(prev => prev.map((_, i) => i + 1 === index ? "" : _));
+                inputRefs.current[index - 1].focus();
+            }
             else setOtp(prev => prev.map((_, i) => i === index ? "" : _));
 
         }
@@ -34,18 +65,13 @@ const Verify = () => {
             inputRefs.current[index - 1].focus();
         }
 
-        else if ( index<otp.length-1 && e.key === "ArrowRight" ) {
+        else if (index < otp.length - 1 && e.key === "ArrowRight") {
             inputRefs.current[index + 1].focus();
         }
     }
 
-    useEffect(() => {
-        console.log(otp);
-    }, [otp])
 
 
-
-    
     return (
         <div className="w-full min-h-screen flex justify-center items-center bg-[#060606] p-4 font-sans antialiased select-none" >
             <div className="main-card w-full max-w-md flex flex-col gap-6 p-6 sm:p-8 bg-[#0b0b0b] border border-neutral-900 rounded-2xl shadow-2xl text-center">
@@ -81,12 +107,13 @@ const Verify = () => {
                         ))}
                     </div>
 
-                    <button className="verify-button w-full h-11 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-wider shadow-sm transition-all duration-150 cursor-pointer active:scale-[0.98]">
-                        Verify OTP
+                    <button onClick={() => { onSubmit(otp) }} disabled={isLoading} className="verify-button w-full h-11 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-wider shadow-sm transition-all duration-150 cursor-pointer active:scale-[0.98] disabled:brightness-50 disabled:flex disabled:justify-center disabled:items-center">
+                        {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : "Verify OTP"}
                     </button>
                 </div>
 
             </div>
+           
         </div>
     )
 }
