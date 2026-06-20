@@ -4,6 +4,7 @@ import { API } from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth.store';
 import { notifyFailure } from '../utils/Toastify';
+import { Link } from 'react-router-dom';
 
 
 const Signup = () => {
@@ -124,7 +125,7 @@ const Signup = () => {
                             )}
                         </div>
 
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 relative">
                             <div className="flex justify-between items-center px-0.5">
                                 <label className="text-xs font-medium text-neutral-400 tracking-wide">
                                     Password
@@ -161,6 +162,11 @@ const Signup = () => {
                                     }`}
                                 placeholder="••••••••"
                             />
+                            {errors.password?.message && (
+                                <span className="absolute right-1 top-0 text-xs font-medium text-rose-400 tracking-wide dynamic-error">
+                                    *{errors.password.message}
+                                </span>
+                            )}
                         </div>
                     </div>
 
@@ -196,9 +202,11 @@ const Signup = () => {
 
                 <div className="flex gap-1.5 items-center justify-center text-xs text-neutral-500 font-medium">
                     <span>Already have an account?</span>
+                    <Link to={'/login'} >
                     <button className="font-semibold text-neutral-300 hover:text-white hover:underline cursor-pointer transition-colors">
                         Login
                     </button>
+                    </Link>
                 </div>
 
             </div>

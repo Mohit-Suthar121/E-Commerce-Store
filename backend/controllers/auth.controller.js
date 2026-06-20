@@ -35,7 +35,7 @@ export const register = async (req, res) => {
                 <p style="font-size: 11px; color: #999; text-align: center;">If you did not request this registration, please safely ignore this email.</p>
             </div>
         `;
-        
+
         await sendEmail({
             email: user.email,
             subject: "Verify Your SHORTCART Account",
@@ -71,8 +71,8 @@ export const verifyOtp = async (req, res) => {
             message: "User not found!",
             status: "error"
         })
-        console.log("the saved otp to the db: ",user.otpCode?.toString())
-        console.log("received otp: ",otp?.toString())
+        console.log("the saved otp to the db: ", user.otpCode?.toString())
+        console.log("received otp: ", otp?.toString())
 
         if (user.otpCode?.toString() !== otp?.toString()) return res.status(400).json({
             message: "OTP is incorrect",
@@ -99,3 +99,62 @@ export const verifyOtp = async (req, res) => {
 }
 
 
+export const login = async (req, res) => {
+    try {
+        console.log("The data received is: ",req.body)
+        const { email, password } = req.body;
+        const user = await User.findOne({ email }).select("+password");
+        if (!user) return res.status(404).json({
+            message: "User not found",
+            status: "failed"
+
+        })
+        
+        const isPasswordVerified = await user.verifyPassword(password);
+        if(!isPasswordVerified) return res.status(401).json({
+            message:"Incorrect Password",
+            staus:"failed"
+        })
+
+        const otp = generateOtp();
+        user.otpCode = otp;
+        user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+        await user.save();
+        const emailHtmlTemplate = `
+            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; rounded: 12px;">
+                <h2 style="color: #111; text-align: center;">Welcome to SHORTCART</h2>
+                <p style="font-size: 14px; color: #555;">WELCOME BACK. Use the following one-time password (OTP) to complete your account verification. This code is valid for 5 minutes:</p>
+                <div style="background-color: #f9f9f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; tracking-content: 4px; color: #10b981; border-radius: 8px; margin: 20px 0;">
+                    ${user.otpCode}
+                </div>
+                <p style="font-size: 11px; color: #999; text-align: center;">If you did not request this registration, please safely ignore this email.</p>
+            </div>
+        `;
+
+        await sendEmail({
+            email: user.email,
+            subject: "Verify Your SHORTCART Account",
+            html: emailHtmlTemplate
+        });
+
+        return res.status(200).json({
+            message:"OTP sent successfully!",
+            status:"success",
+            user
+        })
+    } catch (error) {
+        console.error("Internal server Error",error);
+        return res.status(500).json({
+            message:"Internal server error",
+            status:"failed"
+        })
+    }
+}
+
+
+export const logout = async (req,res)=>{
+    res.clearCookie("token").status(200).json({
+        message:"logged out successfully!",
+        status:"success"
+    })   
+}
