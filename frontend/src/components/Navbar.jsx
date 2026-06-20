@@ -6,9 +6,11 @@ import CloseIcon from '../icons/CloseIcon'
 import HomeHamburgerContent from './HomeHamburgerContent'
 import DashboardHamburgerContent from './DashboardHamburgerContent'
 import fullLogo from '../assets/FullLogo.jpg'
+import { useAuthStore } from '../store/auth.store'
 
 const Navbar = () => {
     const [showMenu, setShowMenu] = useState(false);
+    const user = useAuthStore((state) => state.user);
     const location = useLocation();
 
     return (
@@ -30,14 +32,14 @@ const Navbar = () => {
 
                     <Link to={"/"} className='flex gap-2 items-center' >
 
-                    <div className="logo md:w-9 md:h-9 w-7 h-7 shrink-0 border border-neutral-800 rounded-lg overflow-hidden">
-                        <img className="w-full h-full object-cover object-center" src={fullLogo} alt="logo" />
-                    </div>
+                        <div className="logo md:w-9 md:h-9 w-7 h-7 shrink-0 border border-neutral-800 rounded-lg overflow-hidden">
+                            <img className="w-full h-full object-cover object-center" src={fullLogo} alt="logo" />
+                        </div>
 
 
-                    <div className="logo-text text-neutral-100 text-base md:text-lg tracking-wider font-extrabold font-mono uppercase">
-                        SHORTCART
-                    </div>
+                        <div className="logo-text text-neutral-100 text-base md:text-lg tracking-wider font-extrabold font-mono uppercase">
+                            SHORTCART
+                        </div>
                     </Link>
                 </div>
 
@@ -76,11 +78,22 @@ const Navbar = () => {
                             <CartLogo className="w-5 h-5 font-bold" currentColor="currentColor" />
                         </div>
                     </Link>
-                    <Link to={"/login"} >
+                    {!user && <Link to={"/login"} >
                         <button className="login h-9 px-4 rounded-xl text-xs font-bold uppercase tracking-wider bg-white hover:bg-neutral-200 text-black shadow-sm transition-all cursor-pointer active:scale-[0.98]">
                             login
                         </button>
-                    </Link>
+                    </Link>}
+
+                {user && (
+    <Link to="/profile">
+        <button className="flex items-center gap-2 h-9 px-4 rounded-xl text-xs font-medium tracking-wide bg-white/[0.03] hover:bg-white/[0.08] text-neutral-300 hover:text-white border border-white/[0.08] backdrop-blur-md transition-all duration-200 cursor-pointer active:scale-[0.98]">
+            <svg className="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span>{user.name}</span>
+        </button>
+    </Link>
+)}
                 </div>
 
             </div>

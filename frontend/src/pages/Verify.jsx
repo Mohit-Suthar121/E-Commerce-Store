@@ -3,6 +3,7 @@ import PaymentSuccessIcon from '../icons/PaymentSuccessIcon'
 import { API } from '../api/axiosInstance';
 import { useAuthStore } from '../store/auth.store';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
+import { useNavigate } from 'react-router-dom';
 
 
 const Verify = () => {
@@ -11,6 +12,7 @@ const Verify = () => {
     const [isLoading, setIsLoading] = useState(false);
     const inputRefs = useRef([]);
     const email = useAuthStore((state) => state.email);
+    const navigate = useNavigate();
 
 
     const handleChange = (e, index) => {
@@ -40,6 +42,9 @@ const Verify = () => {
             const response = await API.post('/auth/verify', data);
             console.log("The response after enter the otp is:", response.data)
             notifySuccess("User Verified SuccessFully!");
+            navigate("/")
+            
+
         } catch (error) {
             console.error("Internal server Error: ", error?.response?.data || error.message);
             notifyFailure(error.response?.data?.message);

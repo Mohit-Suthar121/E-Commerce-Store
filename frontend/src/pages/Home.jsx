@@ -1,10 +1,33 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import HomeHamburgerContent from '../components/HomeHamburgerContent'
 import frontPageImage from '../icons/bannerPageMobile.jpg'
+import { API } from '../api/axiosInstance'
+import { useAuthStore } from '../store/auth.store'
 
 const Home = () => {
-  // Fixed: Converted hardcoded color properties to use flexible "currentColor" values
+  const user = useAuthStore((state)=>state.user);
+  const setUser = useAuthStore((state)=>state.setUser);
+  const setEmail = useAuthStore((state)=>state.setEmail);
+
+  const fetchUser = async()=>{
+    try {
+      const response = await API.get('/v1/user/me');
+      console.log("The response while fetching the userData from the backend: ",response)
+      setUser(response.data.user);
+      setEmail(response.data.user.email)
+    } catch (error) {
+      console.error("The user ins't authorized",error.response?.data || error.message)
+      setUser(null);
+      setEmail(null);
+    }
+  }
+
+  useEffect(()=>{
+    fetchUser()
+  },[])
+
+
   const [bottomCard, setBottomCard] = useState([
     {
       image: <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" viewBox="0 -960 960 960" fill="currentColor"><path d="M155-195q-35-35-35-85H40v-440q0-33 23.5-56.5T120-800h560v160h120l120 160v200h-80q0 50-35 85t-85 35q-50 0-85-35t-35-85H360q0 50-35 85t-85 35q-50 0-85-35Zm113.5-56.5Q280-263 280-280t-11.5-28.5Q257-320 240-320t-28.5 11.5Q200-297 200-280t11.5 28.5Q223-240 240-240t28.5-11.5ZM120-360h32q17-18 39-29t49-11q27 0 49 11t39 29h272v-360H120v360Zm628.5 108.5Q760-263 760-280t-11.5-28.5Q737-320 720-320t-28.5 11.5Q680-297 680-280t11.5 28.5Q703-240 720-240t28.5-11.5ZM680-440h170l-90-120h-80v120ZM360-540Z" /></svg>,
@@ -14,7 +37,7 @@ const Home = () => {
     {
       image: <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" viewBox="0 -960 960 960" fill="currentColor"><path d="M480-80q-139-35-229.5-159.5T160-516v-244l320-120 320 120v244q0 152-90.5 276.5T480-80Zm0-84q104-33 172-132t68-220v-189l-240-90-240 90v189q0 121 68 220t172 132Zm0-316Z" /></svg>,
       heading: "Secure Payment",
-      subText: "Protected transactions" // Fixed subtext context mapping symmetry
+      subText: "Protected transactions" 
     },
     {
       image: <svg xmlns="http://www.w3.org/2000/svg" className="w-full h-full" viewBox="0 -960 960 960" fill="currentColor"><path d="M360-120H200q-33 0-56.5-23.5T120-200v-280q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-840q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-480v280q0 33-23.5 56.5T760-120H600v-320h160v-40q0-117-81.5-198.5T480-760q-117 0-198.5 81.5T200-480v40h160v320Zm-80-240h-80v160h80v-160Zm400 0v160h80v-160h-80Zm-400 0h-80 80Zm400 0h80-80Z" /></svg>,

@@ -1,6 +1,7 @@
 import { User } from "../models/User.js";
 import { generateOtp } from "../utils/generateOtp.js";
 import { sendToken } from "../utils/sendToken.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 export const register = async (req, res) => {
     const { name, email, password } = req.body;
@@ -22,7 +23,27 @@ export const register = async (req, res) => {
 
         user.otpCode = generateOtp().toString();
         user.otpExpires = new Date(Date.now() + 5 * 60 * 1000)
+
+
+        const emailHtmlTemplate = `
+            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; rounded: 12px;">
+                <h2 style="color: #111; text-align: center;">Welcome to SHORTCART</h2>
+                <p style="font-size: 14px; color: #555;">Thank you for registering. Use the following one-time password (OTP) to complete your account verification. This code is valid for 5 minutes:</p>
+                <div style="background-color: #f9f9f9; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; tracking-content: 4px; color: #10b981; border-radius: 8px; margin: 20px 0;">
+                    ${user.otpCode}
+                </div>
+                <p style="font-size: 11px; color: #999; text-align: center;">If you did not request this registration, please safely ignore this email.</p>
+            </div>
+        `;
+        
+        await sendEmail({
+            email: user.email,
+            subject: "Verify Your SHORTCART Account",
+            html: emailHtmlTemplate
+        });
+
         await user.save();
+
         res.status(200).json({
             message: "OTP Sent successfully!",
             status: "success"
@@ -47,14 +68,19 @@ export const verifyOtp = async (req, res) => {
 
 
         if (!user) return res.status(404).json({
-            message: "User was not found in the database",
+            message: "User not found!",
             status: "error"
         })
         console.log("the saved otp to the db: ",user.otpCode?.toString())
         console.log("received otp: ",otp?.toString())
 
-        if ((user.otpCode?.toString() !== otp?.toString()) || (currentDate > user.otpExpires)) return res.status(400).json({
-            message: "Entered OTP is either expired or not correct",
+        if (user.otpCode?.toString() !== otp?.toString()) return res.status(400).json({
+            message: "OTP is incorrect",
+            status: "error"
+        })
+
+        else if (currentDate > user.otpExpires) return res.status(400).json({
+            message: "OTP has been expired",
             status: "error"
         })
 
@@ -65,6 +91,7 @@ export const verifyOtp = async (req, res) => {
         sendToken(user, 200, res);
     } catch (error) {
         console.error("Internal Server Error!", error);
+
     }
 
 

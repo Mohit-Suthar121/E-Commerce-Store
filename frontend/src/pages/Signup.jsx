@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { API } from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth.store';
+import { notifyFailure } from '../utils/Toastify';
 
 
 const Signup = () => {
@@ -28,7 +29,9 @@ const Signup = () => {
             navigate("/verify");
 
         } catch (error) {
-            console.error("Internal server error", error.response?.data || error.message);
+            console.error("Internal server error: ", error.response?.data || error.message);
+            console.error("The error response is: ",error.response)
+            notifyFailure(error.response?.data?.message || error.message);
         } finally {
             setIsLoading(false);
         }
