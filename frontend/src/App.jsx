@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import Navbar from './components/Navbar'
 import { Navigate, Route, Routes } from 'react-router-dom'
@@ -21,9 +21,15 @@ import AdminUserOrderDetails from './pages/AdminUserOrderDetails'
 import Signup from './pages/Signup'
 import Verify from './pages/Verify'
 import ProductDetailPage from './pages/ProductDetailPage'
+import { useAuthStore } from './store/auth.store'
 
 function App() {
 
+  const fetchUser = useAuthStore((state)=>state.fetchUser);
+  
+  useEffect(()=>{
+    fetchUser()
+  },[])
   return (
     <MainLayout>
       <Routes>

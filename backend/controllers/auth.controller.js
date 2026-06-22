@@ -101,7 +101,7 @@ export const verifyOtp = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        console.log("The data received is: ",req.body)
+        console.log("The data received is: ", req.body)
         const { email, password } = req.body;
         const user = await User.findOne({ email }).select("+password");
         if (!user) return res.status(404).json({
@@ -109,11 +109,11 @@ export const login = async (req, res) => {
             status: "failed"
 
         })
-        
+
         const isPasswordVerified = await user.verifyPassword(password);
-        if(!isPasswordVerified) return res.status(401).json({
-            message:"Incorrect Password",
-            staus:"failed"
+        if (!isPasswordVerified) return res.status(401).json({
+            message: "Incorrect Password",
+            staus: "failed"
         })
 
         const otp = generateOtp();
@@ -138,23 +138,37 @@ export const login = async (req, res) => {
         });
 
         return res.status(200).json({
-            message:"OTP sent successfully!",
-            status:"success",
+            message: "OTP sent successfully!",
+            status: "success",
             user
         })
     } catch (error) {
-        console.error("Internal server Error",error);
+        console.error("Internal server Error", error);
         return res.status(500).json({
-            message:"Internal server error",
-            status:"failed"
+            message: "Internal server error",
+            status: "failed"
         })
     }
 }
 
 
-export const logout = async (req,res)=>{
-    res.clearCookie("token").status(200).json({
-        message:"logged out successfully!",
-        status:"success"
-    })   
+export const logout = async (req, res) => {
+    try {
+        const cookieOptions = {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+        }
+
+        return res.clearCookie("token", cookieOptions).status(200).json({
+            message: "logged out successfully!",
+            status: "success"
+        })
+    } catch (error) {
+        console.error("Error while logging out: ", error);
+        return res.status(500).json({
+            message: "Internal server error",
+            status: "failed"
+        })
+    }
 }

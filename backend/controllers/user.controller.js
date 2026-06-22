@@ -5,6 +5,7 @@ export const getme= async(req,res)=>{
     try {
         const userId = req.userId;
         const user = await User.findById(userId);
+        console.log("The user Is; ",user);
         if(!user) return res.status(404).json({
             message:"User not found!",
             status:"failed"

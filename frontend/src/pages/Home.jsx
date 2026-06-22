@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import HomeHamburgerContent from '../components/HomeHamburgerContent'
 import frontPageImage from '../icons/bannerPageMobile.jpg'
-import { API } from '../api/axiosInstance'
 import { useAuthStore } from '../store/auth.store'
 
 const Home = () => {
@@ -10,22 +9,6 @@ const Home = () => {
   const setUser = useAuthStore((state)=>state.setUser);
   const setEmail = useAuthStore((state)=>state.setEmail);
 
-  const fetchUser = async()=>{
-    try {
-      const response = await API.get('/v1/user/me');
-      console.log("The response while fetching the userData from the backend: ",response)
-      setUser(response.data.user);
-      setEmail(response.data.user.email)
-    } catch (error) {
-      console.error("The user ins't authorized",error.response?.data || error.message)
-      setUser(null);
-      setEmail(null);
-    }
-  }
-
-  useEffect(()=>{
-    fetchUser()
-  },[])
 
 
   const [bottomCard, setBottomCard] = useState([

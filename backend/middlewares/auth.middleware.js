@@ -4,7 +4,6 @@ import jwt from 'jsonwebtoken'
 export const authMiddleware = (req, res, next) => {
     try {
         const token = req.cookies?.token;
-        console.log("The token is: ",token)
         if (!token) return res.status(401).json({
             message: "Please enter auth token",
             status: "failed"
