@@ -1,6 +1,4 @@
-
 import mongoose from "mongoose";
-
 import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema({
     name: {
@@ -21,6 +19,28 @@ const userSchema = new mongoose.Schema({
         required: [true, "Password is required"],
         minlength: [6, "Password must consist of at least 6 characters"],
         select: false
+    },
+    phoneNo:{
+        type:String,
+        trim:true,
+        default:""
+    },
+    shippingAddress:{
+        street:{
+            type:String,
+            trim:true,
+            default:""
+        },
+        city:{
+            type:String,
+            trim:true,
+            default:""
+        },
+        zipCode:{
+            type:String,
+            trim:true,
+            default:""
+        }
     },
     role: {
         type: String,
@@ -57,3 +77,8 @@ userSchema.methods.verifyPassword = async function (enteredPassword) {
 }
 
 export const User = mongoose.model('User', userSchema);
+
+
+
+
+

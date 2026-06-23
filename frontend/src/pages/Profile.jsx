@@ -11,6 +11,16 @@ const Profile = () => {
     const [showLogOutCard, setShowLogOutCard] = useState(false);
     const [isLoading,setIsLoading] = useState(false);
     const user = useAuthStore((state)=>state.user);
+    const [newInfo,setNewInfo] = useState({
+        firstName:"",
+        lastName:"",
+        email:"",
+        phoneNo:"",
+        street:"",
+        city:"",
+        zipCode:""
+
+    });
 
     const handleLogout = async()=>{
         try {
@@ -30,9 +40,13 @@ const Profile = () => {
     }
 
     const userDetails = {
-        firstName:user.name.split(" ")[0],
-        lastName:user.name.split(" ")[1],
-        email:user.email,
+        firstName:user?.name?.split(" ")[0] || "",
+        lastName:user?.name?.split(" ")[1] || "",
+        email:user?.email || "",
+        phoneNo:user?.phoneNo || "",
+        streetAddress:user?.shippingAddress?.street || "",
+        city:user?.shippingAddress?.city || "",
+        zipCode:user?.shippingAddress?.zipCode || ""
     }
     return (
         <div className="w-full min-h-screen bg-[#060606] text-neutral-200 flex flex-col font-sans selection:bg-emerald-500/30 ">
@@ -114,7 +128,7 @@ const Profile = () => {
                                 <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">First Name</label>
                                 <input
                                     type="text"
-                                    defaultValue={user?user.name.split(" ")[0]:null}
+                                    defaultValue={userDetails.firstName}
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                     placeholder="eg. Ankit"
                                 />
@@ -123,6 +137,7 @@ const Profile = () => {
                                 <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Last Name</label>
                                 <input
                                     type="text"
+                                    defaultValue={userDetails.lastName}
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                     placeholder="eg. Sharma"
                                 />
@@ -133,6 +148,7 @@ const Profile = () => {
                             <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Email Address</label>
                             <input
                                 type="email"
+                                defaultValue={userDetails.email}
                                 className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                 placeholder="eg. arhenius34@gmail.com"
                             />
@@ -142,6 +158,7 @@ const Profile = () => {
                             <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Phone Number</label>
                             <input
                                 type="tel"
+                                defaultValue={userDetails.phoneNo}
                                 className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                 placeholder="Enter contact number"
                             />
@@ -150,6 +167,7 @@ const Profile = () => {
                         <div className="flex flex-col gap-2">
                             <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Street Address</label>
                             <input
+                            defaultValue={userDetails.streetAddress}
                                 type="text"
                                 className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                 placeholder="Enter street address"
@@ -161,6 +179,7 @@ const Profile = () => {
                                 <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">City</label>
                                 <input
                                     type="text"
+                                    defaultValue={userDetails.city}
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                     placeholder="Enter city"
                                 />
@@ -169,6 +188,7 @@ const Profile = () => {
                                 <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Zip Code</label>
                                 <input
                                     type="text"
+                                    defaultValue={userDetails.zipCode}
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                     placeholder="Enter zip code"
                                 />

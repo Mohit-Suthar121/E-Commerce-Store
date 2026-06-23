@@ -172,3 +172,43 @@ export const logout = async (req, res) => {
         })
     }
 }
+
+
+export const googleLogin = async (req,res) =>{
+    const {token} = req.body;
+    try {
+        if(!token) return res.status(400).json({
+            message:"Google token payload is missing.",
+            status:"failed"
+        })
+        const tokenVerifyResponse = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
+        const googleProfile = await tokenVerifyResponse.json();
+        console.log("The google profile is: ",googleProfile)
+        if(!googleProfile.email){
+            return res.status(400).json({
+                message:"Google authentication failed. Access token is invalid.",
+                status:"failed"
+            })
+        }
+        const {name,email} = googleProfile;
+        let user = await User.findOne({email});
+        if(!user){
+            user = new User({
+                name,
+                email,
+                password: Math.random().toString(36).slice(-12),
+                role:"user",
+                isVerified:true,
+            })
+            await user.save();
+        }
+
+        sendToken(user,200,res);
+    } catch (error) {
+        console.error("Some error occured!: ",error);
+        return res.status(500).json({
+            message:"Internal server error",
+            status:"failed"
+        })
+    }
+}

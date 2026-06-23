@@ -5,18 +5,20 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth.store';
 import { notifyFailure } from '../utils/Toastify';
 import { Link } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
 
 
 const Signup = () => {
 
     const { register, handleSubmit, watch, formState: { errors } } = useForm()
     const [isLoading, setIsLoading] = useState(false);
+    const [serverError,setServerError] = useState("");
     const navigate = useNavigate();
+
     const setEmail = useAuthStore((state)=>state.setEmail);
     
 
     const onSubmit = async (data) => {
-        console.log("i'm running again")
         try {
             setIsLoading(true);
             const finalPayload = {
@@ -37,6 +39,31 @@ const Signup = () => {
             setIsLoading(false);
         }
     }
+
+    const handleGoogleLoginSuccess = useGoogleLogin({
+        onSuccess: async (tokenResponse)=>{
+            setServerError("");
+            setIsLoading(true);
+            try {
+                const googleAccessToken = tokenResponse.access_token;
+                const response = await API.post('/auth/google',{token:googleAccessToken});
+                console.log("Backend google auth response: ". response.data);
+                navigate("/")
+                
+            } catch (error) {
+                const msg = error?.response?.data?.message || "Google authentication failed!";
+                console.error(msg);
+                console.error("Some Error occured!: ", msg)
+
+            }finally{
+                setIsLoading(false);
+            }
+        },
+        onError: (error)=>{
+            console.error("Google popup blocked!: ",error);
+            setServerError("Google sign-in window was closed.");
+        }
+     })
 
     return (
         <div className='w-full min-h-screen bg-[#060606] text-neutral-200 flex justify-center items-center  px-4 font-sans select-none' >
@@ -187,6 +214,7 @@ const Signup = () => {
 
 
                 <button
+                onClick={handleGoogleLoginSuccess}
                     type="button"
                     className="w-full h-11 flex justify-center items-center gap-2 rounded-xl bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 text-neutral-300 hover:text-white text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.99]"
                 >
