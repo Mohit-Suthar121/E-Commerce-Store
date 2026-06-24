@@ -4,6 +4,7 @@ import OrdersCard from '../components/OrdersCard';
 import { API } from '../api/axiosInstance';
 import { notifyFailure } from '../utils/Toastify';
 import { useAuthStore } from '../store/auth.store';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
     const [showButton, setShowButton] = useState("profile");
@@ -11,6 +12,8 @@ const Profile = () => {
     const [showLogOutCard, setShowLogOutCard] = useState(false);
     const [isLoading,setIsLoading] = useState(false);
     const user = useAuthStore((state)=>state.user);
+    const resetData = useAuthStore((state)=>state.resetData);
+    const navigate = useNavigate();
     const [newInfo,setNewInfo] = useState({
         firstName:"",
         lastName:"",
@@ -28,7 +31,8 @@ const Profile = () => {
             const response = await API.get('/auth/logout');
             console.log("Response after logging out: ", response.data);
             setShowLogOutCard(true);
-            await fetchUser();
+            resetData();
+            navigate('/')
             
         } catch (error) {
             console.error("Error while logging out: ",error.response?.data||error.message);

@@ -12,6 +12,7 @@ const Verify = () => {
     const [isLoading, setIsLoading] = useState(false);
     const inputRefs = useRef([]);
     const email = useAuthStore((state) => state.email);
+    const setUser = useAuthStore((state)=>state.setUser);
     const navigate = useNavigate();
 
 
@@ -42,8 +43,8 @@ const Verify = () => {
             const response = await API.post('/auth/verify', data);
             console.log("The response after enter the otp is:", response.data)
             notifySuccess("User Verified SuccessFully!");
+            setUser(response.data?.user);
             navigate("/")
-            
 
         } catch (error) {
             console.error("Internal server Error: ", error?.response?.data || error.message);

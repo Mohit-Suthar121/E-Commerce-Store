@@ -18,26 +18,26 @@ export const useAuthStore = create(
                 fetchUser: async () => {
                     try {
                         const response = await API.get('/v1/user/me');
-                        console.log("The response while fetching the userData from the backend: ", response)
                         set({
                             user: response.data.user,
                             email: response.data.user.email
                         })
                     } catch (error) {
-                        console.error("some error occured! :", error.response?.data || error.message)
-                        set({ user: null })
-                        set({ email: null })
+                        if(error.response?.status != 401) console.error("UnExpected error occured!! :", error.response?.data || error.message)
+                        set({
+                            user:null,
+                            email:null
+                        })
                     }
-                }
+                },
+
+                resetData:()=>set({email:null,user:null})
 
             }
         ),
         {
 
             name: "auth-storage",
-            partialize: (state) => ({
-                email: state.email
-            })
         }
     )
 );

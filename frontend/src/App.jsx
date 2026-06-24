@@ -30,6 +30,7 @@ import PageNotFound from './components/PageNotFound'
 function App() {
 
   const fetchUser = useAuthStore((state) => state.fetchUser);
+  const email = useAuthStore((state)=>state.email);
 
   useEffect(() => {
     fetchUser()

@@ -6,17 +6,20 @@ import { useAuthStore } from '../store/auth.store';
 import { notifyFailure } from '../utils/Toastify';
 import { Link } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useGoogleAuth } from '../hooks/useGoogleAuth';
 
 
 const Signup = () => {
 
     const { register, handleSubmit, watch, formState: { errors } } = useForm()
+    const fetchUser = useAuthStore((state) => state.fetchUser);
     const [isLoading, setIsLoading] = useState(false);
-    const [serverError,setServerError] = useState("");
+    const [serverError, setServerError] = useState("");
     const navigate = useNavigate();
+    const setEmail = useAuthStore((state) => state.setEmail);
+    const setUser = useAuthStore((state) => state.setUser);
+    const handleGoogleLogin = useGoogleAuth(serverError,setIsLoading);
 
-    const setEmail = useAuthStore((state)=>state.setEmail);
-    
 
     const onSubmit = async (data) => {
         try {
@@ -33,37 +36,38 @@ const Signup = () => {
 
         } catch (error) {
             console.error("Internal server error: ", error.response?.data || error.message);
-            console.error("The error response is: ",error.response)
+            console.error("The error response is: ", error.response)
             notifyFailure(error.response?.data?.message || error.message);
         } finally {
             setIsLoading(false);
         }
     }
 
-    const handleGoogleLoginSuccess = useGoogleLogin({
-        onSuccess: async (tokenResponse)=>{
-            setServerError("");
-            setIsLoading(true);
-            try {
-                const googleAccessToken = tokenResponse.access_token;
-                const response = await API.post('/auth/google',{token:googleAccessToken});
-                console.log("Backend google auth response: ". response.data);
-                navigate("/")
-                
-            } catch (error) {
-                const msg = error?.response?.data?.message || "Google authentication failed!";
-                console.error(msg);
-                console.error("Some Error occured!: ", msg)
+    // const handleGoogleLoginSuccess = useGoogleLogin({
+    //     onSuccess: async (tokenResponse) => {
+    //         setServerError("");
+    //         setIsLoading(true);
+    //         try {
+    //             const googleAccessToken = tokenResponse.access_token;
+    //             const response = await API.post('/auth/google', { token: googleAccessToken });
+    //             console.log("Backend google auth response: ", response.data);
+    //             setUser(response.data?.user)
+    //             navigate("/")
 
-            }finally{
-                setIsLoading(false);
-            }
-        },
-        onError: (error)=>{
-            console.error("Google popup blocked!: ",error);
-            setServerError("Google sign-in window was closed.");
-        }
-     })
+    //         } catch (error) {
+    //             const msg = error?.response?.data?.message || "Google authentication failed!";
+    //             console.error(msg);
+    //             console.error("Some Error occured!: ", msg)
+
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     },
+    //     onError: (error) => {
+    //         console.error("Google popup blocked!: ", error);
+    //         setServerError("Google sign-in window was closed.");
+    //     }
+    // }) 
 
     return (
         <div className='w-full min-h-screen bg-[#060606] text-neutral-200 flex justify-center items-center  px-4 font-sans select-none' >
@@ -214,7 +218,7 @@ const Signup = () => {
 
 
                 <button
-                onClick={handleGoogleLoginSuccess}
+                    onClick={handleGoogleLoginSuccess}
                     type="button"
                     className="w-full h-11 flex justify-center items-center gap-2 rounded-xl bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 text-neutral-300 hover:text-white text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.99]"
                 >
@@ -231,9 +235,9 @@ const Signup = () => {
                 <div className="flex gap-1.5 items-center justify-center text-xs text-neutral-500 font-medium">
                     <span>Already have an account?</span>
                     <Link to={'/login'} >
-                    <button className="font-semibold text-neutral-300 hover:text-white hover:underline cursor-pointer transition-colors">
-                        Login
-                    </button>
+                        <button className="font-semibold text-neutral-300 hover:text-white hover:underline cursor-pointer transition-colors">
+                            Login
+                        </button>
                     </Link>
                 </div>
 
