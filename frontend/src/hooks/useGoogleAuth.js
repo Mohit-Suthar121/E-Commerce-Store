@@ -1,8 +1,13 @@
+import { useGoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
+import { API } from "../api/axiosInstance";
+import { useAuthStore } from "../store/auth.store";
+
 
 
 export const useGoogleAuth = (setServerError, setIsLoading) => {
-const navigate = useNavigate();9
+const navigate = useNavigate();
+const setUser = useAuthStore((state)=>state.setUser);
 
     return useGoogleLogin({
         onSuccess: async (tokenResponse) => {
@@ -16,8 +21,7 @@ const navigate = useNavigate();9
                 navigate("/")
 
             } catch (error) {
-                const msg = error?.response?.data?.message || "Google authentication failed!";
-                console.error(msg);
+                const msg = error?.response?.data || "Google authentication failed!";
                 console.error("Some Error occured!: ", msg)
 
             } finally {
