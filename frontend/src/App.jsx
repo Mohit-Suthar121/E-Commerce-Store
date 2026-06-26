@@ -50,7 +50,6 @@ function App() {
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Signup />} />
           {/* <Route element={<VerifyRoute />} > */}
-
             <Route path='/verify' element={<Verify />} />
           {/* </Route> */}
         </Route>
