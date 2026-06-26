@@ -156,7 +156,7 @@ export const logout = async (req, res) => {
     try {
         const cookieOptions = {
             httpOnly: true,
-            sameSite: 'strict',
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === 'production',
         }
 
@@ -174,7 +174,7 @@ export const logout = async (req, res) => {
 }
 
 
-export const googleLogin = async (req,res) =>{
+export const  googleLogin = async (req,res) =>{
     const {token} = req.body;
     try {
         if(!token) return res.status(400).json({
@@ -202,7 +202,6 @@ export const googleLogin = async (req,res) =>{
             })
             await user.save();
         }
-
         sendToken(user,200,res);
     } catch (error) {
         console.error("Some error occured!: ",error);
