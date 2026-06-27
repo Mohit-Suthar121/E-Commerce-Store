@@ -2,30 +2,31 @@ import React, { useState } from 'react'
 import Navbar from '../components/Navbar'
 import OrdersCard from '../components/OrdersCard';
 import { API } from '../api/axiosInstance';
-import { notifyFailure } from '../utils/Toastify';
+import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { useAuthStore } from '../store/auth.store';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 
 const Profile = () => {
     const [showButton, setShowButton] = useState("profile");
     const [orderCount, setOrderCount] = useState(1);
     const [showLogOutCard, setShowLogOutCard] = useState(false);
-    const [isLoading,setIsLoading] = useState(false);
-    const user = useAuthStore((state)=>state.user);
-    const resetData = useAuthStore((state)=>state.resetData);
+    const [isLoading, setIsLoading] = useState(false);
+    const user = useAuthStore((state) => state.user);
+    const resetData = useAuthStore((state) => state.resetData);
     const navigate = useNavigate();
-    const [newInfo,setNewInfo] = useState({
-        firstName:"",
-        lastName:"",
-        email:"",
-        phoneNo:"",
-        street:"",
-        city:"",
-        zipCode:""
+    const [newInfo, setNewInfo] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNo: "",
+        street: "",
+        city: "",
+        zipCode: ""
 
     });
 
-    const handleLogout = async()=>{
+    const handleLogout = async () => {
         try {
             setIsLoading(true);
             const response = await API.get('/auth/logout');
@@ -33,25 +34,43 @@ const Profile = () => {
             setShowLogOutCard(true);
             resetData();
             navigate('/')
-            
+
         } catch (error) {
-            console.error("Error while logging out: ",error.response?.data||error.message);
+            console.error("Error while logging out: ", error.response?.data || error.message);
             notifyFailure(error.response?.data?.message);
-        }finally{
+        } finally {
             setIsLoading(false);
             setShowLogOutCard(false);
         }
     }
 
     const userDetails = {
-        firstName:user?.name?.split(" ")[0] || "",
-        lastName:user?.name?.split(" ")[1] || "",
-        email:user?.email || "",
-        phoneNo:user?.phoneNo || "",
-        streetAddress:user?.shippingAddress?.street || "",
-        city:user?.shippingAddress?.city || "",
-        zipCode:user?.shippingAddress?.zipCode || ""
+        firstName: user?.name?.split(" ")[0] || "",
+        lastName: user?.name?.split(" ")[1] || "",
+        email: user?.email || "",
+        phoneNo: user?.phoneNo || "",
+        streetAddress: user?.shippingAddress?.street || "",
+        city: user?.shippingAddress?.city || "",
+        zipCode: user?.shippingAddress?.zipCode || ""
     }
+
+    const handleUpdateProfile = async(data) => {
+        console.log("The data is: ", data)
+        setIsLoading(true);
+        try {
+            const response = await API.patch('/v1/user/updateProfile',data);
+            console.log("profile updated successfully!", response.data);
+            notifySuccess(response.data.message);
+        } catch (error) {
+            console.log("Some error occured while updating the profile",error?.response?.data || error.message);
+            notifyFailure(error?.response?.data?.message)
+        }finally{
+            setIsLoading(false);
+        }
+    }
+    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+
+
     return (
         <div className="w-full min-h-screen bg-[#060606] text-neutral-200 flex flex-col font-sans selection:bg-emerald-500/30 ">
             <Navbar />
@@ -84,7 +103,7 @@ const Profile = () => {
                             Change Avatar
                         </button>
 
-                        <button onClick={()=>{setShowLogOutCard(true)}} className="text-xs font-medium text-red-200 bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 hover:border-red-700/50 px-4 py-2.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 shadow-sm whitespace-nowrap flex items-center gap-2 ">
+                        <button onClick={() => { setShowLogOutCard(true) }} className="text-xs font-medium text-red-200 bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 hover:border-red-700/50 px-4 py-2.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 shadow-sm whitespace-nowrap flex items-center gap-2 ">
                             <svg className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
@@ -112,11 +131,11 @@ const Profile = () => {
                                 </div>
 
                                 <div className="flex flex-col gap-2 w-full mt-2">
-                                    <button disabled={isLoading} onClick={handleLogout} className={`log-out w-full py-2.5 rounded-xl text-xs font-semibold text-red-200 bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 hover:border-red-700/50 shadow-sm transition-all duration-200 cursor-pointer active:scale-[0.98] disabled:brightness-50 ${isLoading&&"flex justify-center items-center"} disabled:cursor-default disabled:hover:bg-red-950/40 disabled:hover:border-red-900/30 `}>
-                                       {isLoading ? <div className="w-5 h-5 border-3 border-neutral-400 border-t-red-400 rounded-full animate-spin " /> : "Yes,Log Out"}
+                                    <button disabled={isLoading} onClick={handleLogout} className={`log-out w-full py-2.5 rounded-xl text-xs font-semibold text-red-200 bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 hover:border-red-700/50 shadow-sm transition-all duration-200 cursor-pointer active:scale-[0.98] disabled:brightness-50 ${isLoading && "flex justify-center items-center"} disabled:cursor-default disabled:hover:bg-red-950/40 disabled:hover:border-red-900/30 `}>
+                                        {isLoading ? <div className="w-5 h-5 border-3 border-neutral-400 border-t-red-400 rounded-full animate-spin " /> : "Yes,Log Out"}
                                     </button>
 
-                                    <button onClick={()=>{setShowLogOutCard(false)}} className="stay-button w-full py-2.5 rounded-xl text-xs font-medium text-neutral-400 hover:text-white bg-transparent hover:bg-neutral-800/50 border border-transparent hover:border-neutral-800 transition-all duration-200 cursor-pointer active:scale-[0.98]">
+                                    <button onClick={() => { setShowLogOutCard(false) }} className="stay-button w-full py-2.5 rounded-xl text-xs font-medium text-neutral-400 hover:text-white bg-transparent hover:bg-neutral-800/50 border border-transparent hover:border-neutral-800 transition-all duration-200 cursor-pointer active:scale-[0.98]">
                                         Cancel
                                     </button>
                                 </div>
@@ -125,13 +144,23 @@ const Profile = () => {
                         </div>
                     )}
 
-                    <div className="w-full max-w-xl bg-[#0b0b0b] border border-neutral-900 p-6 rounded-2xl shadow-xl flex flex-col gap-5">
+                    <form className="w-full max-w-xl bg-[#0b0b0b] border border-neutral-900 p-6 rounded-2xl shadow-xl flex flex-col gap-5" onSubmit={handleSubmit(handleUpdateProfile)}>
+
 
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="flex flex-col flex-1 gap-2">
-                                <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">First Name</label>
+                            <div className="flex flex-col flex-1 gap-2 ">
+                                <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide w-fit pr-2 relative flex gap-2">
+                                    <div className="text-name">First Name</div>
+                                    <div className="absolute right-0 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit">*</div>
+                                    {errors.firstName?.message && (
+                                        <span className="absolute -right-2 translate-x-full top-0 text-xs font-medium text-rose-400 tracking-wide dynamic-error whitespace-nowrap">
+                                            {errors.firstName?.message}
+                                        </span>
+                                    )}
+                                </label>
                                 <input
                                     type="text"
+                                    {...register("firstName", { required: "first name is required" })}
                                     defaultValue={userDetails.firstName}
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                     placeholder="eg. Ankit"
@@ -141,6 +170,7 @@ const Profile = () => {
                                 <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Last Name</label>
                                 <input
                                     type="text"
+                                    {...register("lastName")}
                                     defaultValue={userDetails.lastName}
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                     placeholder="eg. Sharma"
@@ -149,19 +179,20 @@ const Profile = () => {
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Email Address</label>
-                            <input
-                                type="email"
-                                defaultValue={userDetails.email}
-                                className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
-                                placeholder="eg. arhenius34@gmail.com"
-                            />
+                            <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide w-fit pr-2 relative flex gap-2 ">
+                                <div className="text-name">Email</div>
+                            </label>
+
+                            <div className="h-11 px-4 rounded-xl text-sm bg-neutral-950 text-neutral-400 placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full flex items-center ">
+                                {userDetails.email}
+                            </div>
                         </div>
 
                         <div className="flex flex-col gap-2">
                             <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Phone Number</label>
                             <input
                                 type="tel"
+                                {...register("phoneNo")}
                                 defaultValue={userDetails.phoneNo}
                                 className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                 placeholder="Enter contact number"
@@ -171,7 +202,8 @@ const Profile = () => {
                         <div className="flex flex-col gap-2">
                             <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Street Address</label>
                             <input
-                            defaultValue={userDetails.streetAddress}
+                                defaultValue={userDetails.streetAddress}
+                                {...register("street")}
                                 type="text"
                                 className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
                                 placeholder="Enter street address"
@@ -182,6 +214,7 @@ const Profile = () => {
                             <div className="flex flex-col flex-1 gap-2">
                                 <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">City</label>
                                 <input
+                                    {...register("city")}
                                     type="text"
                                     defaultValue={userDetails.city}
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
@@ -191,6 +224,7 @@ const Profile = () => {
                             <div className="flex flex-col flex-1 gap-2">
                                 <label className="text-xs font-medium text-neutral-400 pl-1 tracking-wide">Zip Code</label>
                                 <input
+                                    {...register("zipCode")}
                                     type="text"
                                     defaultValue={userDetails.zipCode}
                                     className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none w-full"
@@ -199,11 +233,14 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        <button className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold text-sm transition-colors duration-200 mt-2 cursor-pointer active:scale-[0.99]">
-                            Update Profile
+                        <button disabled={isLoading} className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold text-sm transition-colors duration-200 mt-2 cursor-pointer active:scale-[0.99] disabled:cursor-default disabled:brightness-50">
+                          {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : "Update Proflie"}
                         </button>
 
-                    </div>
+
+                    </form>
+
+
                 </div>}
 
                 {showButton === "orders" && orderCount == 0 && <div className="show-orders w-full max-w-xl p-8 items-center flex flex-col border bg-[#0b0b0b] justify-center border-neutral-900 mx-auto rounded-2xl">

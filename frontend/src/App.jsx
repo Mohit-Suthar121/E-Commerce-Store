@@ -23,7 +23,6 @@ import Verify from './pages/Verify'
 import ProductDetailPage from './pages/ProductDetailPage'
 import { useAuthStore } from './store/auth.store'
 import AuthRoute from './routes/AuthRoute'
-import VerifyRoute from './routes/VerifyRoute'
 import PageNotFound from './components/PageNotFound'
 
 
@@ -49,9 +48,7 @@ function App() {
         <Route element={<AuthRoute />} >
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Signup />} />
-          {/* <Route element={<VerifyRoute />} > */}
             <Route path='/verify' element={<Verify />} />
-          {/* </Route> */}
         </Route>
 
 
