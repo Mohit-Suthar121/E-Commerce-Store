@@ -15,6 +15,9 @@ const Profile = () => {
     const user = useAuthStore((state) => state.user);
     const resetData = useAuthStore((state) => state.resetData);
     const navigate = useNavigate();
+    const [file,setFile] = useState(null);
+    const [imagePreviewUrl,setImagePreviewUrl] = useState("");
+
     const [newInfo, setNewInfo] = useState({
         firstName: "",
         lastName: "",
@@ -54,20 +57,43 @@ const Profile = () => {
         zipCode: user?.shippingAddress?.zipCode || ""
     }
 
-    const handleUpdateProfile = async(data) => {
-        console.log("The data is: ", data)
+    const handleUpdateProfile = async (data) => {
         setIsLoading(true);
+        const formData = new FormData();
+        console.log("The data is: ", data)
+        Object.entries(data).forEach(([key,value])=>{
+            formData.append(key,value);
+        })
+        if(file){
+
+            formData.append("profilePicture",file);
+        }
+
         try {
-            const response = await API.patch('/v1/user/updateProfile',data);
+            const response = await API.patch('/v1/user/updateProfile', formData);
+
             console.log("profile updated successfully!", response.data);
             notifySuccess(response.data.message);
         } catch (error) {
-            console.log("Some error occured while updating the profile",error?.response?.data || error.message);
-            notifyFailure(error?.response?.data?.message)
-        }finally{
+            console.log("Some error occured while updating the profile", error?.response?.data || error.message);
+            notifyFailure(error?.response?.data?.message);
+        } finally {
             setIsLoading(false);
         }
     }
+
+    const handleFileUpload = (e)=>{
+        const inputFile = e.target.files[0];
+        if(!inputFile) return;
+        setFile(inputFile);
+        if(imagePreviewUrl){
+            URL.revokeObjectURL(imagePreviewUrl);
+        }
+        const newUrl = URL.createObjectURL(inputFile);
+        setImagePreviewUrl(newUrl);
+    }
+
+
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
 
@@ -95,13 +121,18 @@ const Profile = () => {
                         <div className="relative group w-28 h-28 rounded-full border border-neutral-800 p-1 bg-neutral-900/30 overflow-hidden shadow-inner">
                             <img
                                 className="w-full h-full object-cover rounded-full"
-                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTcT0QGetG2uzAvnYBjODTUeGzqZjpcfsUUQ&s"
+                                src= {imagePreviewUrl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTcT0QGetG2uzAvnYBjODTUeGzqZjpcfsUUQ&s"}
                                 alt="User Profile Avatar"
                             />
                         </div>
-                        <button className="text-xs font-medium text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 shadow-sm">
+
+                        {/* <button className="text-xs font-medium text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 shadow-sm">
                             Change Avatar
-                        </button>
+                        </button> */}
+                        <label htmlFor="profilePicture" className="text-xs font-medium text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 shadow-sm" >
+                            Change Avatar
+                        </label>
+                            <input onChange={handleFileUpload} className='hidden' type="file" id="profilePicture" accept='image/'/>
 
                         <button onClick={() => { setShowLogOutCard(true) }} className="text-xs font-medium text-red-200 bg-red-950/40 hover:bg-red-900/40 border border-red-900/30 hover:border-red-700/50 px-4 py-2.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 shadow-sm whitespace-nowrap flex items-center gap-2 ">
                             <svg className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,13 +265,9 @@ const Profile = () => {
                         </div>
 
                         <button disabled={isLoading} className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-semibold text-sm transition-colors duration-200 mt-2 cursor-pointer active:scale-[0.99] disabled:cursor-default disabled:brightness-50">
-                          {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : "Update Proflie"}
+                            {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : "Update Proflie"}
                         </button>
-
-
                     </form>
-
-
                 </div>}
 
                 {showButton === "orders" && orderCount == 0 && <div className="show-orders w-full max-w-xl p-8 items-center flex flex-col border bg-[#0b0b0b] justify-center border-neutral-900 mx-auto rounded-2xl">

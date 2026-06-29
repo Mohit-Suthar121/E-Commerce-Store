@@ -25,6 +25,16 @@ const userSchema = new mongoose.Schema({
         trim:true,
         default:""
     },
+    profilePic:{
+        url:{
+            type:String,
+            default:""
+        },
+        publicId:{
+            type:String,
+            default:null
+        }
+    },
     shippingAddress:{
         street:{
             type:String,
