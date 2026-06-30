@@ -121,7 +121,7 @@ const Profile = () => {
                         <div className="relative group w-28 h-28 rounded-full border border-neutral-800 p-1 bg-neutral-900/30 overflow-hidden shadow-inner">
                             <img
                                 className="w-full h-full object-cover rounded-full"
-                                src= {imagePreviewUrl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTcT0QGetG2uzAvnYBjODTUeGzqZjpcfsUUQ&s"}
+                                src= { imagePreviewUrl|| user?.profilePic?.url || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTcT0QGetG2uzAvnYBjODTUeGzqZjpcfsUUQ&s"}
                                 alt="User Profile Avatar"
                             />
                         </div>
