@@ -18,7 +18,7 @@ const Signup = () => {
     const navigate = useNavigate();
     const setEmail = useAuthStore((state) => state.setEmail);
     const setUser = useAuthStore((state) => state.setUser);
-    const handleGoogleLogin = useGoogleAuth(serverError,setIsLoading);
+    const handleGoogleLogin = useGoogleAuth(setServerError,setIsLoading);
 
 
     const onSubmit = async (data) => {
@@ -193,7 +193,7 @@ const Signup = () => {
 
 
                 <button
-                    onClick={handleGoogleLoginSuccess}
+                    onClick={handleGoogleLogin}
                     type="button"
                     className="w-full h-11 flex justify-center items-center gap-2 rounded-xl bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 text-neutral-300 hover:text-white text-sm font-medium transition-all duration-200 cursor-pointer active:scale-[0.99]"
                 >

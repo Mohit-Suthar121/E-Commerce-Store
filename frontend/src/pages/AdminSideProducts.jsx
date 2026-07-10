@@ -1,7 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import AdminListedProductCard from '../components/AdminListedProductCard'
+import AdminPaginationController from '../components/AdminPaginationController'
 
 const AdminSideProducts = () => {
+
+    const [currentPage,setCurrentPage] = useState(1);
+    const [totalPages,setTotalPages] = useState(6);
+    const [isLoading,setIsLoading] = useState(false);
+
+    const handleNextPage = ()=>{
+        if(currentPage===totalPages) return;
+        setCurrentPage((state) => state+1);
+    }
+    const handlePreviousPage = ()=>{
+        if(currentPage===0) return;
+        setCurrentPage((state)=>state-1);
+    }
+
+
     return (
         <div className="flex-1 bg-[#060606] text-neutral-200 p-4 sm:p-6 lg:p-10 flex flex-col gap-6 font-sans antialiased select-none">
 
@@ -55,10 +71,11 @@ const AdminSideProducts = () => {
                 </div>
             </div>
 
-            <div className="flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design">
+            <div className="flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design min-h-0 scrollbar-gutter-stable">
                 <AdminListedProductCard />
                 <AdminListedProductCard />
-                <AdminListedProductCard />
+
+                <AdminPaginationController currentPage={currentPage} totalPages={totalPages} isLoading={isLoading} onNext={handleNextPage} onPrev={handlePreviousPage} />
             </div>
 
         </div>
