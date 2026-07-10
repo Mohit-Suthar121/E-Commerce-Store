@@ -115,6 +115,8 @@ const Profile = () => {
                     </div>
                 </div>
 
+
+
                 {showButton == "profile" && <div className="w-full flex flex-col md:flex-row items-center md:items-start justify-center gap-8 lg:gap-12 mt-4 ">
 
                     <div className="flex flex-col items-center gap-4 shrink-0">
@@ -126,9 +128,6 @@ const Profile = () => {
                             />
                         </div>
 
-                        {/* <button className="text-xs font-medium text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 shadow-sm">
-                            Change Avatar
-                        </button> */}
                         <label htmlFor="profilePicture" className="text-xs font-medium text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 px-4 py-2 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 shadow-sm" >
                             Change Avatar
                         </label>
