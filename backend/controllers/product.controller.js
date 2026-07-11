@@ -15,12 +15,11 @@ export const addProduct = async(req,res)=>{
             const uploadedImages = await Promise.all(files.map(async (file)=>{
                 const uploadResponse = await uploadToCloudinary(file);
                 return {
-                    fileUrl:uploadResponse.secure_url,
+                    url:uploadResponse.secure_url,
                     publicId:uploadResponse.public_id
                 }
             })) 
             console.log("The cloudinary uploaded images are: ",uploadedImages)
-
             product.images = uploadedImages;
         }
 
@@ -38,4 +37,28 @@ export const addProduct = async(req,res)=>{
         })
     }
 
+}
+
+
+export const getAllProducts = async(req,res)=>{
+    try {
+        
+        const page= parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        console.log("The page and limits are: ",page,limit);
+        const skip = limit * (page-1);
+        const products = await Product.find().skip(skip).limit(limit).sort({createdAt:-1});
+        const totalPages = Math.ceil(await Product.countDocuments()/limit);
+        res.status(200).json({
+            products,
+            totalPages,
+            message:"success",
+        })
+
+    } catch (error) {
+        console.log("couldn't get products: ",error);
+        return res.status(500).json({
+            message:"Internal server error, couldn't get products!"
+        })
+    }
 }

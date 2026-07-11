@@ -1,26 +1,72 @@
-import React, { useState } from 'react'
-import AdminListedProductCard from '../components/AdminListedProductCard'
-import AdminPaginationController from '../components/AdminPaginationController'
+import React, { useEffect, useState } from "react";
+import AdminListedProductCard from "../components/AdminListedProductCard";
+import AdminPaginationController from "../components/AdminPaginationController";
+import { API } from "../api/axiosInstance";
+import { useProductStore } from "../store/product.store";
+import { Rings } from "react-loader-spinner";
 
 const AdminSideProducts = () => {
+    const [currentPage, setCurrentPage] = useState(1);
 
-    const [currentPage,setCurrentPage] = useState(1);
-    const [totalPages,setTotalPages] = useState(6);
-    const [isLoading,setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const setCurrentProducts = useProductStore(
+        (state) => state.setCurrentProducts,
+    );
+    const totalPages = useProductStore((state) => state.totalPages);
+    const setTotalPages = useProductStore((state) => state.setTotalPages);
+    const currentProducts = useProductStore((state) => state.currentProducts);
 
-    const handleNextPage = ()=>{
-        if(currentPage===totalPages) return;
-        setCurrentPage((state) => state+1);
+    const handleNextPage = () => {
+        if (currentPage === totalPages) return;
+        setCurrentPage((state) => state + 1);
+    };
+    const handlePreviousPage = () => {
+        if (currentPage === 1) return;
+        setCurrentPage((state) => state - 1);
+    };
+
+    async function fetchProducts() {
+        try {
+            setIsLoading(true);
+            const response = await API.get(
+                `/v1/product/get-all-products?limit=10&page=${currentPage}`,
+            );
+            setTotalPages(response.data.totalPages);
+            setCurrentProducts(response.data.products);
+            console.log("The response is: ", response.data);
+        } catch (error) {
+            console.error(
+                "some error occured while fetching the products!",
+                error.response?.data || error.message,
+            );
+        } finally {
+            setIsLoading(false);
+        }
     }
-    const handlePreviousPage = ()=>{
-        if(currentPage===0) return;
-        setCurrentPage((state)=>state-1);
-    }
 
+    async function getDummyData() {
+        try {
+            setIsLoading(true);
+            const response = await fetch(
+                `https://dummyjson.com/products?limit=10&skip=${10 * (currentPage - 1)}`,
+            );
+            const parsedObject = await response.json();
+            const products = parsedObject.products;
+            console.log("The dummy data is:", products);
+            setCurrentProducts(products);
+            setTotalPages(5);
+        } catch (error) {
+            console.log("some error occured while fetching: ", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+    useEffect(() => {
+        fetchProducts();
+    }, [currentPage]);
 
     return (
         <div className="flex-1 bg-[#060606] text-neutral-200 p-4 sm:p-6 lg:p-10 flex flex-col gap-6 font-sans antialiased select-none">
-
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900 pb-5">
                 <div className="flex flex-col gap-0.5">
                     <h1 className="text-xl font-bold tracking-tight text-neutral-100">
@@ -39,11 +85,20 @@ const AdminSideProducts = () => {
             </div>
 
             <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0b0b0b]/40 p-3 rounded-2xl border border-neutral-900/60">
-
                 <div className="relative w-full sm:max-w-xs group">
                     <span className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-neutral-600 group-focus-within:text-emerald-500 transition-colors duration-200">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
                         </svg>
                     </span>
 
@@ -64,22 +119,59 @@ const AdminSideProducts = () => {
                     </select>
 
                     <span className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none text-neutral-500">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M19 9l-7 7-7-7"
+                            />
                         </svg>
                     </span>
                 </div>
             </div>
 
-            <div className="flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design min-h-0 scrollbar-gutter-stable">
-                <AdminListedProductCard />
-                <AdminListedProductCard />
 
-                <AdminPaginationController currentPage={currentPage} totalPages={totalPages} isLoading={isLoading} onNext={handleNextPage} onPrev={handlePreviousPage} />
+            <div className={`flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design min-h-0 scrollbar-gutter-stable ${isLoading ? "flex justify-center items-center" : ""}`}>
+                {!isLoading ? <div className="flex flex-col gap-3">
+                    {currentProducts.map((product, index) => (
+                        <AdminListedProductCard product={product} key={index} />
+                    ))}
+                    
+                    <AdminPaginationController
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        isLoading={isLoading}
+                        onNext={handleNextPage}
+                        onPrev={handlePreviousPage}
+                    />
+                </div>:<Rings
+                    visible={true}
+                    height="80"
+                    width="80"
+                    color="#ffffff"
+                    ariaLabel="rings-loading"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                />}
+
+
+
+
+
             </div>
 
-        </div>
-    )
-}
 
-export default AdminSideProducts
+
+
+
+        </div>
+    );
+};
+
+export default AdminSideProducts;

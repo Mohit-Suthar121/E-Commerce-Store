@@ -3,17 +3,36 @@ import DeleteIcon from '../icons/DeleteIcon'
 import EditIcon from '../icons/EditIcon'
 
 const AdminListedProductCard = ({ product, onEdit, onDelete }) => {
+
+
     const {
         name = "Unknown Product",
         price = 1000,
         stock = 88,
         category = "Others",
+        subCategory = "",
         brandName = "",
-        images = []
+        images = [],
     } = product || {};
+    
+
+    // for using the dummy data url
+    // const { 
+    // title:name = "Unknown Product" ,
+    //     price = 1000,
+    //     stock = 88,
+    //     category = "Others",
+    //     subCategory = "",
+    //     brand: brandName = "",
+    //     images = [],
+    // } = product || {};
 
     // Get the first image URL or a sleek placeholder if empty
     const displayImage = images[0]?.url || "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=200&auto=format&fit=crop&q=60";
+    
+
+    // for using the dummy data url
+    // const displayImage = images[0] || "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=200&auto=format&fit=crop&q=60"; 
 
 
     // Format price cleanly into Indian Rupees (₹)
