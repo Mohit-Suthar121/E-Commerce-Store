@@ -7,9 +7,14 @@ import { API } from '../api/axiosInstance';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
 
 const AddProductPage = () => {
+
+
   const [isLoading, setIsLoading] = useState(false);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState([]);
-  const [imageFiles,setImageFiles] = useState([]);
+  const [images, setImages] = useState([])
+  // images:{
+  //   file,
+  //   previewUrl
+  // }
   const {
     register,
     handleSubmit,
@@ -23,28 +28,28 @@ const AddProductPage = () => {
   })
 
 
-  const onSubmit = async(data) => {
+  const onSubmit = async (data) => {
     setIsLoading(true);
     try {
       console.log("The data is: ", data);
       const formData = new FormData();
-      console.log("the imageFiles sent are: ",imageFiles)
-      imageFiles.forEach((file)=>{
-        formData.append("productImages",file)
+      console.log("the imageFiles sent are: ", images)
+      images.forEach((obj) => {
+        formData.append("productImages", obj.file)
       })
-      formData.append("name",data.name);
-      formData.append("price",data.price);
-      formData.append("stock",data.stockCount);
-      formData.append("productDesc",data.productDesc);
-      formData.append("subCategory",data.subCategory);
-      formData.append("category",data.category);
-      formData.append("brandName",data.brandName);
+      formData.append("name", data.name);
+      formData.append("price", data.price);
+      formData.append("stock", data.stockCount);
+      formData.append("productDesc", data.productDesc);
+      formData.append("subCategory", data.subCategory);
+      formData.append("category", data.category);
+      formData.append("brandName", data.brandName);
 
-      const response = await API.post("/v1/product/add-product",formData);
-      console.log("The response is: ",response.data);
+      const response = await API.post("/v1/product/add-product", formData);
+      console.log("The response is: ", response.data);
       notifySuccess("product added successfully!");
     } catch (error) {
-      console.error("Some error occured!",error?.response?error?.response?.data:error.message);
+      console.error("Some error occured!", error?.response ? error?.response?.data : error.message);
       notifyFailure("some error occured adding product")
     } finally {
       setIsLoading(false);
@@ -52,37 +57,43 @@ const AddProductPage = () => {
   }
 
 
-  useEffect(() => {
-    console.log(imagePreviewUrl)
-  }, [imagePreviewUrl])
 
 
-  function handleRemoveImage(currentUrl) {
-    const removeIndex = imagePreviewUrl.findIndex((url)=>url===currentUrl);
-    console.log("The removed index is: ",removeIndex)
-    setImagePreviewUrl((urls) => urls.filter((url,index) => url !== currentUrl)
-    )
-    setImageFiles((files)=>files.filter((file,index)=>index!=removeIndex));
+  function handleRemoveImage(index) {
+    setImages((state)=> state.filter((obj, i) => i != index));
+
   }
 
-  const handleFileChange = (e)=>{
-    if(imagePreviewUrl.length>=5) return;
+  const handleFileChange = (e) => {
+    if (images.length >= 5) return;
     const files = e.target.files;
     let fileArray = Array.from(files);
-    let totalFiles = [...imageFiles,...fileArray];
-    if(totalFiles.length>5){
-      totalFiles = totalFiles.slice(0,5);
+
+    const convertedFileArray = fileArray.map((file) => {
+      const newImageObject = {
+        file: file,
+        previewUrl: URL.createObjectURL(file)
+      }
+      return newImageObject
+    })
+
+    let totalImageFiles = [...images, ...convertedFileArray];
+
+    if (totalImageFiles.length > 5) {
+      totalImageFiles = totalImageFiles.slice(0, 5);
     }
-    setImageFiles(totalFiles);
-    const urls = totalFiles.map((file)=> URL.createObjectURL(file));
-    setImagePreviewUrl(urls);
+    setImages(totalImageFiles);
   }
 
-  useEffect(()=>{
-    return ()=>{
-      imagePreviewUrl.forEach((url)=>URL.revokeObjectURL(url));
+  useEffect(() => {
+    return () => {
+      images.forEach((obj) => URL.revokeObjectURL(obj.previewUrl));
     }
-  },[imagePreviewUrl])
+  }, [])
+
+  useEffect(()=>{
+    console.log("The images are: ",images)
+  },[images])
 
   return (
     <div className="overflow-wrapper w-full overflow-y-auto scrollbar-design">
@@ -110,7 +121,7 @@ const AddProductPage = () => {
                   <span className="absolute -right-2 translate-x-full top-0 text-xs font-medium text-rose-400 tracking-wide dynamic-error whitespace-nowrap">
                     {errors.name?.message}
                   </span>
-                )}
+                )}   
               </label>
               <input
                 {...register("name", {
@@ -142,7 +153,7 @@ const AddProductPage = () => {
                     </span>
                   )}
                 </label>
-                
+
                 <input
                   {...register("price", {
                     required: "price is required!"
@@ -242,12 +253,12 @@ const AddProductPage = () => {
             <div className="flex flex-col gap-2 pt-1 ">
               <div className="text-xs font-semibold text-neutral-400 tracking-wide w-fit relative">
                 Product Media Files (MAX 5)
-               {errors.images && <span className="absolute -right-2 translate-x-full top-0 text-xs font-medium text-rose-400 tracking-wide dynamic-error whitespace-nowrap">
-                  *{errors.images?.message} 
+                {errors.images && <span className="absolute -right-2 translate-x-full top-0 text-xs font-medium text-rose-400 tracking-wide dynamic-error whitespace-nowrap">
+                  *{errors.images?.message}
                 </span>}
               </div>
 
-              {imagePreviewUrl.length < 5 && <label className="w-full border border-dashed border-neutral-800 hover:border-neutral-700 bg-neutral-950/40 rounded-xl p-6 flex flex-col justify-center items-center gap-2 cursor-pointer transition-colors duration-200 group">
+              {images.length < 5 && <label className="w-full border border-dashed border-neutral-800 hover:border-neutral-700 bg-neutral-950/40 rounded-xl p-6 flex flex-col justify-center items-center gap-2 cursor-pointer transition-colors duration-200 group">
                 <ImageIcon className={"w-5 h-5 text-neutral-600 group-hover:text-neutral-400 transition-colors"} />
                 <div className="flex flex-col items-center text-center gap-0.5">
                   <span className="text-xs font-medium text-neutral-300">
@@ -263,9 +274,9 @@ const AddProductPage = () => {
 
 
 
-              {imagePreviewUrl.length > 0 && <div className="w-full image-preview-section flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 p-1">
-                {imagePreviewUrl.map((url, index) => (
-                  <PreviewImageCard onClick={() => { handleRemoveImage(url) }} key={index} imageUrl={url} />
+              {images.length > 0 && <div className="w-full image-preview-section flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 p-1">
+                {images.map((image, index) => (
+                  <PreviewImageCard onClick={() => { handleRemoveImage(index) }} key={index} imageUrl={image.previewUrl} />
                 ))}
               </div>}
 
