@@ -4,10 +4,11 @@ import AdminPaginationController from "../components/AdminPaginationController";
 import { API } from "../api/axiosInstance";
 import { useProductStore } from "../store/product.store";
 import { Rings } from "react-loader-spinner";
+import { useNavigate } from "react-router-dom";
 
 const AdminSideProducts = () => {
     const [currentPage, setCurrentPage] = useState(1);
-
+    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const setCurrentProducts = useProductStore(
         (state) => state.setCurrentProducts,
@@ -61,6 +62,27 @@ const AdminSideProducts = () => {
             setIsLoading(false);
         }
     }
+
+    async function handleEdit(id) {
+        try {
+            navigate(`/admin/products/edit-product/${id}`)
+        } catch (error) {
+            console.error("some error occured",error);
+        }
+    }
+
+    async function handleDelete() {
+        try {
+            
+        } catch (error) {
+
+        }
+    }
+
+
+
+
+
     useEffect(() => {
         fetchProducts();
     }, [currentPage]);
@@ -140,9 +162,9 @@ const AdminSideProducts = () => {
             <div className={`flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design min-h-0 scrollbar-gutter-stable ${isLoading ? "flex justify-center items-center" : ""}`}>
                 {!isLoading ? <div className="flex flex-col gap-3">
                     {currentProducts.map((product, index) => (
-                        <AdminListedProductCard product={product} key={index} />
+                        <AdminListedProductCard product={product} key={index} onEdit={()=>{handleEdit(product._id)}} onDelete={handleDelete} />
                     ))}
-                    
+
                     <AdminPaginationController
                         currentPage={currentPage}
                         totalPages={totalPages}
@@ -150,7 +172,7 @@ const AdminSideProducts = () => {
                         onNext={handleNextPage}
                         onPrev={handlePreviousPage}
                     />
-                </div>:<Rings
+                </div> : <Rings
                     visible={true}
                     height="80"
                     width="80"
@@ -159,10 +181,6 @@ const AdminSideProducts = () => {
                     wrapperStyle={{}}
                     wrapperClass=""
                 />}
-
-
-
-
 
             </div>
 

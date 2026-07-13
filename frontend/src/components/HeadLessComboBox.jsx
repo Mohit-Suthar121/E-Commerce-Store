@@ -22,7 +22,7 @@ const HeadLessComboBox = ({value, onChange}) => {
         "Office Supplies",
         "Footwear",
         "Accessories",
-        "Others"
+        "Others"  
     ]
     const [query, setQuery] = useState('')
 
