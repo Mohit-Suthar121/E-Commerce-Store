@@ -24,6 +24,7 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import { useAuthStore } from './store/auth.store'
 import AuthRoute from './routes/AuthRoute'
 import PageNotFound from './components/PageNotFound'
+import EditProductPage from './pages/EditProductPage'
 
 
 function App() {
@@ -57,14 +58,13 @@ function App() {
           <Route path='sales' element={<SalesPage />} />
           <Route path='add-product' element={<AddProductPage />} />
           <Route path='products' element={<AdminSideProducts />} />
-
-
           <Route path='users' element={<AdminShowUsersPage />} />
           <Route path='users/orders/:userId' element={<AdminUserOrderDetails />} />
           <Route path='users/:userId' element={<AdminEditUserInfo />} />
           <Route path='orders' element={<AdminOrdersPage />} />
-
         </Route>
+
+        <Route path='/admin/products/edit-product/:id' element={<EditProductPage/>} />
 
         <Route path='*' element={<PageNotFound/>}/>
 

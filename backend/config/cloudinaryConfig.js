@@ -29,3 +29,11 @@ export const uploadToCloudinary = async (file) => {
         throw error
     }
 }
+
+export const deleteFromCloudinary = async(publicId)=>{
+    try {
+        await cloudinary.uploader.destroy(publicId);
+    } catch (error) {
+        throw error
+    }
+}
