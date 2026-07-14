@@ -3,16 +3,17 @@ import HeadLessComboBox from '../components/HeadLessComboBox';
 import ImageIcon from '../icons/ImageIcon'
 import PreviewImageCard from '../components/PreviewImageCard';
 import { Controller, set, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmit }) => {
 
 
-    // const [images, setImages] = useState([])
+    const navigate = useNavigate();
     const [newImages, setNewImages] = useState([]);
     const [existingImages, setExistingImages] = useState([]);
     // newImages:{
     //   file,
-    //   previewUrl
+    //   url
     // }
 
     const localSubmitHandler = (data) => {
@@ -57,7 +58,7 @@ const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmi
         const convertedFileArray = fileArray.map((file) => {
             const newImageObject = {
                 file: file,
-                previewUrl: URL.createObjectURL(file)
+                url: URL.createObjectURL(file)
             }
             return newImageObject
         })
@@ -80,6 +81,10 @@ const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmi
             newImages.forEach((obj) => URL.revokeObjectURL(obj.previewUrl));
         }
     }, [])
+
+    useEffect(()=>{
+        console.log("The existing images are: ",existingImages)
+    },[existingImages])
 
 
     // using the useEffect hook to initialize if the product is being edited and not adding a new product;
@@ -275,26 +280,38 @@ const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmi
 
 
 
-                            {newImages.length + existingImages > 0 && <div className="w-full image-preview-section flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 p-1">
+                            {newImages.length + existingImages.length > 0 && <div className="w-full image-preview-section flex flex-col gap-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-3 p-1">
                                 {existingImages.map((image, index) => (
-                                    <PreviewImageCard onClick={() => { handleRemoveExistingImages(index) }} key={index} imageUrl={image.previewUrl} />
+                                    <PreviewImageCard onClick={() => { handleRemoveExistingImages(index) }} key={index} imageUrl={image.url} />
                                 ))}
 
                                 {newImages.map((image, index) => (
-                                    <PreviewImageCard onClick={() => { handleRemoveNewImages(index) }} key={index} imageUrl={image.previewUrl} />
+                                    <PreviewImageCard onClick={() => { handleRemoveNewImages(index) }} key={index} imageUrl={image.url} />
                                 ))}
 
                             </div>}
 
                         </div>
 
-                        <button disabled={isLoading}
+                        <div className="buttons flex flex-col">
+                                <button disabled={isLoading}
                             type="submit"
                             className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99] mt-3 disabled:brightness-50 disabled:cursor-not-allowed disabled:scale-100"
                         >
                             {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : isEditing ? "Save Changes" : "Publish Product Line"}
 
                         </button>
+
+                       {isEditing && <button onClick={()=>{navigate("/dashboard/products")}}
+                            type="button"
+                            className="w-full h-11 flex justify-center items-center rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99] mt-3 disabled:brightness-50 disabled:cursor-not-allowed disabled:scale-100"
+                        >
+                          Cancel
+
+                        </button>}
+                        </div>
+
+                        
 
                     </form>
                 </div>

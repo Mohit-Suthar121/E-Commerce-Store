@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import ProductForm from '../components/ProductForm'
 import { API } from '../api/axiosInstance';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { notifyFailure, notifySuccess } from '../utils/Toastify';
 
 const EditProductPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [product,setProduct] = useState({});
     const {id} = useParams();
+    const navigate = useNavigate();
 
     async function fetchProduct(){
         try {
@@ -45,7 +47,9 @@ const EditProductPage = () => {
             formData.append("brandName", data.brandName);
             const response = await API.patch(`/v1/product/edit-product/${id}`, formData);
             console.log("The response is: ", response.data);
-            notifySuccess("product added successfully!");
+            notifySuccess("product Edited successfully!");
+            navigate("/dashboard/products")
+            
         } catch (error) {
             console.error("Some error occured!", error?.response ? error?.response?.data : error.message);
             notifyFailure("some error occured adding product")

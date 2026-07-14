@@ -45,7 +45,7 @@ export const editProduct = async(req,res)=>{
         const newImages = req.files;
         const {name,price,stock,productDesc,subCategory,category,brandName,existingImages} = req.body
         const remainingImages = JSON.parse(existingImages);
-        const product = Product.findById(id);
+        const product = await Product.findById(id);
         if(!product){
             return res.status(404).json({
                 message:"product was not found"
@@ -61,8 +61,11 @@ export const editProduct = async(req,res)=>{
             }
         }))
 
-        const toDeleteImages = product.images.filter(objImg=> !remainingImages.some((img)=>img===objImg.publicId))
-        await Promise.all(toDeleteImages.map(async (imgObj)=>await deleteFromCloudinary(imgObj.publicId)));
+        const toDeleteImages = product?.images?.filter(objImg=> !remainingImages.some((img)=>img===objImg.publicId))
+        if(toDeleteImages){
+
+            await Promise.all(toDeleteImages?.map(async (imgObj)=>await deleteFromCloudinary(imgObj.publicId)));
+        }
 
         product.images = [...remainingImages,...newImagesArray];
 
