@@ -1,5 +1,5 @@
-import { deleteFromCloudinary, uploadToCloudinary } from "../config/cloudinaryConfig.js";
-import { Product } from "../models/Product.model.js";
+import { deleteFromCloudinary, uploadToCloudinary } from "../../config/cloudinaryConfig.js";
+import { Product } from "../../models/Product.model.js";
 
 export const addProduct = async(req,res)=>{
     try {        
@@ -98,7 +98,7 @@ export const editProduct = async(req,res)=>{
 export const getAllProducts = async(req,res)=>{
     try {
         
-        const page= parseInt(req.query.page) || 1;
+        const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         console.log("The page and limits are: ",page,limit);
         const skip = limit * (page-1);

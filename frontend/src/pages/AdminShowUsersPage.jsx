@@ -1,11 +1,46 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import UserInfoCard from '../components/UserInfoCard'
 import { Outlet } from 'react-router-dom'
+import AdminPaginationController from '../components/AdminPaginationController';
+import { API } from '../api/axiosInstance';
+import { useAdminUsersStore } from '../store/users.store';
 
 const AdminShowUsersPage = () => {
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const currentUsers = useAdminUsersStore((state)=>state.currentUsers);
+    const setCurrentUsers = useAdminUsersStore((state)=>state.setCurrentUsers);
+
+    const handleNextPage = () => {
+        if (currentPage === totalPages) return;
+        setCurrentPage((state) => state + 1);
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage === 1) return;
+        setCurrentPage((state) => state - 1);
+    };
+
+    async function fetchUsers(){
+        try {
+            const response = await API.get(`/v1/admin/users/get-all-users?limit=12&page=${currentPage}`);
+            setCurrentUsers(response.data.users);
+            console.log("The response is: ",response.data);
+
+        } catch (error) {
+            console.error("some error occured:",error)
+        }
+    }
+
+    useEffect(()=>{
+        fetchUsers();
+    },[])
+
     return (
         <div className="flex-1 flex flex-col gap-5 p-5 bg-[#060606] text-neutral-200 font-sans antialiased select-none ">
-            
+
             <div className="flex flex-col w-full pl-1 border-b border-neutral-900 pb-4">
                 <h2 className="text-xl font-bold tracking-tight text-neutral-100">
                     User Management
@@ -31,29 +66,28 @@ const AdminShowUsersPage = () => {
                 </div>
             </div>
 
-            <div className="users-section flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 gap-2 items-center w-full">
-                <UserInfoCard 
-                    profilePicture="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5FyhKFiRoCdmrxbS5CDkACBhuak_CQjnhKg&s" 
-                    username="Rohan Singh" 
-                    email="rohansingh232@gmail.com" 
-                    position={"user"}
-                    
-                />
-                <UserInfoCard 
-                    profilePicture="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5FyhKFiRoCdmrxbS5CDkACBhuak_CQjnhKg&s" 
-                    username="Rohan Singh" 
-                    email="rohansingh232@gmail.com" 
-                    position={"admin"}
-                    
-                />
-                <UserInfoCard 
-                    profilePicture="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5FyhKFiRoCdmrxbS5CDkACBhuak_CQjnhKg&s" 
-                    username="Rohan Singh" 
-                    email="rohansingh232@gmail.com" 
-                    position={"superadmin"}
-                    
-                />
+            <div className="users-section flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 gap-2 items-start w-full flex-1 min-h-0 overflow-y-auto scrollbar-gutter-stable scrollbar-design">
+
+
+                {currentUsers.map((user)=> <UserInfoCard
+                    profilePicture={user?.profilePic?.url}
+                    username={user?.name}
+                    email={user?.email}
+                    position={user?.role}
+                    key={user?._id}
+                />)}
+
+
+                
+
             </div>
+            <AdminPaginationController
+                currentPage={currentPage}
+                totalPages={totalPages}
+                isLoading={isLoading}
+                onNext={handleNextPage}
+                onPrev={handlePreviousPage}
+            />
         </div>
     )
 }
