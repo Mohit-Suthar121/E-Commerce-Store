@@ -32,7 +32,8 @@ app.use(express.json());
 app.use(cookieParser())
 app.use('/api/auth',authRoute)
 app.use('/api/v1/user',userRoute)
-app.use('/api/v1/product',productRoute)
+app.use('/api/v1/admin/product',productRoute)
+
 
 app.get('/', (req, res) => {
     console.log("We've just hit a get request") 

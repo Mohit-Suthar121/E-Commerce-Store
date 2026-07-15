@@ -5,6 +5,8 @@ import { API } from "../api/axiosInstance";
 import { useProductStore } from "../store/product.store";
 import { Rings } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
+import DeleteConfirmationCard from "../components/DeleteConfirmationCard";
+import { notifyFailure, notifySuccess } from "../utils/Toastify";
 
 const AdminSideProducts = () => {
     const [currentPage, setCurrentPage] = useState(1);
@@ -16,6 +18,8 @@ const AdminSideProducts = () => {
     const totalPages = useProductStore((state) => state.totalPages);
     const setTotalPages = useProductStore((state) => state.setTotalPages);
     const currentProducts = useProductStore((state) => state.currentProducts);
+    const [toDeleteProduct,setToDelelteProduct] = useState(null);
+    const [showDeleteConfirmationCard,setShowDeleteConfirmationCard] = useState(false);
 
     const handleNextPage = () => {
         if (currentPage === totalPages) return;
@@ -30,7 +34,7 @@ const AdminSideProducts = () => {
         try {
             setIsLoading(true);
             const response = await API.get(
-                `/v1/product/get-all-products?limit=10&page=${currentPage}`,
+                `/v1/admin/product/get-all-products?limit=10&page=${currentPage}`,
             );
             setTotalPages(response.data.totalPages);
             setCurrentProducts(response.data.products);
@@ -71,14 +75,34 @@ const AdminSideProducts = () => {
         }
     }
 
-    async function handleDelete() {
+    async function handleShowDeleteWarning(id) {
         try {
+            setShowDeleteConfirmationCard(true);
+            const product = currentProducts.find((product)=>product._id===id);
+            setToDelelteProduct(product);
             
         } catch (error) {
-
+            console.log("some error occured",error)
         }
     }
 
+    async function handleDelete(){
+        try {
+            setIsLoading(true);
+            const id = toDeleteProduct._id;
+            const response = await API.delete(`/v1/admin/product/delete-product/${id}`);
+            const remainingProducts = currentProducts.filter((product)=>product._id != id);
+            setCurrentProducts(remainingProducts);
+            console.log("Response after deleting the product is: ",response.data);
+            notifySuccess("product deleted successfully!");
+        } catch (error) {
+            console.error("some error occured while detelting the product: ",error?.response?.data)
+            notifyFailure("some error occured!");
+        }finally{
+            setIsLoading(false);
+            setToDelelteProduct(null)
+        }
+    }
 
 
 
@@ -89,6 +113,7 @@ const AdminSideProducts = () => {
 
     return (
         <div className="flex-1 bg-[#060606] text-neutral-200 p-4 sm:p-6 lg:p-10 flex flex-col gap-6 font-sans antialiased select-none">
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900 pb-5">
                 <div className="flex flex-col gap-0.5">
                     <h1 className="text-xl font-bold tracking-tight text-neutral-100">
@@ -105,6 +130,7 @@ const AdminSideProducts = () => {
                     </span>
                 </div>
             </div>
+
 
             <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#0b0b0b]/40 p-3 rounded-2xl border border-neutral-900/60">
                 <div className="relative w-full sm:max-w-xs group">
@@ -162,7 +188,7 @@ const AdminSideProducts = () => {
             <div className={`flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design min-h-0 scrollbar-gutter-stable ${isLoading ? "flex justify-center items-center" : ""}`}>
                 {!isLoading ? <div className="flex flex-col gap-3">
                     {currentProducts.map((product, index) => (
-                        <AdminListedProductCard product={product} key={index} onEdit={()=>{handleEdit(product._id)}} onDelete={handleDelete} />
+                        <AdminListedProductCard product={product} key={index} onEdit={()=>{handleEdit(product._id)}} onDelete={()=>{handleShowDeleteWarning(product._id)}} />
                     ))}
 
                     <AdminPaginationController
@@ -183,6 +209,11 @@ const AdminSideProducts = () => {
                 />}
 
             </div>
+
+           {toDeleteProduct && showDeleteConfirmationCard && <DeleteConfirmationCard isLoading={isLoading} showDeleteConfirmationCard={showDeleteConfirmationCard} product={toDeleteProduct} onCancel={()=>{
+            setToDelelteProduct(null);
+            setShowDeleteConfirmationCard(false);
+           }} onConfirm={handleDelete} />}
 
 
 
