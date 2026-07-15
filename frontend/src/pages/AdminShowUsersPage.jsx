@@ -4,14 +4,16 @@ import { Outlet } from 'react-router-dom'
 import AdminPaginationController from '../components/AdminPaginationController';
 import { API } from '../api/axiosInstance';
 import { useAdminUsersStore } from '../store/users.store';
+import NoUsersFoundCard from '../components/NoUsersFoundCard';
+import { Rings } from 'react-loader-spinner';
 
 const AdminShowUsersPage = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
-    const currentUsers = useAdminUsersStore((state)=>state.currentUsers);
-    const setCurrentUsers = useAdminUsersStore((state)=>state.setCurrentUsers);
+    const currentUsers = useAdminUsersStore((state) => state.currentUsers);
+    const setCurrentUsers = useAdminUsersStore((state) => state.setCurrentUsers);
 
     const handleNextPage = () => {
         if (currentPage === totalPages) return;
@@ -23,20 +25,24 @@ const AdminShowUsersPage = () => {
         setCurrentPage((state) => state - 1);
     };
 
-    async function fetchUsers(){
+    async function fetchUsers() {
         try {
+            setIsLoading(true)
             const response = await API.get(`/v1/admin/users/get-all-users?limit=12&page=${currentPage}`);
             setCurrentUsers(response.data.users);
-            console.log("The response is: ",response.data);
+            console.log("The response is: ", response.data);
 
         } catch (error) {
-            console.error("some error occured:",error)
+            console.error("some error occured:", error)
+        }finally{
+            setIsLoading(false);
         }
     }
+    
 
-    useEffect(()=>{
+    useEffect(() => {
         fetchUsers();
-    },[])
+    }, [])
 
     return (
         <div className="flex-1 flex flex-col gap-5 p-5 bg-[#060606] text-neutral-200 font-sans antialiased select-none ">
@@ -50,7 +56,7 @@ const AdminShowUsersPage = () => {
                 </p>
             </div>
 
-            <div className="search-bar-wrapper w-full flex justify-center items-center md:justify-start">
+            <div className="search-bar-wrapper w-full flex justify-center items-center md:justify-start ">
                 <div className="relative max-w-xl w-full md:max-w-sm group flex justify-center items-center">
                     <span className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-neutral-600 group-focus-within:text-emerald-500 transition-colors duration-200">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -66,21 +72,32 @@ const AdminShowUsersPage = () => {
                 </div>
             </div>
 
-            <div className="users-section flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 gap-2 items-start w-full flex-1 min-h-0 overflow-y-auto scrollbar-gutter-stable scrollbar-design">
-
-
-                {currentUsers.map((user)=> <UserInfoCard
+            {currentUsers.length == 0 && !isLoading ? <NoUsersFoundCard /> : !isLoading && <div className="users-section flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 gap-2 items-start w-full flex-1 min-h-0 overflow-y-auto scrollbar-gutter-stable scrollbar-design">
+                {currentUsers.map((user) => <UserInfoCard
                     profilePicture={user?.profilePic?.url}
                     username={user?.name}
                     email={user?.email}
                     position={user?.role}
                     key={user?._id}
                 />)}
+            </div>}
 
-
-                
+            <div className=" flex flex-1 justify-center items-center">
+                    {isLoading&& <Rings
+                    visible={true}
+                    height="80"
+                    width="80"
+                    color="#ffffff"
+                    ariaLabel="rings-loading"
+                    wrapperStyle={{}}
+                    wrapperClass=""
+                    
+                />}
 
             </div>
+
+            
+
             <AdminPaginationController
                 currentPage={currentPage}
                 totalPages={totalPages}
