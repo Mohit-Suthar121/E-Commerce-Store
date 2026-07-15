@@ -13,7 +13,7 @@ const EditProductPage = () => {
     async function fetchProduct(){
         try {
             setIsLoading(true)
-            const response = await API.get(`/v1/product/get-product/${id}`)
+            const response = await API.get(`/v1/admin/product/get-product/${id}`)
             console.log("The fetched product is:",response.data.product);
             setProduct(response.data.product);
         } catch (error) {
@@ -45,7 +45,7 @@ const EditProductPage = () => {
             formData.append("subCategory", data.subCategory);
             formData.append("category", data.category);
             formData.append("brandName", data.brandName);
-            const response = await API.patch(`/v1/product/edit-product/${id}`, formData);
+            const response = await API.patch(`/v1/admin/product/edit-product/${id}`, formData);
             console.log("The response is: ", response.data);
             notifySuccess("product Edited successfully!");
             navigate("/dashboard/products")

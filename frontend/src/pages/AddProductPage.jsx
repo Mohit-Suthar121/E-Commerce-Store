@@ -3,10 +3,12 @@ import ProductForm from '../components/ProductForm';
 
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
+import { useNavigate } from 'react-router-dom';
 const AddProductPage = () => {
 
   const [isEditing,setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
   const onSubmit = async (data,newImages) => {
         setIsLoading(true);
@@ -25,7 +27,7 @@ const AddProductPage = () => {
             formData.append("category", data.category);
             formData.append("brandName", data.brandName);
 
-            const response = await API.post("/v1/product/add-product", formData);
+            const response = await API.post("/v1/admin/product/add-product", formData);
             console.log("The response is: ", response.data);
             notifySuccess("product added successfully!");
         } catch (error) {
@@ -33,6 +35,8 @@ const AddProductPage = () => {
             notifyFailure("some error occured adding product")
         } finally {
             setIsLoading(false);
+            navigate("/dashboard/products");
+            
         }
     }
   

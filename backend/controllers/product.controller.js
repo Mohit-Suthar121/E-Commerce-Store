@@ -137,3 +137,25 @@ export const getSingleProduct = async(req,res)=>{
         })
     }
 }
+
+export const deleteProduct = async (req,res)=>{
+    try {
+        const {id} = req.params;
+        const product = await Product.findById(id);
+        if(!product) return res.status(404).json({
+            message:"product not found!"
+        })
+        const allImages = product.images;
+        await Promise.all(allImages.map( async (image)=> await deleteFromCloudinary(image.publicId)));
+        await product.deleteOne();
+
+        return res.status(200).json({
+            message:"product deleted successfully!"
+        })
+    } catch (error) {
+        console.error("Internal server error: ",error);
+        return res.status(500).json({
+            message:"Internal server error!"
+        })
+    }
+}
