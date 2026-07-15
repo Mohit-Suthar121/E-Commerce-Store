@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import UserInfoCard from '../components/UserInfoCard'
 import { Outlet } from 'react-router-dom'
 import AdminPaginationController from '../components/AdminPaginationController';
@@ -12,6 +12,9 @@ const AdminShowUsersPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchValue, setSearchValue] = useState("");
+    const [inputValue, setInputValue] = useState("");
+    const timerRef = useRef();
     const currentUsers = useAdminUsersStore((state) => state.currentUsers);
     const setCurrentUsers = useAdminUsersStore((state) => state.setCurrentUsers);
 
@@ -28,21 +31,33 @@ const AdminShowUsersPage = () => {
     async function fetchUsers() {
         try {
             setIsLoading(true)
-            const response = await API.get(`/v1/admin/users/get-all-users?limit=12&page=${currentPage}`);
+            const response = await API.get(`/v1/admin/users/get-all-users?limit=12&page=${currentPage}&search=${searchValue}`);
             setCurrentUsers(response.data.users);
             console.log("The response is: ", response.data);
 
         } catch (error) {
             console.error("some error occured:", error)
-        }finally{
+        } finally {
             setIsLoading(false);
         }
     }
-    
+
+
+    async function handleChange(e) {
+        const value = e.target.value.trim();
+        setInputValue(value);
+        clearTimeout(timerRef.current);
+
+        timerRef.current = setTimeout(async () => {
+            setCurrentPage(1);
+            setSearchValue(value);
+        }, 500)
+
+    }
 
     useEffect(() => {
         fetchUsers();
-    }, [])
+    }, [currentPage, searchValue])
 
     return (
         <div className="flex-1 flex flex-col gap-5 p-5 bg-[#060606] text-neutral-200 font-sans antialiased select-none ">
@@ -65,6 +80,8 @@ const AdminShowUsersPage = () => {
                     </span>
 
                     <input
+                        onChange={handleChange}
+                        value={inputValue}
                         type="text"
                         placeholder="Search users by name or email..."
                         className="w-full h-11 pl-10 pr-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-neutral-200 placeholder-neutral-700 focus:border-emerald-500/60 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none"
@@ -72,18 +89,37 @@ const AdminShowUsersPage = () => {
                 </div>
             </div>
 
-            {currentUsers.length == 0 && !isLoading ? <NoUsersFoundCard /> : !isLoading && <div className="users-section flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 gap-2 items-start w-full flex-1 min-h-0 overflow-y-auto scrollbar-gutter-stable scrollbar-design">
-                {currentUsers.map((user) => <UserInfoCard
+            {currentUsers.length == 0 && !isLoading ? <NoUsersFoundCard /> : !isLoading && <div className="users-section flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 gap-2 w-full flex-1 min-h-0 overflow-y-auto scrollbar-gutter-stable scrollbar-design">
+                {currentUsers.map((user) =>
+                 <UserInfoCard
                     profilePicture={user?.profilePic?.url}
                     username={user?.name}
                     email={user?.email}
                     position={user?.role}
                     key={user?._id}
                 />)}
-            </div>}
 
-            <div className=" flex flex-1 justify-center items-center">
-                    {isLoading&& <Rings
+                {/* <UserInfoCard
+                    profilePicture={""}
+                    username={"no name"}
+                    email={"something"}
+                    position={"user"}
+                    key={"2"}
+                />
+                <UserInfoCard
+                    profilePicture={""}
+                    username={"no name"}
+                    email={"something"}
+                    position={"user"}
+                    key={"2"}
+                /> */}
+
+
+            </div>}
+           
+
+           {isLoading && <div className=" flex flex-1 justify-center items-center ">
+                 <Rings
                     visible={true}
                     height="80"
                     width="80"
@@ -91,12 +127,12 @@ const AdminShowUsersPage = () => {
                     ariaLabel="rings-loading"
                     wrapperStyle={{}}
                     wrapperClass=""
-                    
-                />}
 
-            </div>
+                />
 
-            
+            </div>}
+
+
 
             <AdminPaginationController
                 currentPage={currentPage}
