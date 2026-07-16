@@ -10,7 +10,7 @@ const UserInfoCard = ({ profilePicture, username, email, position = "user" }) =>
   }
 
   return (
-    <div className="w-full relative p-4 flex flex-col gap-4 bg-[#0b0b0b] border border-neutral-900 rounded-2xl shadow-xl select-none font-sans antialiased max-w-xl h-full max-h-40 justify-between">
+    <div className="w-full relative p-4 flex flex-col gap-4 bg-[#0b0b0b] border border-neutral-900 rounded-2xl shadow-xl select-none font-sans antialiased max-w-xl h-full max-h-40 justify-between min-h-fit">
       
       <div className={`absolute right-4 top-4 uppercase text-[9px] font-bold tracking-widest px-2 py-0.5 rounded-md border ${roleStyles[position.toLowerCase()] || roleStyles.user}`}>
         {position}

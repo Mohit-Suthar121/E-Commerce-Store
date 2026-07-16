@@ -2,22 +2,22 @@ import React, { useEffect, useState } from "react";
 import AdminListedProductCard from "../components/AdminListedProductCard";
 import AdminPaginationController from "../components/AdminPaginationController";
 import { API } from "../api/axiosInstance";
-import { useProductStore } from "../store/product.store";
 import { Rings } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationCard from "../components/DeleteConfirmationCard";
 import { notifyFailure, notifySuccess } from "../utils/Toastify";
+import { useAdminProductStore } from "../store/admin/product.store";
 
 const AdminSideProducts = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
-    const setCurrentProducts = useProductStore(
+    const setCurrentProducts = useAdminProductStore(
         (state) => state.setCurrentProducts,
     );
-    const totalPages = useProductStore((state) => state.totalPages);
-    const setTotalPages = useProductStore((state) => state.setTotalPages);
-    const currentProducts = useProductStore((state) => state.currentProducts);
+    const totalPages = useAdminProductStore((state) => state.totalPages);
+    const setTotalPages = useAdminProductStore((state) => state.setTotalPages);
+    const currentProducts = useAdminProductStore((state) => state.currentProducts);
     const [toDeleteProduct,setToDelelteProduct] = useState(null);
     const [showDeleteConfirmationCard,setShowDeleteConfirmationCard] = useState(false);
 
