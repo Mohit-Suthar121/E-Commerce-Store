@@ -44,8 +44,8 @@ const AdminShowUsersPage = () => {
 
 
     async function handleChange(e) {
+        setInputValue(e.target.value);
         const value = e.target.value.trim();
-        setInputValue(value);
         clearTimeout(timerRef.current);
 
         timerRef.current = setTimeout(async () => {

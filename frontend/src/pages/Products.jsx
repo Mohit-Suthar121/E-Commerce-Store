@@ -1,36 +1,65 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import DownArrowIcon from '../icons/DownArrowIcon'
 import ProductCard from '../components/ProductCard';
 import PreviousArrow from '../icons/PreviousArrow';
 import NextArrow from '../icons/NextArrow';
+import { API } from '../api/axiosInstance';
+import { Rings } from 'react-loader-spinner';
+import { useProductStore } from '../store/product.store';
 
 const Products = () => {
-    const getProductsPerPage =()=>{
-        console.log("The inner width of the window is: ",window.innerWidth)
-            if(window.innerWidth<768) return 4;
-            else return 8;
-    } 
+    const getProductsPerPage = () => {
+        console.log("The inner width of the window is: ", window.innerWidth)
+        if (window.innerWidth < 768) return 4;
+        else return 8;
+    }
     const [minPriceValue, setMinPriceValue] = useState(0);
     const [maxPriceValue, setMaxPriceValue] = useState(999999);
     const [currentPage, setCurrentPage] = useState(1);
-    const [allProducts, setAllProducts] = useState([1, 2, 127, 312, 4235, 32, 123, 231, 324, 7465, 43, 3664, 5654, 4, 34, 345, 23, 4, 5, 43,9]);
-    const [productsPerPage,setProductsPerPage] = useState(getProductsPerPage());
-    const totalPages = Math.ceil(allProducts.length / productsPerPage);
-    const startIndex = (currentPage - 1) * productsPerPage;
-    const endIndex = currentPage * productsPerPage;
-    const currentProducts = allProducts.slice(startIndex, endIndex)
-    console.log("The start index: ", startIndex)
-    console.log("The end index: ", endIndex)
-    console.log(currentProducts)
-    const [showFilter, setShowFilter] = useState(false);
+    // const [allProducts, setAllProducts] = useState([1, 2, 127, 312, 4235, 32, 123, 231]);
+    const [productsPerPage, setProductsPerPage] = useState(getProductsPerPage());
+    const [isLoading, setIsLoading] = useState(false);
+    // const totalPages = useState(1);
+    // const startIndex = (currentPage - 1) * productsPerPage;
+    // const endIndex = currentPage * productsPerPage;
 
-    
+    // console.log("The start index: ", startIndex)
+    // console.log("The end index: ", endIndex)
+    // console.log(currentProducts)
+    const [showFilter, setShowFilter] = useState(false);
+    const currentProducts = useProductStore((state) => state.currentProducts);
+    const setCurrentProducts = useProductStore((state) => state.setCurrentProducts);
+    const totalPages = useProductStore((state) => state.totalPages);
+    const setTotalPages = useProductStore((state) => state.setTotalPages);
+
+    async function getAllProducts() {
+        try {
+            setIsLoading(true);
+            const response = await API.get(`/v1/product/get-all-products?limit=8&page=${currentPage}`);
+            console.log("The products received from the backend are: ", response.data);
+            setCurrentProducts(response.data.products);
+            setTotalPages(response.data.totalPages);
+
+
+        } catch (error) {
+            console.error("Some error occured!", error.response);
+
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        getAllProducts();
+    }, [])
+
+
 
     return (
         <div className='flex flex-col w-full min-h-screen'>
             <Navbar />
-            <div className='main-page w-full flex flex-col md:flex-row gap-6 p-6 items-start justify-center'>
+            <div className='main-page w-full flex flex-col md:flex-row gap-6 p-6 items-start justify-center  flex-1 '>
 
                 <button onClick={() => { setShowFilter(prev => !prev) }} className="showfilter md:hidden w-full rounded-lg flex justify-center items-center py-3 border border-neutral-800 bg-[#0f0f0f] font-semibold active:scale-95 transition-all duration-200">{showFilter ? "Close Filters" : "Show Filters"}</button>
 
@@ -83,8 +112,6 @@ const Products = () => {
                         <div className="border-line border-neutral-800/60 border" />
 
                         <div className="price-range flex flex-col gap-2 w-full">
-                            {/* <h1 className='text-xs font-bold uppercase tracking-wider text-neutral-400'>Price Range</h1>
-                        <div className="price-text">Price Range: ₹0-₹999999</div> */}
                             <div className="show-price flex gap-2 items-center">
                                 <div className="left-price relative">
                                     <input type="text" onChange={(e) => { setMinPriceValue(e.target.value) }} value={minPriceValue} className='min-range w-28 h-10 pl-8 text-sm py-4 bg-neutral-900 border-neutral-800 rounded-lg  border focus:border-emerald-400  outline-none transition-all duration-300' />
@@ -120,11 +147,15 @@ const Products = () => {
 
 
 
-                <div className="right-section flex-1 flex flex-col gap-4 justify-start w-full lg:w-fit ">
+                {!isLoading && <div className="right-section flex-1 flex flex-col gap-4 justify-start w-full lg:w-fit ">
 
-                    <div className="cards flex flex-col items-center md:grid md:place-items-center md:grid-cols-2 md:gap-2 md:items-center md:justify-center lg:grid lg:grid-cols-3 2xl:grid-cols-4 gap-4 ">
-                        {currentProducts.map((product) => (<ProductCard key={product} />))}
+                    <div className={`cards flex flex-col items-center md:grid md:place-items-center md:grid-cols-2 md:gap-2 md:items-center md:justify-center lg:grid lg:grid-cols-3 2xl:grid-cols-4 gap-4 `}>
+
+                        {currentProducts.map((product) => <ProductCard name={product?.name} price={product?.price} brandName={product?.brandName} desc={product?.productDesc} image={product?.images[0]?.url} key={product._id} />)}
+
                     </div>
+
+
 
                     <div className="border-line border-neutral-800/60 border w-3/4 self-center" />
 
@@ -140,7 +171,22 @@ const Products = () => {
                         </button>
                     </div>
 
-                </div>
+                </div>}
+
+
+               {isLoading && <div className="loader-div flex-1 h-full flex justify-center items-center">
+
+                    <Rings
+                        visible={true}
+                        height="80"
+                        width="80"
+                        color="#ffffff"
+                        ariaLabel="rings-loading"
+                        wrapperStyle={{}}
+                        wrapperClass=""
+                    />
+                </div>}
+
 
                 <div className="hidden lg:block seperator-line w-0 h-1/2 top-1/2 -translate-y-1/2 relative border border-neutral-800" />
 
