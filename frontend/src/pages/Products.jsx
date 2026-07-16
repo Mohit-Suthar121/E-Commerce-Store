@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Navbar from '../components/Navbar'
 import DownArrowIcon from '../icons/DownArrowIcon'
 import ProductCard from '../components/ProductCard';
@@ -17,17 +17,13 @@ const Products = () => {
     const [minPriceValue, setMinPriceValue] = useState(0);
     const [maxPriceValue, setMaxPriceValue] = useState(999999);
     const [currentPage, setCurrentPage] = useState(1);
-    // const [allProducts, setAllProducts] = useState([1, 2, 127, 312, 4235, 32, 123, 231]);
     const [productsPerPage, setProductsPerPage] = useState(getProductsPerPage());
     const [isLoading, setIsLoading] = useState(false);
-    // const totalPages = useState(1);
-    // const startIndex = (currentPage - 1) * productsPerPage;
-    // const endIndex = currentPage * productsPerPage;
-
-    // console.log("The start index: ", startIndex)
-    // console.log("The end index: ", endIndex)
-    // console.log(currentProducts)
     const [showFilter, setShowFilter] = useState(false);
+    const [inputValue,setInputValue] = useState("");
+    const [searchValue, setSearchValue] = useState("");
+
+    const timerRef = useRef();
     const currentProducts = useProductStore((state) => state.currentProducts);
     const setCurrentProducts = useProductStore((state) => state.setCurrentProducts);
     const totalPages = useProductStore((state) => state.totalPages);
@@ -36,7 +32,7 @@ const Products = () => {
     async function getAllProducts() {
         try {
             setIsLoading(true);
-            const response = await API.get(`/v1/product/get-all-products?limit=8&page=${currentPage}`);
+            const response = await API.get(`/v1/product/get-all-products?limit=8&page=${currentPage}&search=${searchValue}`);
             console.log("The products received from the backend are: ", response.data);
             setCurrentProducts(response.data.products);
             setTotalPages(response.data.totalPages);
@@ -50,9 +46,21 @@ const Products = () => {
         }
     }
 
+    async function handleChange(e) {
+        setInputValue(e.target.value);
+        const value = e.target.value.trim();
+        clearTimeout(timerRef.current);
+
+        timerRef.current = setTimeout(async () => {
+            setCurrentPage(1);
+            setSearchValue(value);
+        }, 500)
+
+    }
+
     useEffect(() => {
         getAllProducts();
-    }, [])
+    }, [currentPage,searchValue])
 
 
 
@@ -72,7 +80,7 @@ const Products = () => {
                             <div className="absolute left-3 search-icon bg-neutral-900 h-full flex justify-center items-center rounded-lg ">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
-                            <input type="text" placeholder='Search Products...' className=' rounded-xl px-10 py-2 w-full h-12 items-center outline-none border placeholder-neutral-500 border-neutral-800  focus:ring focus:ring-[#00ff4e] transition-all duration-300 bg-neutral-900' />
+                            <input onChange={handleChange}  type="text" placeholder='Search Products...' className=' rounded-xl px-10 py-2 w-full h-12 items-center outline-none border placeholder-neutral-500 border-neutral-800  focus:ring focus:ring-[#00ff4e] transition-all duration-300 bg-neutral-900' />
                         </div>
 
                         <div className="border-line border-neutral-800/60 border" />
@@ -151,7 +159,7 @@ const Products = () => {
 
                     <div className={`cards flex flex-col items-center md:grid md:place-items-center md:grid-cols-2 md:gap-2 md:items-center md:justify-center lg:grid lg:grid-cols-3 2xl:grid-cols-4 gap-4 `}>
 
-                        {currentProducts.map((product) => <ProductCard name={product?.name} price={product?.price} brandName={product?.brandName} desc={product?.productDesc} image={product?.images[0]?.url} key={product._id} />)}
+                        {currentProducts.map((product) => <ProductCard stock={product?.stock}  name={product?.name} price={product?.price} brandName={product?.brandName} category={product?.category}  productDesc={product?.productDesc} image={product?.images[0]?.url} key={product._id} />)}
 
                     </div>
 
@@ -160,7 +168,7 @@ const Products = () => {
                     <div className="border-line border-neutral-800/60 border w-3/4 self-center" />
 
                     <div className="previous-and-next-section flex items-center justify-center gap-4">
-                        <button onClick={() => { setCurrentPage(currentPage => currentPage - 1) }} disabled={currentPage == 1} className="previous-button px-4 py-2 text-sm capitalize font-semibold bg-neutral-900 border-neutral-800 rounded-lg cursor-pointer active:scale-95 border hover:brightness-110 hover:border-gray-500 transition-colors duration-300 disabled:brightness-75 disabled:hover:border-neutral-800">
+                        <button onClick={() => { setCurrentPage(currentPage => currentPage - 1) }} disabled={currentPage == 1} className="previous-button px-4 py-2 text-sm capitalize font-semibold bg-neutral-900 border-neutral-800 rounded-lg cursor-pointer active:scale-95 border hover:brightness-110 hover:border-gray-500 transition-colors duration-300 disabled:brightness-50 disabled:hover:border-neutral-800">
                             <PreviousArrow currentColor={"white"} className={"w-4 h-4"} />
                         </button>
 
