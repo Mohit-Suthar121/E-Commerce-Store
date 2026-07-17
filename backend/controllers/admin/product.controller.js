@@ -100,9 +100,29 @@ export const getAllProducts = async(req,res)=>{
         
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
+        const search = req.query.search;
+        const sortBy = parseInt(req.query.sortBy);
+
         console.log("The page and limits are: ",page,limit);
+        let query = {}
+        if(search.trim()){
+            query.name = {
+                $regex:search.trim(),
+                $options:"i"
+            }
+        }
+
+        let sortValue = {
+            createdAt:-1
+        }
+        if(sortBy!==0){
+            sortValue = {
+                price:sortBy
+            }
+        }
         const skip = limit * (page-1);
-        const products = await Product.find().skip(skip).limit(limit).sort({createdAt:-1});
+
+        const products = await Product.find(query).skip(skip).limit(limit).sort(sortValue);
         const totalPages = Math.ceil(await Product.countDocuments()/limit);
         res.status(200).json({
             products,
@@ -111,7 +131,7 @@ export const getAllProducts = async(req,res)=>{
         })
 
     } catch (error) {
-        console.log("couldn't get products: ",error);
+        console.error("couldn't get products: ",error);
         return res.status(500).json({
             message:"Internal server error, couldn't get products!"
         })
