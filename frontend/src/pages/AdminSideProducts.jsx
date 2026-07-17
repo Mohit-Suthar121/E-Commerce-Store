@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AdminListedProductCard from "../components/AdminListedProductCard";
 import AdminPaginationController from "../components/AdminPaginationController";
 import { API } from "../api/axiosInstance";
@@ -18,8 +18,13 @@ const AdminSideProducts = () => {
     const totalPages = useAdminProductStore((state) => state.totalPages);
     const setTotalPages = useAdminProductStore((state) => state.setTotalPages);
     const currentProducts = useAdminProductStore((state) => state.currentProducts);
+    const [searchValue, setSearchValue] = useState("");
+    const [inputValue, setInputValue] = useState("");
+    const timerRef = useRef();
     const [toDeleteProduct,setToDelelteProduct] = useState(null);
     const [showDeleteConfirmationCard,setShowDeleteConfirmationCard] = useState(false);
+    const [priceSorting,setPriceSorting] = useState("");
+    
 
     const handleNextPage = () => {
         if (currentPage === totalPages) return;
@@ -33,8 +38,10 @@ const AdminSideProducts = () => {
     async function fetchProducts() {
         try {
             setIsLoading(true);
+            const sortValue = priceSorting==="price_asc"?1:priceSorting==="price_dec"?-1:0;
+            console.log("the sorBy value is: ",sortValue)
             const response = await API.get(
-                `/v1/admin/product/get-all-products?limit=10&page=${currentPage}`,
+                `/v1/admin/product/get-all-products?limit=10&page=${currentPage}&search=${searchValue}&sortBy=${sortValue}`,
             );
             setTotalPages(response.data.totalPages);
             setCurrentProducts(response.data.products);
@@ -75,6 +82,18 @@ const AdminSideProducts = () => {
         }
     }
 
+    async function handleChange(e) {
+        setInputValue(e.target.value);
+        const value = e.target.value.trim();
+        clearTimeout(timerRef.current);
+
+        timerRef.current = setTimeout(async () => {
+            setCurrentPage(1);
+            setSearchValue(value);
+        }, 500)
+
+    }
+
     async function handleShowDeleteWarning(id) {
         try {
             setShowDeleteConfirmationCard(true);
@@ -104,12 +123,18 @@ const AdminSideProducts = () => {
         }
     }
 
+    async function handleSorting (e){
+        const value = e.target.value;
+        setPriceSorting(value);
+        console.log("the value is: ",value)
+    }
+
 
 
 
     useEffect(() => {
         fetchProducts();
-    }, [currentPage]);
+    }, [currentPage,searchValue,priceSorting]);
 
     return (
         <div className="flex-1 bg-[#060606] text-neutral-200 p-4 sm:p-6 lg:p-10 flex flex-col gap-6 font-sans antialiased select-none">
@@ -151,6 +176,8 @@ const AdminSideProducts = () => {
                     </span>
 
                     <input
+                    onChange={handleChange}
+                    value={inputValue}
                         type="text"
                         placeholder="Search product line..."
                         className="w-full h-11 pl-10 pr-4 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-neutral-200 placeholder-neutral-700 focus:border-emerald-500/60 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none"
@@ -159,11 +186,13 @@ const AdminSideProducts = () => {
 
                 <div className="relative w-full sm:w-48">
                     <select
+                    onChange={handleSorting}
                         name="price-sort"
                         className="w-full h-11 pl-3.5 pr-10 rounded-xl text-sm bg-neutral-950 border border-neutral-900 text-neutral-400 hover:text-neutral-200 focus:border-emerald-500/60 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none appearance-none cursor-pointer font-medium"
                     >
-                        <option value="low-to-high">Price: Low to High</option>
-                        <option value="high-to-low">Price: High to Low</option>
+                        <option value="">Price: None</option>
+                        <option value="price_asc">Price: Low to High</option>
+                        <option value="price_dec">Price: High to Low</option>
                     </select>
 
                     <span className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none text-neutral-500">
