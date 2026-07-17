@@ -10,19 +10,22 @@ import { useProductStore } from '../store/product.store';
 
 const Products = () => {
     const getProductsPerPage = () => {
-        console.log("The inner width of the window is: ", window.innerWidth)
         if (window.innerWidth < 768) return 4;
         else return 8;
     }
+    const [inputMinPriceValue, setInputMinPriceValue] = useState(0);
     const [minPriceValue, setMinPriceValue] = useState(0);
-    const [maxPriceValue, setMaxPriceValue] = useState(999999);
+    const [inputMaxPriceValue, setInputMaxPriceValue] = useState(999999);
+    const [maxPriceValue, setMaxPriceValue] = useState(999999)
     const [currentPage, setCurrentPage] = useState(1);
     const [productsPerPage, setProductsPerPage] = useState(getProductsPerPage());
     const [isLoading, setIsLoading] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
-    const [inputValue,setInputValue] = useState("");
+    const [category, setCategory] = useState("all");
     const [searchValue, setSearchValue] = useState("");
-
+    const [inputValue, setInputValue] = useState("");
+    const [inputBrandName, setInputBrandName] = useState("");
+    const [brandName, setBrandName] = useState("");
     const timerRef = useRef();
     const currentProducts = useProductStore((state) => state.currentProducts);
     const setCurrentProducts = useProductStore((state) => state.setCurrentProducts);
@@ -30,9 +33,11 @@ const Products = () => {
     const setTotalPages = useProductStore((state) => state.setTotalPages);
 
     async function getAllProducts() {
+
         try {
             setIsLoading(true);
-            const response = await API.get(`/v1/product/get-all-products?limit=8&page=${currentPage}&search=${searchValue}`);
+            console.log("The category:", category)
+            const response = await API.get(`/v1/product/get-all-products?limit=8&page=${currentPage}&search=${searchValue}&category=${category}&brandName=${brandName}&minPrice=${minPriceValue}&maxPrice=${maxPriceValue}`);
             console.log("The products received from the backend are: ", response.data);
             setCurrentProducts(response.data.products);
             setTotalPages(response.data.totalPages);
@@ -46,21 +51,55 @@ const Products = () => {
         }
     }
 
-    async function handleChange(e) {
-        setInputValue(e.target.value);
+    const handleChange = (fieldName) => (e) => {
+
+        if (fieldName === "search") {
+            console.log("I'm running right now!")
+            setInputValue(e.target.value);
+        } else if (fieldName === "brandName") {
+            setInputBrandName(e.target.value)
+        } else if (fieldName === "minPrice") {
+            setInputMinPriceValue(e.target.value)
+        } else if (fieldName === "maxPrice") {
+            setInputMaxPriceValue(e.target.value)
+        }
         const value = e.target.value.trim();
         clearTimeout(timerRef.current);
 
         timerRef.current = setTimeout(async () => {
+            if (fieldName === "search") {
+                setSearchValue(value);
+            } else if (fieldName === "brandName") {
+                setBrandName(e.target.value)
+            } else if (fieldName === "minPrice") {
+                setMinPriceValue(e.target.value)
+            } else if (fieldName === "maxPrice") {
+                setMaxPriceValue(e.target.value)
+            }
             setCurrentPage(1);
-            setSearchValue(value);
         }, 500)
 
     }
 
+    const handleResetFilters=()=>{
+        setInputBrandName("");
+        setBrandName("");
+        setCategory("all");
+        setInputMaxPriceValue(999999);
+        setInputMinPriceValue(0);
+        setMinPriceValue(0);
+        setMaxPriceValue(999999);
+        setInputValue("");
+        setSearchValue("")
+    }
+
+
+
     useEffect(() => {
         getAllProducts();
-    }, [currentPage,searchValue])
+        console.log("run")
+    }, [currentPage, category, searchValue, brandName,minPriceValue,maxPriceValue])
+
 
 
 
@@ -80,7 +119,7 @@ const Products = () => {
                             <div className="absolute left-3 search-icon bg-neutral-900 h-full flex justify-center items-center rounded-lg ">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
-                            <input onChange={handleChange}  type="text" placeholder='Search Products...' className=' rounded-xl px-10 py-2 w-full h-12 items-center outline-none border placeholder-neutral-500 border-neutral-800  focus:ring focus:ring-[#00ff4e] transition-all duration-300 bg-neutral-900' />
+                            <input onChange={handleChange("search")} value={inputValue} type="text" placeholder='Search Products...' className=' rounded-xl px-10 py-2 w-full h-12 items-center outline-none border placeholder-neutral-500 border-neutral-800  focus:ring focus:ring-[#00ff4e] transition-all duration-300 bg-neutral-900' />
                         </div>
 
                         <div className="border-line border-neutral-800/60 border" />
@@ -89,9 +128,26 @@ const Products = () => {
                             <h1 className='text-xs font-semibold uppercase text-neutral-400 tracking-wider'>Category</h1>
 
                             <div className="catagory-list flex flex-col ">
-                                {["all", "mobile", "laptop", "headphone", "tv"].map((item) => (
+                                {["all",
+                                    "Electronics",
+                                    "Fashion",
+                                    "Home & Kitchen",
+                                    "Beauty & Personal Care",
+                                    "Books",
+                                    "Sports & Fitness",
+                                    "Toys & Games",
+                                    "Grocery",
+                                    "Health",
+                                    "Automotive",
+                                    "Jewelry",
+                                    "Pet Supplies",
+                                    "Office Supplies",
+                                    "Footwear",
+                                    "Accessories",
+                                    "Others"
+                                ].map((item) => (
                                     <label key={item} className='capitalize text-neutral-300 gap-2 px-3 py-2.5 rounded-xl hover:bg-neutral-900/60 active:bg-neutral-900/60 flex items-center cursor-pointer '>
-                                        <input className='cursor-pointer bg-neutral-900 border-neutral-700 outline-none accent-emerald-500 focus:ring-0 w-4 h-4 ' type="radio" name="catagory" value={item} />
+                                        <input onChange={() => { setCategory(item) }} checked={category === item} className='cursor-pointer bg-neutral-900 border-neutral-700 outline-none accent-emerald-500 focus:ring-0 w-4 h-4 ' type="radio" name="catagory" value={item} />
                                         {item}
                                     </label>
                                 ))}
@@ -107,12 +163,19 @@ const Products = () => {
                                 <div className="down-arrow-key absolute right-2  w-6 h-6 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <DownArrowIcon currentColor={"#D4D4D4"} className={"w-6 h-6"} />
                                 </div>
-                                <select className=' w-full h-10 bg-neutral-900 rounded-xl text-sm px-4 py-2.5 appearance-none capitalize border-neutral-800 border text-neutral-300 focus:border-emerald-500 outline-none' >
-                                    {["all", "asus", "apple", "samsung", "boat", "oneplus", "hp"].map((item) => (
 
+                                {/* <select value={brandName} onChange={(e) => { setBrandName(e.target.value) }} className=' w-full h-10 bg-neutral-900 rounded-xl text-sm px-4 py-2.5 appearance-none capitalize border-neutral-800 border text-neutral-300 focus:border-emerald-500 outline-none' >
+                                    {["all", "asus", "apple", "samsung", "boat", "oneplus", "hp"].map((item) => (
                                         <option key={item} value={item} className='capitalize text-neutral-300'>{item}</option>
                                     ))}
-                                </select>
+                                </select> */}
+                                <div className="relative searchbar flex items-center gap-2 bg-neutral-900 rounded-lg">
+
+                                    <div className="absolute left-3 search-icon bg-neutral-900 h-full flex justify-center items-center rounded-lg ">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                    </div>
+                                    <input value={inputBrandName} onChange={handleChange("brandName")} type="text" placeholder='Search Brand...' className=' rounded-xl px-10 py-2 w-full h-12 items-center outline-none border placeholder-neutral-500 border-neutral-800  focus:ring focus:ring-[#00ff4e] transition-all duration-300 bg-neutral-900' />
+                                </div>
                             </div>
                         </div>
 
@@ -122,27 +185,27 @@ const Products = () => {
                         <div className="price-range flex flex-col gap-2 w-full">
                             <div className="show-price flex gap-2 items-center">
                                 <div className="left-price relative">
-                                    <input type="text" onChange={(e) => { setMinPriceValue(e.target.value) }} value={minPriceValue} className='min-range w-28 h-10 pl-8 text-sm py-4 bg-neutral-900 border-neutral-800 rounded-lg  border focus:border-emerald-400  outline-none transition-all duration-300' />
+                                    <input type="text" onChange={handleChange("minPrice")} value={inputMinPriceValue} className='min-range w-28 h-10 pl-8 text-sm py-4 bg-neutral-900 border-neutral-800 rounded-lg  border focus:border-emerald-400  outline-none transition-all duration-300' />
                                     <div className="ruppee-symbol absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-xs">₹</div>
                                 </div>
 
                                 <div className='border border-neutral-400 w-4 h-0' />
                                 <div className="right-price relative">
-                                    <input type="text" onChange={(e) => { setMaxPriceValue(e.target.value) }} value={maxPriceValue} className='max-range w-28 h-10 pl-8  py-4 text-sm  bg-neutral-900 border-neutral-800 rounded-lg border focus:border-emerald-400  outline-none transition-all duration-300' />
+                                    <input type="text" onChange={handleChange("maxPrice")} value={inputMaxPriceValue} className='max-range w-28 h-10 pl-8  py-4 text-sm  bg-neutral-900 border-neutral-800 rounded-lg border focus:border-emerald-400  outline-none transition-all duration-300' />
                                     <div className="ruppee-symbol absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-xs">₹</div>
                                 </div>
 
                             </div>
 
                             <div className="ranges flex flex-col gap-2 pt-2">
-                                <input className='accent-emerald-500 bg-neutral-800 appearance-none rounded-2xl h-2' value={minPriceValue} type="range" max={999999} min={0} name="" id="" onChange={(e) => { setMinPriceValue(e.target.value) }} />
-                                <input className='accent-emerald-500 bg-neutral-800 appearance-none rounded-2xl h-2' value={maxPriceValue} type="range" max={999999} min={0} name="" id="" onChange={(e) => { setMaxPriceValue(e.target.value) }} />
+                                <input className='accent-emerald-500 bg-neutral-800 appearance-none rounded-2xl h-2' value={inputMinPriceValue} type="range" max={999999} min={0} name="" id="" onChange={handleChange("minPrice")} />
+                                <input className='accent-emerald-500 bg-neutral-800 appearance-none rounded-2xl h-2' value={inputMaxPriceValue} type="range" max={999999} min={0} name="" id="" onChange={handleChange("maxPrice")} />
                             </div>
                         </div>
 
                         <div className="border-line border-neutral-800/60 border" />
 
-                        <button className="reset-filters py-2.5 capitalize text-sm font-semibold flex justify-center items-center bg-neutral-900 border border-neutral-800 rounded-lg cursor-pointer active:scale-95 hover:border-emerald-500 transition-all duration-300 hover:bg-emerald-950 ">
+                        <button onClick={handleResetFilters} className="reset-filters py-2.5 capitalize text-sm font-semibold flex justify-center items-center bg-neutral-900 border border-neutral-800 rounded-lg cursor-pointer active:scale-95 hover:border-emerald-500 transition-all duration-300 hover:bg-emerald-950 ">
                             reset filters
                         </button>
 
@@ -159,7 +222,7 @@ const Products = () => {
 
                     <div className={`cards flex flex-col items-center md:grid md:place-items-center md:grid-cols-2 md:gap-2 md:items-center md:justify-center lg:grid lg:grid-cols-3 2xl:grid-cols-4 gap-4 `}>
 
-                        {currentProducts.map((product) => <ProductCard stock={product?.stock}  name={product?.name} price={product?.price} brandName={product?.brandName} category={product?.category}  productDesc={product?.productDesc} image={product?.images[0]?.url} key={product._id} />)}
+                        {currentProducts.map((product) => <ProductCard stock={product?.stock} name={product?.name} price={product?.price} brandName={product?.brandName} category={product?.category} productDesc={product?.productDesc} image={product?.images[0]?.url} key={product._id} />)}
 
                     </div>
 
@@ -182,7 +245,7 @@ const Products = () => {
                 </div>}
 
 
-               {isLoading && <div className="loader-div flex-1 h-full flex justify-center items-center">
+                {isLoading && <div className="loader-div flex-1 h-full flex justify-center items-center">
 
                     <Rings
                         visible={true}

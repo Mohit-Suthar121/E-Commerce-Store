@@ -7,6 +7,10 @@ export const getAllProducts = async (req,res)=>{
     try {
         const limit = parseInt(req.query.limit);
         const page = parseInt(req.query.page);
+        const brandName = req.query.brandName.toLowerCase();
+        const category = req.query.category.toLowerCase();
+        const minPrice = parseInt(req.query.minPrice);
+        const maxPrice = parseInt(req.query.maxPrice);
         const search = req.query.search;
 
         let query = {};
@@ -14,6 +18,24 @@ export const getAllProducts = async (req,res)=>{
             query.name={
                 $regex:search.trim(),
                 $options:"i"
+            }
+        }
+        if(category!=="" && category!=="all"){
+            query.category={
+                $regex:category,
+                $options:"i",
+            }
+        }
+        if(brandName!=="" && brandName!=="all"){
+            query.brandName={
+                $regex:brandName,
+                $options:"i"
+            }
+        }
+        if(minPrice!=0 || maxPrice!=999999){
+            query.price={
+                $gt:minPrice,
+                $lt:maxPrice
             }
         }
 
@@ -28,7 +50,7 @@ export const getAllProducts = async (req,res)=>{
         })
 
     } catch (error) {
-        console.error("Internal server error!")
+        console.error("Internal server error! ",error)
         return res.status(500).json({
             message:"Internal server error!"
         })
