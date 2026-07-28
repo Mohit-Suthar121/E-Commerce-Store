@@ -5,7 +5,7 @@ import PreviewImageCard from '../components/PreviewImageCard';
 import { Controller, set, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
-const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmit }) => {
+const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmit, handleAiSubmit = null }) => {
 
 
     const navigate = useNavigate();
@@ -21,12 +21,23 @@ const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmi
     }
 
 
+    const handleAiClick = async () => {
+        const isValid = await trigger("name");
+        if (!isValid) return;
+        const data = getValues();
+        console.log("the data just after getValues: ", data)
+        handleAiSubmit(data);
+    }
+
+
 
     const {
         register,
         handleSubmit,
         watch,
         control,
+        trigger,
+        getValues,
         formState: { errors },
         reset
     } = useForm({
@@ -82,9 +93,9 @@ const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmi
         }
     }, [])
 
-    useEffect(()=>{
-        console.log("The existing images are: ",existingImages)
-    },[existingImages])
+    useEffect(() => {
+        console.log("The existing images are: ", existingImages)
+    }, [existingImages])
 
 
     // using the useEffect hook to initialize if the product is being edited and not adding a new product;
@@ -294,24 +305,39 @@ const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmi
                         </div>
 
                         <div className="buttons flex flex-col">
-                                <button disabled={isLoading}
-                            type="submit"
-                            className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99] mt-3 disabled:brightness-50 disabled:cursor-not-allowed disabled:scale-100"
-                        >
-                            {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : isEditing ? "Save Changes" : "Publish Product Line"}
+                            <button disabled={isLoading}
+                                type="submit"
+                                className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99] mt-3 disabled:brightness-50 disabled:cursor-not-allowed disabled:scale-100"
+                            >
+                                {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : isEditing ? "Save Changes" : "Publish Product Line"}
 
-                        </button>
+                            </button>
 
-                       {isEditing && <button onClick={()=>{navigate("/dashboard/products")}}
-                            type="button"
-                            className="w-full h-11 flex justify-center items-center rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99] mt-3 disabled:brightness-50 disabled:cursor-not-allowed disabled:scale-100"
-                        >
-                          Cancel
+                            {isEditing && <button onClick={() => { navigate("/dashboard/products") }}
+                                type="button"
+                                className="w-full h-11 flex justify-center items-center rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99] mt-3 disabled:brightness-50 disabled:cursor-not-allowed disabled:scale-100"
+                            >
+                                Cancel
 
-                        </button>}
+                            </button>}
                         </div>
 
-                        
+                        {!isEditing && <button disabled={isLoading} onClick={handleAiClick} type='button' className="w-full h-11 flex justify-center items-center rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99] disabled:brightness-50 disabled:cursor-not-allowed disabled:scale-100  gap-2" >
+
+                            {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : <div className="flex gap-2">
+
+                                <div className="icon">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="m176-120-56-56 301-302-181-45 198-123-17-234 179 151 216-88-87 217 151 178-234-16-124 198-45-181-301 301Zm24-520-80-80 80-80 80 80-80 80Zm355 197 48-79 93 7-60-71 35-86-86 35-71-59 7 92-79 49 90 22 23 90Zm165 323-80-80 80-80 80 80-80 80ZM569-570Z" /></svg>
+                                </div>
+                                <div className="text">
+                                    Generate using AI
+
+                                </div>
+                            </div>}
+
+
+                        </button>}
 
                     </form>
                 </div>

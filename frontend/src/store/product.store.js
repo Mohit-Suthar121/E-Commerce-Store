@@ -6,6 +6,8 @@ export const useProductStore = create(
         {   
             currentProducts:[],
             totalPages:1,
+            currentProduct:{},
+            setCurrentProduct:(product)=>set({currentProduct:product}),
             setCurrentProducts:(products)=>set({currentProducts:products}),
             setTotalPages:(pages)=>set({totalPages:pages})
         }

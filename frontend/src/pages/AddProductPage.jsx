@@ -8,7 +8,7 @@ const AddProductPage = () => {
 
   const [isEditing,setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const onSubmit = async (data,newImages) => {
         setIsLoading(true);
@@ -39,10 +39,26 @@ const AddProductPage = () => {
             
         }
     }
+
+    const handleAiSubmit = async(data)=>{
+      try {
+        setIsLoading(true);
+        console.log("the product to be send to the backend: ",data)
+        const response = await API.post("/v1/admin/ai/generate-product",data);
+        console.log("the response from the ai is: ",response.data)
+        notifySuccess("product generated successfully!");
+        navigate("/products")
+      } catch (error) {
+        console.error("couldn't generate using ai: ",error?.response || error)
+        notifyFailure("coudn't generate product!")
+      }finally{
+        setIsLoading(false);
+      }
+    }
   
 
   return (
-    <ProductForm isLoading={isLoading} onSubmit={onSubmit}/>
+    <ProductForm isLoading={isLoading} onSubmit={onSubmit} handleAiSubmit={handleAiSubmit}/>
     
   )
 }

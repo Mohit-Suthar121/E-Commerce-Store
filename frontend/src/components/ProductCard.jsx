@@ -1,11 +1,11 @@
 import React from 'react';
 import CartLogo from '../icons/CartLogo';
 
-const ProductCard = ({ name, productDesc, image, price, brandName, stock, category }) => {
+const ProductCard = ({ name, productDesc, image, price, brandName, stock, category,onClick }) => {
   const isOutOfStock = stock <= 0;
 
   return (
-    <div className='main-card flex flex-col w-[90%] md:w-[95%] h-full border items-start gap-2 p-2 rounded-2xl bg-[#0f0f0f] border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-700 cursor-pointer relative group'>
+    <div onClick={onClick} className='main-card flex flex-col w-[90%] md:w-[95%] h-full border items-start gap-2 p-2 rounded-2xl bg-[#0f0f0f] border-neutral-800 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-700 cursor-pointer relative group'>
       
       {category && (
         <span className="absolute top-4 right-4 z-10 text-xs font-semibold uppercase text-neutral-400 tracking-wider bg-neutral-900 border border-neutral-800 px-2 py-0.5 rounded-lg">

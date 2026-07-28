@@ -7,6 +7,7 @@ import NextArrow from '../icons/NextArrow';
 import { API } from '../api/axiosInstance';
 import { Rings } from 'react-loader-spinner';
 import { useProductStore } from '../store/product.store';
+import { useNavigate } from 'react-router-dom';
 
 const Products = () => {
     const getProductsPerPage = () => {
@@ -31,6 +32,7 @@ const Products = () => {
     const setCurrentProducts = useProductStore((state) => state.setCurrentProducts);
     const totalPages = useProductStore((state) => state.totalPages);
     const setTotalPages = useProductStore((state) => state.setTotalPages);
+    const navigate = useNavigate();
 
     async function getAllProducts() {
 
@@ -44,7 +46,7 @@ const Products = () => {
 
 
         } catch (error) {
-            console.error("Some error occured!", error.response);
+            console.error("Some error occured!", error);
 
         } finally {
             setIsLoading(false);
@@ -91,6 +93,10 @@ const Products = () => {
         setMaxPriceValue(999999);
         setInputValue("");
         setSearchValue("")
+    }
+
+    function handleShowProduct(id){
+        navigate(`/products/${id}`)
     }
 
 
@@ -164,11 +170,6 @@ const Products = () => {
                                     <DownArrowIcon currentColor={"#D4D4D4"} className={"w-6 h-6"} />
                                 </div>
 
-                                {/* <select value={brandName} onChange={(e) => { setBrandName(e.target.value) }} className=' w-full h-10 bg-neutral-900 rounded-xl text-sm px-4 py-2.5 appearance-none capitalize border-neutral-800 border text-neutral-300 focus:border-emerald-500 outline-none' >
-                                    {["all", "asus", "apple", "samsung", "boat", "oneplus", "hp"].map((item) => (
-                                        <option key={item} value={item} className='capitalize text-neutral-300'>{item}</option>
-                                    ))}
-                                </select> */}
                                 <div className="relative searchbar flex items-center gap-2 bg-neutral-900 rounded-lg">
 
                                     <div className="absolute left-3 search-icon bg-neutral-900 h-full flex justify-center items-center rounded-lg ">
@@ -222,7 +223,7 @@ const Products = () => {
 
                     <div className={`cards flex flex-col items-center md:grid md:place-items-center md:grid-cols-2 md:gap-2 md:items-center md:justify-center lg:grid lg:grid-cols-3 2xl:grid-cols-4 gap-4 `}>
 
-                        {currentProducts.map((product) => <ProductCard stock={product?.stock} name={product?.name} price={product?.price} brandName={product?.brandName} category={product?.category} productDesc={product?.productDesc} image={product?.images[0]?.url} key={product._id} />)}
+                        {currentProducts.map((product) => <ProductCard stock={product?.stock} name={product?.name} price={product?.price} brandName={product?.brandName} category={product?.category} productDesc={product?.productDesc} image={product?.images[0]?.url} key={product._id} onClick={()=>{handleShowProduct(product?._id)}}/>)}
 
                     </div>
 
