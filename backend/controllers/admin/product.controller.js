@@ -87,6 +87,7 @@ export const editProduct = async (req, res) => {
         const newImages = req.files;
         const { name, price, stock, productDesc, subCategory, category, brandName, existingImages } = req.body
         const remainingImages = JSON.parse(existingImages);
+        console.log("the remianing images are: ",remainingImages)
         const product = await Product.findById(id);
         if (!product) {
             return res.status(404).json({
@@ -103,9 +104,10 @@ export const editProduct = async (req, res) => {
             }
         }))
 
-        const toDeleteImages = product?.images?.filter(objImg => !remainingImages.some((img) => img === objImg.publicId))
-        if (toDeleteImages) {
-
+        const toDeleteImages = product?.images?.filter(objImg => !remainingImages.some((img) => img.url === objImg.url))
+        console.log("toDeleteImages are: ",toDeleteImages)
+        
+        if (toDeleteImages.length>0) {
             await Promise.all(toDeleteImages?.map(async (imgObj) => await deleteFromCloudinary(imgObj.publicId)));
         }
 
@@ -129,7 +131,7 @@ export const editProduct = async (req, res) => {
         })
 
     } catch (error) {
-        console.error("Internal server error: ", error);
+        console.error("error while editing the product: ", error);
         return res.status(500).json({
             message: "Internal server error"
         })
