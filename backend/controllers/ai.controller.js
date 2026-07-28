@@ -1,5 +1,6 @@
 import { Product } from "../models/Product.model.js";
 import { createNewProduct } from "../services/ai.service.js";
+import { searchProductImagesSerper } from "../services/serper.service.js";
 import { searchProductImages } from "../services/unsplash.service.js";
 
 export const generateProduct = async(req, res) => {
@@ -160,7 +161,11 @@ Return ONLY the JSON object.`
         
         const  { name:newName, price:newPrice, stock:newStock, category:newCategory, subCategory:newSubCategory, brandName:newBrandName, productDesc:newProductDesc,highlights:newHighlights,imageSearchQuery } = product;
         
-        const productImages = await searchProductImages(imageSearchQuery);
+        let productImages = await searchProductImages(imageSearchQuery);
+        if(productImages.length==0){
+          productImages = await searchProductImagesSerper(imageSearchQuery);
+        }
+
         const newProduct = await Product.create({
             name:newName,
             price:newPrice,
