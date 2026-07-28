@@ -75,6 +75,7 @@ const AdminSideProducts = () => {
     }
 
     async function handleEdit(id) {
+        
         try {
             navigate(`/admin/products/edit-product/${id}`)
         } catch (error) {
@@ -127,6 +128,10 @@ const AdminSideProducts = () => {
         const value = e.target.value;
         setPriceSorting(value);
         console.log("the value is: ",value)
+    }
+
+    async function handleOpenProduct(id){
+        navigate(`/products/${id}`)
     }
 
 
@@ -217,7 +222,7 @@ const AdminSideProducts = () => {
             <div className={`flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design min-h-0 scrollbar-gutter-stable ${isLoading ? "flex justify-center items-center" : ""}`}>
                 {!isLoading ? <div className="flex flex-col gap-3">
                     {currentProducts.map((product, index) => (
-                        <AdminListedProductCard product={product} key={index} onEdit={()=>{handleEdit(product._id)}} onDelete={()=>{handleShowDeleteWarning(product._id)}} />
+                        <AdminListedProductCard onClick={()=>{handleOpenProduct(product._id)}} product={product} key={index} onEdit={()=>{handleEdit(product._id)}} onDelete={()=>{handleShowDeleteWarning(product._id)}} />
                     ))}
 
                     <AdminPaginationController
