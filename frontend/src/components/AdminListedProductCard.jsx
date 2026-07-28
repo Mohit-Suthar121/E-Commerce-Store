@@ -2,7 +2,7 @@ import React from 'react'
 import DeleteIcon from '../icons/DeleteIcon'
 import EditIcon from '../icons/EditIcon'
 
-const AdminListedProductCard = ({ product, onEdit, onDelete }) => {
+const AdminListedProductCard = ({ product, onEdit, onDelete,onClick }) => {
 
 
     const {
@@ -47,7 +47,7 @@ const AdminListedProductCard = ({ product, onEdit, onDelete }) => {
     const isLowStock = stock > 0 && stock <= 5;
 
     return (
-        <div className='w-full rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4 px-4 bg-[#09090b] border border-neutral-800/60 hover:border-zinc-700/80 transition-all duration-300 justify-between group relative overflow-hidden shadow-2xl shadow-black/50 shrink-0'>
+        <div onClick={onClick} className='w-full rounded-xl flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4 px-4 bg-[#09090b] border border-neutral-800/60 hover:border-zinc-700/80 transition-all duration-300 justify-between group relative overflow-hidden shadow-2xl shadow-black/50 shrink-0 hover:cursor-pointer'>
             
             {/* Left Side: Product Media & Identity */}
             <div className="flex gap-4 w-full sm:w-auto flex-1 min-w-0">
@@ -113,7 +113,10 @@ const AdminListedProductCard = ({ product, onEdit, onDelete }) => {
                 {/* Management Call-to-Actions */}
                 <div className="flex gap-2.5">
                     <button 
-                        onClick={onEdit}
+                        onClick={(e)=>{
+                            e.stopPropagation();
+                            onEdit();
+                        }}
                         type="button"
                         aria-label="Edit product"
                         className="flex text-neutral-400 cursor-pointer p-2.5 rounded-lg bg-[#121214] border border-neutral-800/80 justify-center items-center hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all duration-200 active:scale-95 hover:text-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500/30"
@@ -122,7 +125,10 @@ const AdminListedProductCard = ({ product, onEdit, onDelete }) => {
                     </button>
 
                     <button 
-                        onClick={onDelete}
+                        onClick={(e)=>{
+                            e.stopPropagation();
+                            onDelete();
+                        }}
                         type="button"
                         aria-label="Delete product"
                         className="flex text-neutral-400 cursor-pointer p-2.5 rounded-lg bg-[#121214] border border-neutral-800/80 justify-center items-center hover:border-red-500/40 hover:bg-red-500/5 transition-all duration-200 active:scale-95 hover:text-red-400 focus:outline-none focus:ring-1 focus:ring-red-500/30"
