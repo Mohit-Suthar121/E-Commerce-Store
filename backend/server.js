@@ -18,7 +18,8 @@ connectDb();
 const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://e-commerce-store-eight-wine.vercel.app' 
+    'https://e-commerce-store-eight-wine.vercel.app',
+    'https://e-commerce-store-qa8d.onrender.com' 
 ];
 app.use(cors({
     origin:function(origin,callback){
