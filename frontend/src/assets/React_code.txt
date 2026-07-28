@@ -1,0 +1,25 @@
+// ===== App.jsx =====
+import React, { useState } from 'react';
+import './style.css';
+
+const products = [
+  { id: 1, name: 'Mechanical Keyboard', inStock: true },
+  { id: 2, name: '4K Monitor', inStock: true },
+  { id: 3, name: 'USB-C Dock', inStock: false },
+  { id: 4, name: 'Wireless Mouse', inStock: true },
+];
+
+export default function App() {
+  // TODO: implement filtering and cart behaviour.
+  return (<main>
+<h1>Inventory Dashboard</h1>
+<div className="border " >hello world</div>
+
+</main>)
+}
+
+
+// ===== style.css =====
+*{box-sizing:border-box}
+
+body:{margin:0;font-family:Arial,sans-serif;background:#f4f6f8;color:#17202a}.inventory-shell{max-width:960px;margin:auto;padding:32px}header{display:flex;justify-content:space-between;align-items:center}.eyebrow{color:#567;letter-spacing:0;margin:0}nav{display:flex;gap:8px;margin:24px 0}.product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}.product-card{background:white;border:1px solid #dce2e8;padding:18px;border-radius:8px}.add-button{min-height:40px}

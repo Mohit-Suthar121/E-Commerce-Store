@@ -1,21 +1,35 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
-import image1 from "../assets/31pQkw-B4WL._SX342_SY445_QL70_FMwebp_.jpg"
-import image2 from "../assets/51hRToIjgxL._SL1500_.jpg"
-import image3 from "../assets/61cAW5VKUTL._SL1500_.jpg"
-import image4 from "../assets/71kahbX9OlL._SL1500_.jpg"
-import image5 from "../assets/81XzDQHVXQL._SL1500_.jpg"
-import image6 from "../assets/81YnXfZ-NwL._SL1500_.jpg"
 import PreviousArrow from '../icons/PreviousArrow'
 import NextArrow from '../icons/NextArrow'
 import CartLogo from '../icons/CartLogo'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
+import { API } from '../api/axiosInstance'
+import { useProductStore } from '../store/product.store'
 
 const ProductDetailPage = () => {
-    const [images, setImages] = useState([
-        image1, image2, image3, image4, image5, image6
-    ]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isLoading,setIsLoading] = useState(true);
+    const currentProduct = useProductStore((state)=>state.currentProduct);
+    const setCurrentProduct = useProductStore((state)=>state.setCurrentProduct);
+    const {id} = useParams();
+
+    async function fetchProduct(){
+        try {
+            setIsLoading(true);
+            const response = await API.get(`/v1/product/get-product/${id}`);
+            console.log("the current product is: ",response.data);
+            setCurrentProduct(response.data.product);
+        } catch (error) {
+            console.error("some error occured!",error);
+        }finally{
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(()=>{
+        fetchProduct();
+    },[])
 
     return (
         <div className="w-full min-h-screen flex flex-col bg-[#060606] text-neutral-200 font-sans antialiased select-none">
@@ -43,9 +57,9 @@ const ProductDetailPage = () => {
                         
                         <div className="scrollwrapper overflow-x-auto lg:overflow-x-visible order-2 lg:order-1 flex p-1 scrollbar-none">
                             <div className="short-product-images flex flex-row lg:flex-col gap-3 mx-auto lg:mx-0">
-                                {images.map((image, index) => (
+                                {currentProduct.images?.map((image, index) => (
                                     <div 
-                                        key={index} 
+                                        key={image._id} 
                                         onClick={() => setCurrentIndex(index)} 
                                         className={`product-image-card w-16 h-16 rounded-xl shrink-0 p-1 bg-[#0b0b0b] border transition-all duration-200 cursor-pointer overflow-hidden ${
                                             currentIndex === index 
@@ -53,7 +67,7 @@ const ProductDetailPage = () => {
                                                 : "border-neutral-900 hover:border-neutral-700"
                                         }`}
                                     >
-                                        <img src={image} alt={`image ${index}`} className="w-full h-full object-cover rounded-lg mix-blend-luminosity hover:mix-blend-normal transition-all" />
+                                        <img src={image?.url} alt={`image ${index}`} className="w-full h-full object-cover rounded-lg mix-blend-luminosity hover:mix-blend-normal transition-all" />
                                     </div>
                                 ))}
                             </div>
@@ -74,7 +88,7 @@ const ProductDetailPage = () => {
                             </div>
                             
                             <img 
-                                src={images[currentIndex]} 
+                                src={currentProduct?.images?.[currentIndex]?.url} 
                                 alt="Main Product Preview" 
                                 className="w-full h-full object-contain p-6 select-none pointer-events-none transition-transform duration-500 group-hover:scale-[1.02]" 
                             />
@@ -85,7 +99,7 @@ const ProductDetailPage = () => {
                                     setCurrentIndex(currentIndex => currentIndex + 1)
                                 }} 
                                 className={`right-button absolute right-4 top-1/2 -translate-y-1/2 flex lg:hidden w-11 h-11 rounded-xl bg-neutral-950/80 backdrop-blur-md border border-neutral-800 text-white justify-center items-center p-2.5 transition-all active:scale-95 z-10 ${
-                                    currentIndex === images.length - 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                                    currentIndex === currentProduct.images?.length - 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
                                 }`}
                             >
                                 <NextArrow className="w-full h-full" currentColor="currentColor" />
@@ -98,26 +112,24 @@ const ProductDetailPage = () => {
                         
                         <div className="flex flex-col gap-2">
                             <span className="product-type text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
-                                Mobile // Apple
+                                {currentProduct.subCategory} // {currentProduct.brandName}
                             </span>
                             <h1 className="main-heading font-extrabold text-2xl md:text-3xl tracking-tighter text-neutral-100 leading-tight">
-                                Apple iPhone 16 Plus 256GB
+                                {currentProduct.name}
                             </h1>
                             <p className="text-xs text-neutral-500 font-medium leading-relaxed tracking-tight mt-1 border-l-2 border-neutral-800 pl-3">
-                                5G Mobile Phone with A18 Chip, Advanced Dual-Camera System, All-Day Battery Life, Ceramic Shield, and Dynamic Island; White.
+                                {currentProduct.productDesc} 
                             </p>
                         </div>
 
                         <div className="price font-mono text-3xl font-bold text-white tracking-tight py-2 border-b border-neutral-900">
-                            ₹119,901
+                            ₹{Number(currentProduct.price).toLocaleString("en-US")}
                         </div>
 
                         <div className="scroll-wrapper py-2">
                             <div className="sub-details text-xs md:text-sm text-neutral-400 leading-relaxed font-normal tracking-tight space-y-4">
-                                <p><strong className="block font-semibold mb-0.5 uppercase tracking-wide text-[11px] font-mono text-neutral-300">[ Built for Apple Intelligence ]</strong> Apple Intelligence is the personal intelligence system that helps you write, express yourself and get things done effortlessly. With groundbreaking privacy protections, it gives you peace of mind that no one else can access your data — not even Apple.</p>
-                                <p><strong className="block font-semibold mb-0.5 uppercase tracking-wide text-[11px] font-mono text-neutral-300">[ Take Total Camera Control ]</strong> Camera Control gives you an easier way to quickly access camera tools, like zoom or depth of field, so you can take the perfect shot in record time.</p>
-                                <p><strong className="block font-semibold mb-0.5 uppercase tracking-wide text-[11px] font-mono text-neutral-300">[ Get Further and Closer ]</strong> The improved Ultra Wide camera with autofocus lets you take incredibly detailed macro photos and videos. Use the 48MP Fusion camera for stunning high-resolution images, and zoom in with the 2x optical-quality Telephoto.</p>
-                                <p><strong className=" block font-semibold mb-0.5 uppercase tracking-wide text-[11px] font-mono text-neutral-300">[ Super-Smart A18 Chip ]</strong> A18 jumps two generations ahead of the A16 Bionic chip in iPhone 15. It enables Apple Intelligence, powers advanced photo and video features, and supports console-level gaming, with exceptional power efficiency.</p>
+                                {currentProduct?.highlights?.map((highlight)=><p><strong className="block font-semibold mb-0.5 uppercase tracking-wide text-[11px] font-mono text-neutral-300">[ {highlight?.title} ]</strong>{highlight?.description}</p>)}
+                               
                             </div>
                         </div>
 
