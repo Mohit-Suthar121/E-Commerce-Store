@@ -106,7 +106,7 @@ export const editProduct = async (req, res) => {
 
         const toDeleteImages = product?.images?.filter(objImg => !remainingImages.some((img) => img.url === objImg.url))
         console.log("toDeleteImages are: ",toDeleteImages)
-        
+
         if (toDeleteImages.length>0) {
             await Promise.all(toDeleteImages?.map(async (imgObj) => await deleteFromCloudinary(imgObj.publicId)));
         }
@@ -210,7 +210,10 @@ export const deleteProduct = async (req, res) => {
             message: "product not found!"
         })
         const allImages = product.images;
-        await Promise.all(allImages.map(async (image) => await deleteFromCloudinary(image.publicId)));
+        await Promise.all(allImages.map(async (image) => {
+            if(image.publicId) return await deleteFromCloudinary(image.publicId)
+            
+        }));
         await product.deleteOne();
 
         return res.status(200).json({
