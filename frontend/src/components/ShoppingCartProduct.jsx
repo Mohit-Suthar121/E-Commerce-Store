@@ -1,22 +1,23 @@
 import React from 'react'
 import DeleteIcon from '../icons/DeleteIcon'
 
-const ShoppingCartProduct = () => {
+const ShoppingCartProduct = ({name,price,quantity,image,onClick}) => {
+    const totalPrice = price*quantity;
     return (
-        <div className='w-full rounded-2xl flex xl:flex-row flex-col items-center gap-4 py-4 px-4 bg-[#0f0f0f] border-neutral-800/80 border cursor-pointer group hover:border-neutral-700 transition-colors duration-200 justify-between '>
+        <div onClick={onClick} className='w-full rounded-2xl flex xl:flex-row flex-col items-center gap-4 py-4 px-4 bg-[#0f0f0f] border-neutral-800/80 border cursor-pointer group hover:border-neutral-700 transition-colors duration-200 justify-between '>
 
             <div className="left-side-wrapper flex items-center gap-4 w-full ">
 
             
              <div className="product-image w-12 h-12 md:w-20 md:h-20 rounded-lg group-hover:scale-102 transition-all duration-200 ">
-                <img className='w-full h-full object-contain rounded-lg' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5FyhKFiRoCdmrxbS5CDkACBhuak_CQjnhKg&s" alt="" />
+                <img className='w-full h-full object-contain rounded-lg' src={image} alt="" />
              </div>
 
              <div className="product-name-and-price flex flex-col flex-1 min-w-0 gap-2">
                 <div className="heading w-full truncate font-semibold text-sm text-neutral-200 ">
-                    Iphone 14 Pro Max 5g
+                    {name}
                 </div>
-                <div className="price font-mono uppercase text-xs  text-neutral-400"> unit: ₹1,34,000</div>
+                <div className="price font-mono uppercase text-xs  text-neutral-400"> unit: ₹{price}</div>
              </div>
 
             </div>
@@ -28,12 +29,12 @@ const ShoppingCartProduct = () => {
                 <div className="product-quantity flex items-center rounded-lg border bg-neutral-950 border-neutral-800 p-1">
 
                     <button className="decrease-quantity w-6 h-6  md:w-8   md:h-8 flex justify-center items-center cursor-pointer hover:border-neutral-600 transition-colors duration-300 hover:bg-neutral-900 rounded-lg">-</button>
-                    <div className="show-quantity flex justify-center items-center bg-neutral-950 w-10 text-sm select-none text-center">2</div>
+                    <div className="show-quantity flex justify-center items-center bg-neutral-950 w-10 text-sm select-none text-center">{quantity}</div>
                     <button className="increase-quantity w-6 h-6  md:w-8   md:h-8  flex justify-center items-center  cursor-pointer hover:border-neutral-600 transition-colors duration-300 hover:bg-neutral-900 rounded-lg">+</button>
                 </div>
                 <div className="product-total-price font-semibold flex flex-col items-center">
                     <span className='flex md:hidden text-[9px] text-neutral-600 uppercase font-semibold' >Total price</span>
-                    <span className='font-mono text-sm' >₹1,34,000</span>
+                    <span className='font-mono text-sm' >₹{totalPrice}</span>
                     
                 </div>
                 <div className="remove-button flex text-neutral-500 cursor-pointer p-2 rounded-lg bg-neutral-950 border border-neutral-800 justify-center items-center hover:border-red-500/30 hover:bg-red-500/5 transition-all duration-200 active:scale-95 hover:text-red-400">

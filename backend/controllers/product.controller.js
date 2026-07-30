@@ -1,3 +1,4 @@
+import { Cart } from "../models/cart.model.js";
 import { Product } from "../models/Product.model.js";
 
 
@@ -76,5 +77,23 @@ export const getProduct = async (req,res)=>{
         return res.status(500).json({
             message:"Internal server error"
         })
+    }
+}
+
+export const addToCart = async(req,res)=>{
+    try {
+        const user = req.user;
+        const {product, quantity}  = req.body;
+        const cart = await Cart.findOne({user:user._id});
+        const existingProduct = cart.items.find((item)=>item._id===id);
+
+        if(existingProduct){
+
+        }
+        else{
+
+        }
+    } catch (error) {
+        
     }
 }

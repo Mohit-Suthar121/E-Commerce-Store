@@ -2,14 +2,30 @@ import React, { useState } from 'react'
 import Navbar from '../components/Navbar'
 import CartLogo from '../icons/CartLogo';
 import ShoppingCartProduct from '../components/ShoppingCartProduct';
+import { useCartStore } from '../store/cart.store';
+import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
     const [items, setItems] = useState(4); // we will change it later , it will contain objects
+    const productsInCart = useCartStore((state) => state.productsInCart);
+    const [gstPercentage, setGstPercentage] = useState(3);
+    const [shippingCost, setShippingCost] = useState(0);
+    const navigate = useNavigate();
+    let subTotal = 0;
+    if(productsInCart?.length>0){
+
+        productsInCart.forEach((p) => {
+            subTotal += p.quantity * p.product.price;
+        });
+    }
+
+    const gstPrice = subTotal * gstPercentage / 100;
+    const totalAmount = subTotal + gstPrice;
     return (
         <div className='w-full h-screen flex flex-col'>
             <Navbar />
 
-            {items > 0 && <div className="maincontent flex min-h-0 flex-1 md:py-6 md:px-16 p-2">
+            {productsInCart?.length > 0 && <div className="maincontent flex min-h-0 flex-1 md:py-6 md:px-16 p-2">
 
                 <div className="show-items flex flex-col gap-4 w-full h-full min-h-0">
 
@@ -18,12 +34,12 @@ const Cart = () => {
                     <div className="left-right-section flex flex-col gap-4 flex-1 lg:items-start md:min-h-0 md:justify-between md:gap-10 lg:flex-row border-red-500  items-center">
 
                         <div className="show-products flex h-82 md:h-full flex-col min-h-0 md:min-h-0 md:flex-1 gap-6 w-full md:w-[60%] px-4 overflow-y-auto scrollbar-design items-center max-w-xl">
+                            {productsInCart?.map((p) => <ShoppingCartProduct onClick={()=>{navigate(`/products/${p?.product?._id}`)}} key={p?.product?._id} image={p?.product?.images[0]?.url} quantity={p?.quantity} price={p?.product?.price} name={p?.product?.name} />)}
+
+                            {/* <ShoppingCartProduct />
                             <ShoppingCartProduct />
                             <ShoppingCartProduct />
-                            <ShoppingCartProduct />
-                            <ShoppingCartProduct />
-                            <ShoppingCartProduct />
-                            <ShoppingCartProduct />
+                            <ShoppingCartProduct /> */}
                         </div>
 
                         <div className="flex md:hidden border-line border-neutral-800/60 border w-[90%] self-center h-0" />
@@ -38,22 +54,26 @@ const Cart = () => {
 
                                 <div className="details flex flex-col gap-2 border bg-neutral-950/40 p-4 rounded-xl border-neutral-900/50">
                                     <div className="flex justify-between items-center text-sm font-medium text-neutral-400">
-                                        <span>Subtotal ({items} items)</span>
-                                        <span className="font-mono text-neutral-200">₹1,23,432.00</span>
+                                        <span>Subtotal ({productsInCart?.length} items)</span>
+                                        <span className="font-mono text-neutral-200">₹{subTotal}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm font-medium text-neutral-400">
                                         <span>Estimated Shipping</span>
-                                        <span className="font-mono text-emerald-400 text-xs font-bold uppercase tracking-wide bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">Free</span>
+                                        {shippingCost > 0 ?
+                                            <span className="font-mono text-neutral-200">₹{shippingCost}</span> :
+                                            <span className="font-mono text-emerald-400 text-xs font-bold uppercase tracking-wide bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">Free</span>}
+
                                     </div>
                                     <div className="flex justify-between items-center text-sm font-medium text-neutral-400">
-                                        <span>Tax (GST 5%)</span>                                          <span className="font-mono text-neutral-200">₹6,199.00</span>
+                                        <span>Tax (GST {gstPercentage}%)</span>
+                                        <span className="font-mono text-neutral-200">₹{gstPrice}</span>
                                     </div>
 
                                     <div className="h-px bg-neutral-900 my-1 " />
 
                                     <div className="flex justify-between items-center pt-1">
                                         <span className="text-sm font-bold text-neutral-200">Total Amount</span>
-                                        <span className="text-lg font-bold font-mono text-white tracking-tight">₹1,30,188.45</span>
+                                        <span className="text-lg font-bold font-mono text-white tracking-tight">₹{totalAmount}</span>
                                     </div>
 
                                 </div>
@@ -109,7 +129,7 @@ const Cart = () => {
 
 
 
-            {items == 0 && <div className="maincontent flex flex-1 justify-center items-center">
+            {(!productsInCart || productsInCart?.length==0) && <div className="maincontent flex flex-1 justify-center items-center">
                 <div className="no-items-box flex flex-col gap-2  justify-center items-center">
 
                     <div className="cart-logo p-4 rounded-full bg-neutral-900 border border-neutral-800">
