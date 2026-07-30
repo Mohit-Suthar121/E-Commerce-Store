@@ -33,12 +33,12 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(cookieParser())
-app.use('/api/auth',authRoute)
-app.use('/api/v1/user',userRoute)
-app.use('/api/v1/admin/product',adminProductRoute)
-app.use('/api/v1/admin/users',adminUserRoute)
-app.use('/api/v1/admin/ai',aiRoute)
+app.use(cookieParser());
+app.use('/api/auth',authRoute);
+app.use('/api/v1/user',userRoute);
+app.use('/api/v1/admin/product',adminProductRoute);
+app.use('/api/v1/admin/users',adminUserRoute);
+app.use('/api/v1/admin/ai',aiRoute);
 app.use('/api/v1/product',productRoute);
 
 
