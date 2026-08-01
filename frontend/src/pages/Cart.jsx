@@ -1,28 +1,48 @@
-import React, {  useState } from 'react'
+import React, { useState } from 'react'
 import Navbar from '../components/Navbar'
 import CartLogo from '../icons/CartLogo';
 import ShoppingCartProduct from '../components/ShoppingCartProduct';
 import { useCartStore } from '../store/cart.store';
 import { useNavigate } from 'react-router-dom';
+import { notifyFailure, notifySuccess } from '../utils/Toastify';
+import { API } from '../api/axiosInstance';
+import { useAuthStore } from '../store/auth.store';
 
 const Cart = () => {
     const [items, setItems] = useState(4); // we will change it later , it will contain objects
     const productsInCart = useCartStore((state) => state.productsInCart);
+    const deleteProductFromCart = useCartStore((state)=>state.deleteProductFromCart);
+    const user = useAuthStore((state)=>state.user);
     const [gstPercentage, setGstPercentage] = useState(3);
     const [shippingCost, setShippingCost] = useState(0);
     const navigate = useNavigate();
     let subTotal = 0;
-    if(productsInCart?.length>0){
+    if (productsInCart?.length > 0) {
 
         productsInCart.forEach((p) => {
             subTotal += p.quantity * p.product.price;
         });
     }
-    console.log("the products in cart are: ",productsInCart)
+    console.log("the products in cart are: ", productsInCart)
     const gstPrice = subTotal * gstPercentage / 100;
     const totalAmount = subTotal + gstPrice;
 
-    
+    const handleDelete = async(id) => {
+        if(!user) {
+            deleteProductFromCart(id);
+            return;
+        }
+        try {
+            const response = await API.delete(`/v1/cart/product/${id}/delete-product`);
+            deleteProductFromCart(id);
+            notifySuccess("the product removed from the cart successfully!")
+        } catch (error) {
+            console.error("couldn't delete product",error?.response?.data || error);
+            notifyFailure(error?.response?.data || error)
+        }
+    }
+
+
     return (
         <div className='w-full h-screen flex flex-col'>
             <Navbar />
@@ -36,7 +56,7 @@ const Cart = () => {
                     <div className="left-right-section flex flex-col gap-4 flex-1 lg:items-start md:min-h-0 md:justify-between md:gap-10 lg:flex-row border-red-500  items-center">
 
                         <div className="show-products flex h-82 md:h-full flex-col min-h-0 md:min-h-0 md:flex-1 gap-6 w-full md:w-[60%] px-4 overflow-y-auto scrollbar-design items-center max-w-xl">
-                            {productsInCart?.map((p) => <ShoppingCartProduct stock={p?.product?.stock}  onClick={()=>{navigate(`/products/${p?.product?._id}`)}} key={p?.product?._id} image={p?.product?.images[0]?.url} quantity={p?.quantity} price={p?.product?.price} name={p?.product?.name} id={p?.product?._id}/>)}
+                            {productsInCart?.map((p) => <ShoppingCartProduct stock={p?.product?.stock} onClick={() => { navigate(`/products/${p?.product?._id}`) }} key={p?.product?._id} image={p?.product?.images[0]?.url} quantity={p?.quantity} price={p?.product?.price} name={p?.product?.name} id={p?.product?._id} handleDelete={()=>{handleDelete(p?.product?._id)}} />) }
 
                         </div>
 
@@ -94,7 +114,7 @@ const Cart = () => {
                                 <div className="flex flex-col gap-2 pt-2">
                                     <button className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99]">                                            Proceed to Checkout
                                     </button>
-                                    <button className="w-full h-11 flex justify-center items-center rounded-xl bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 text-neutral-400 hover:text-neutral-200 text-sm font-medium cursor-pointer transition-all active:scale-[0.99]">
+                                    <button onClick={()=>{navigate('/products')}} className="w-full h-11 flex justify-center items-center rounded-xl bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 text-neutral-400 hover:text-neutral-200 text-sm font-medium cursor-pointer transition-all active:scale-[0.99]">
                                         Continue Shopping
                                     </button>
                                 </div>
@@ -127,7 +147,7 @@ const Cart = () => {
 
 
 
-            {(!productsInCart || productsInCart?.length==0) && <div className="maincontent flex flex-1 justify-center items-center">
+            {(!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
                 <div className="no-items-box flex flex-col gap-2  justify-center items-center">
 
                     <div className="cart-logo p-4 rounded-full bg-neutral-900 border border-neutral-800">
@@ -136,7 +156,7 @@ const Cart = () => {
                     <div className="empty-text font-semibold text-xl text-[#ebebeb]">Your Cart is Empty</div>
 
                     <div className="text-neutral-500 font-semibold">Looks like you haven't added anything to your cart yet</div>
-                    <div onClick={()=>{navigate('/products')}} className="start-shoppingbutton pt-2">
+                    <div onClick={() => { navigate('/products') }} className="start-shoppingbutton pt-2">
 
                         <button className="start-shopping text-sm text-black font-semibold px-6 py-3 rounded-lg bg-white border border-neutral-800 cursor-pointer active:scale-95 hover:brightness-90  ">Start Shopping</button>
                     </div>

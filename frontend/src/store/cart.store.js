@@ -35,6 +35,10 @@ export const useCartStore = create(
             setQuantity: (productId, quantity) => set((state) => ({
                 productsInCart: state.productsInCart.map((item) => item.product._id === productId ? { ...item, quantity } : item)
 
+            })),
+
+            deleteProductFromCart:(productId)=> set((state)=>({
+                productsInCart:state.productsInCart.filter((item)=>item.product._id!==productId)
             }))
         })),
 

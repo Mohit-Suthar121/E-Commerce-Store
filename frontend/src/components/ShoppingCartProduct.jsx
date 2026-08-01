@@ -13,7 +13,8 @@ const ShoppingCartProduct = ({
     stock = 99,
     onClick,
     onRemove,
-    id
+    id,
+    handleDelete
 }) => {
 
 
@@ -71,6 +72,11 @@ const ShoppingCartProduct = ({
 
         timerRef.current = timer;
     }
+
+
+    
+
+
     
     useEffect(()=>{
         return ()=>{
@@ -160,7 +166,7 @@ const ShoppingCartProduct = ({
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation(); // Stops card click
-                        if (onRemove) onRemove();
+                        handleDelete();
                     }}
                     aria-label="Remove product"
                     className="remove-button flex text-neutral-500 cursor-pointer p-2.5 rounded-xl bg-neutral-950 border border-neutral-800/80 justify-center items-center hover:border-red-500/40 hover:bg-red-500/5 hover:text-red-400 transition-all duration-200 active:scale-95 shrink-0"
