@@ -6,7 +6,7 @@ import CartLogo from '../icons/CartLogo'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { API } from '../api/axiosInstance'
 import { useProductStore } from '../store/product.store'
-import { notifySuccess } from '../utils/Toastify'
+import { notifyFailure, notifySuccess } from '../utils/Toastify'
 import { useAuthStore } from '../store/auth.store'
 import { useCartStore } from '../store/cart.store'
 
@@ -15,12 +15,13 @@ const ProductDetailPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const currentProduct = useProductStore((state) => state.currentProduct);
     const setCurrentProduct = useProductStore((state) => state.setCurrentProduct);
-    const [errorMessage,setErrorMessage] = useState("")
+    const [errorMessage, setErrorMessage] = useState("")
     const [quantity, setQuantity] = useState(1);
     const { id } = useParams();
-    const user = useAuthStore((state)=>state.user);
-    const addProductToCart = useCartStore((state)=>state.addProductToCart);
-    const productsInCart = useCartStore((state)=>state.productsInCart)
+    const user = useAuthStore((state) => state.user);
+    const addProductToCart = useCartStore((state) => state.addProductToCart);
+    const productsInCart = useCartStore((state) => state.productsInCart)
+    const setProducts = useCartStore((state)=>state.setProducts);
     const navigate = useNavigate();
 
     async function fetchProduct() {
@@ -28,14 +29,15 @@ const ProductDetailPage = () => {
             setIsLoading(true);
             const response = await API.get(`/v1/product/get-product/${id}`);
             setCurrentProduct(response.data.product);
-            console.log("the current Product:",response.data.product)
-            productsInCart.forEach((p)=>{
-                console.log("the products in the cart: ",p.product);
-                if(p?.product?._id===response.data.product?._id){
+            console.log("the current Product:", response.data.product)
+
+            productsInCart.forEach((p) => {
+                console.log("the products in the cart: ", p.product);
+                if (p?.product?._id === response.data.product?._id) {
                     setQuantity(p?.quantity);
                 }
             })
-            
+
         } catch (error) {
             console.error("some error occured!", error);
         } finally {
@@ -43,7 +45,7 @@ const ProductDetailPage = () => {
         }
     }
 
-    
+
 
     useEffect(() => {
         fetchProduct();
@@ -55,30 +57,52 @@ const ProductDetailPage = () => {
         setQuantity(value);
     }
 
-    const handleAddToCart = (productId) => {
-
+    const handleAddToCart = async (productId) => {
+        setIsLoading(true);
         setErrorMessage("");
-        if(quantity>currentProduct.stock){
+        if (quantity > currentProduct.stock) {
             setErrorMessage(`Only ${currentProduct.stock} units left in stock`)
             return;
         }
-        else if(quantity<1){
+        else if (quantity < 1) {
             setErrorMessage("Please select at least 1 unit to proceed");
             return;
         }
 
-        if(!user){
+        if (!user) {
             // check if the product already exists in the store, if yes , then increase it's count;
             const productData = {
-                product:currentProduct,
+                product: currentProduct,
                 quantity
             }
             addProductToCart(productData);
+
             console.log("the product successfully added to cart since the user was not logged in:")
+            setIsLoading(false);
+            notifySuccess("product added to cart successfully!")
+            navigate("/cart")
         }
 
-        notifySuccess("product added to cart successfully!")
-        navigate("/cart")
+        else {
+            const productData = {
+                product: currentProduct._id,
+                quantity
+            }
+            try {
+                const response = await API.post("/v1/cart/add-to-cart", productData);
+                console.log("the products set in the cart are: ",response.data.cart.items);
+                setProducts(response.data.cart.items);
+                console.log("the response from the backend is: ", response.data);
+                notifySuccess("product added to cart successfully!")
+                navigate("/cart")
+            } catch (error) {
+                console.error("couldn't add product to cart: ", error?.response?.data || error?.response);
+                notifyFailure(error?.response?.data || error?.response)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
     }
 
     return (
@@ -241,10 +265,16 @@ const ProductDetailPage = () => {
                                 <div className="add-to-cart w-full">
                                     <button
                                         onClick={handleAddToCart}
-                                        className="w-full sm:w-auto h-11 bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-widest px-8 rounded-xl flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] shadow-lg cursor-pointer whitespace-nowrap"
+                                        className={`w-full sm:w-auto h-11 bg-white hover:bg-neutral-200 text-black font-bold text-xs uppercase tracking-widest px-8 rounded-xl flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] shadow-lg cursor-pointer whitespace-nowrap`}
                                     >
-                                        <CartLogo className="w-4 h-4 text-black" currentColor="currentColor" />
-                                        Add to cart
+                                        {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> :
+                                            <div className="flex gap-2 justify-center align-items-center">
+
+                                                <CartLogo className="w-4 h-4 text-black" currentColor="currentColor" />
+                                                <div className="text">Add to Cart</div>
+                                            </div>
+                                        }
+
                                     </button>
                                 </div>
 

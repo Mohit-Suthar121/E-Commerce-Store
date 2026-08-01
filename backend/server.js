@@ -11,6 +11,7 @@ import adminUserRoute from './routes/admin/user.route.js'
 import { authMiddleware } from './middlewares/auth.middleware.js';
 import productRoute from './routes/product.route.js';
 import { aiRoute } from './routes/ai.route.js';
+import { cartRoute } from './routes/cart.route.js';
 const app = express();
 const port = 3000;
 connectDb();
@@ -40,6 +41,7 @@ app.use('/api/v1/admin/product',adminProductRoute);
 app.use('/api/v1/admin/users',adminUserRoute);
 app.use('/api/v1/admin/ai',aiRoute);
 app.use('/api/v1/product',productRoute);
+app.use('/api/v1/cart',cartRoute);
 
 
 

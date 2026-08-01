@@ -30,7 +30,12 @@ export const useCartStore = create(
                     productsInCart: [...state.productsInCart, newProduct]
                 }
 
-            })
+            }),
+
+            setQuantity: (productId, quantity) => set((state) => ({
+                productsInCart: state.productsInCart.map((item) => item.product._id === productId ? { ...item, quantity } : item)
+
+            }))
         })),
 
     {
