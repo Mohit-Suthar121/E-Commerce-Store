@@ -79,21 +79,3 @@ export const getProduct = async (req,res)=>{
         })
     }
 }
-
-export const addToCart = async(req,res)=>{
-    try {
-        const user = req.user;
-        const {product, quantity}  = req.body;
-        const cart = await Cart.findOne({user:user._id});
-        const existingProduct = cart.items.find((item)=>item._id===id);
-
-        if(existingProduct){
-
-        }
-        else{
-
-        }
-    } catch (error) {
-        
-    }
-}

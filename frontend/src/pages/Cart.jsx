@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, {  useState } from 'react'
 import Navbar from '../components/Navbar'
 import CartLogo from '../icons/CartLogo';
 import ShoppingCartProduct from '../components/ShoppingCartProduct';
@@ -18,9 +18,11 @@ const Cart = () => {
             subTotal += p.quantity * p.product.price;
         });
     }
-
+    console.log("the products in cart are: ",productsInCart)
     const gstPrice = subTotal * gstPercentage / 100;
     const totalAmount = subTotal + gstPrice;
+
+    
     return (
         <div className='w-full h-screen flex flex-col'>
             <Navbar />
@@ -34,12 +36,8 @@ const Cart = () => {
                     <div className="left-right-section flex flex-col gap-4 flex-1 lg:items-start md:min-h-0 md:justify-between md:gap-10 lg:flex-row border-red-500  items-center">
 
                         <div className="show-products flex h-82 md:h-full flex-col min-h-0 md:min-h-0 md:flex-1 gap-6 w-full md:w-[60%] px-4 overflow-y-auto scrollbar-design items-center max-w-xl">
-                            {productsInCart?.map((p) => <ShoppingCartProduct onClick={()=>{navigate(`/products/${p?.product?._id}`)}} key={p?.product?._id} image={p?.product?.images[0]?.url} quantity={p?.quantity} price={p?.product?.price} name={p?.product?.name} />)}
+                            {productsInCart?.map((p) => <ShoppingCartProduct stock={p?.product?.stock}  onClick={()=>{navigate(`/products/${p?.product?._id}`)}} key={p?.product?._id} image={p?.product?.images[0]?.url} quantity={p?.quantity} price={p?.product?.price} name={p?.product?.name} id={p?.product?._id}/>)}
 
-                            {/* <ShoppingCartProduct />
-                            <ShoppingCartProduct />
-                            <ShoppingCartProduct />
-                            <ShoppingCartProduct /> */}
                         </div>
 
                         <div className="flex md:hidden border-line border-neutral-800/60 border w-[90%] self-center h-0" />
@@ -138,7 +136,7 @@ const Cart = () => {
                     <div className="empty-text font-semibold text-xl text-[#ebebeb]">Your Cart is Empty</div>
 
                     <div className="text-neutral-500 font-semibold">Looks like you haven't added anything to your cart yet</div>
-                    <div className="start-shoppingbutton pt-2">
+                    <div onClick={()=>{navigate('/products')}} className="start-shoppingbutton pt-2">
 
                         <button className="start-shopping text-sm text-black font-semibold px-6 py-3 rounded-lg bg-white border border-neutral-800 cursor-pointer active:scale-95 hover:brightness-90  ">Start Shopping</button>
                     </div>
