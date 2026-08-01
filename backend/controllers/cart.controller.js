@@ -127,3 +127,36 @@ export const updateProductQuantity = async(req,res)=>{
 
     }
 }
+
+export const deleteFromCart = async(req,res)=>{
+    try {
+        const userId = req.userId;
+        const productId = req.params.productId;
+        const cart = await Cart.findOne({user:userId});
+        if(!cart){
+            return res.status(404).json({
+                message:"cart not found!"
+            })
+        }
+        // check if the product even exists
+        const item = cart.items.find((item)=>item.product.equals(productId));
+        if(!item){
+            return res.status(404).json({
+                message:"product not found!"
+            })
+        }
+
+        cart.items = cart.items.filter((item)=>!item.product.equals(productId));
+        await cart.save();
+        return res.status(200).json({
+            message:"product deleted successfully",
+        })
+
+
+    } catch (error) {
+        console.error("Internal server error",error);
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
