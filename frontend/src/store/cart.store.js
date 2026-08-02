@@ -39,7 +39,13 @@ export const useCartStore = create(
 
             deleteProductFromCart:(productId)=> set((state)=>({
                 productsInCart:state.productsInCart.filter((item)=>item.product._id!==productId)
-            }))
+            })),
+
+
+            currentAddress:null,
+            addresses:[],
+
+            
         })),
 
     {

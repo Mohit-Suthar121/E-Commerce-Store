@@ -35,21 +35,31 @@ const userSchema = new mongoose.Schema({
             default:null
         }
     },
-    shippingAddress:{
-        street:{
-            type:String,
-            trim:true,
-            default:""
+    shippingAddress: {
+        street: {
+            type: String,
+            trim: true,
+            default: ""
         },
-        city:{
-            type:String,
-            trim:true,
-            default:""
+        city: {
+            type: String,
+            trim: true,
+            default: ""
         },
-        zipCode:{
-            type:String,
-            trim:true,
-            default:""
+        state: {
+            type: String,
+            trim: true,
+            default: ""
+        },
+        country: {
+            type: String,
+            trim: true,
+            default: "India" // Set a sensible default if your app operates mostly in one country
+        },
+        zipCode: {
+            type: String,
+            trim: true,
+            default: ""
         }
     },
     role: {

@@ -7,28 +7,16 @@ import { useNavigate } from 'react-router-dom';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
 import { useAuthStore } from '../store/auth.store';
+import OrderSummaryCard from '../components/orderSummaryCard';
 
 const Cart = () => {
-    const [items, setItems] = useState(4); // we will change it later , it will contain objects
-    const productsInCart = useCartStore((state) => state.productsInCart);
-    const deleteProductFromCart = useCartStore((state)=>state.deleteProductFromCart);
-    const user = useAuthStore((state)=>state.user);
-    const [gstPercentage, setGstPercentage] = useState(3);
-    const [shippingCost, setShippingCost] = useState(0);
+    const deleteProductFromCart = useCartStore((state) => state.deleteProductFromCart);
+    const user = useAuthStore((state) => state.user);
     const navigate = useNavigate();
-    let subTotal = 0;
-    if (productsInCart?.length > 0) {
+    const productsInCart = useCartStore((state) => state.productsInCart);
 
-        productsInCart.forEach((p) => {
-            subTotal += p.quantity * p.product.price;
-        });
-    }
-    console.log("the products in cart are: ", productsInCart)
-    const gstPrice = subTotal * gstPercentage / 100;
-    const totalAmount = subTotal + gstPrice;
-
-    const handleDelete = async(id) => {
-        if(!user) {
+    const handleDelete = async (id) => {
+        if (!user) {
             deleteProductFromCart(id);
             return;
         }
@@ -37,7 +25,7 @@ const Cart = () => {
             deleteProductFromCart(id);
             notifySuccess("the product removed from the cart successfully!")
         } catch (error) {
-            console.error("couldn't delete product",error?.response?.data || error);
+            console.error("couldn't delete product", error?.response?.data || error);
             notifyFailure(error?.response?.data || error)
         }
     }
@@ -47,103 +35,55 @@ const Cart = () => {
         <div className='w-full h-screen flex flex-col'>
             <Navbar />
 
-            {productsInCart?.length > 0 && <div className="maincontent flex min-h-0 flex-1 md:py-6 md:px-16 p-2">
+            {productsInCart?.length > 0 && (
+                <div className="maincontent w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-4 sm:p-8 lg:p-12">
+                    <div className="w-full max-w-6xl flex flex-col gap-6 ">
 
-                <div className="show-items flex flex-col gap-4 w-full h-full min-h-0">
-
-                    <h1 className='text-xl font-bold text-gray-300 px-4 uppercase h-fit flex items-center'>Shopping Cart</h1>
-
-                    <div className="left-right-section flex flex-col gap-4 flex-1 lg:items-start md:min-h-0 md:justify-between md:gap-10 lg:flex-row border-red-500  items-center">
-
-                        <div className="show-products flex h-82 md:h-full flex-col min-h-0 md:min-h-0 md:flex-1 gap-6 w-full md:w-[60%] px-4 overflow-y-auto scrollbar-design items-center max-w-xl">
-                            {productsInCart?.map((p) => <ShoppingCartProduct stock={p?.product?.stock} onClick={() => { navigate(`/products/${p?.product?._id}`) }} key={p?.product?._id} image={p?.product?.images[0]?.url} quantity={p?.quantity} price={p?.product?.price} name={p?.product?.name} id={p?.product?._id} handleDelete={()=>{handleDelete(p?.product?._id)}} />) }
-
-                        </div>
-
-                        <div className="flex md:hidden border-line border-neutral-800/60 border w-[90%] self-center h-0" />
-
-
-
-                        <div className="flex right-side-wrapper flex-1 h-full justify-center md:flex items-center xl:items-center w-full ">
-
-
-                            <div className="order-summary-card bg-[#0f0f0f] max-w-xl xl:max-w-110 border-neutral-800 rounded-2xl flex flex-1 flex-col gap-3 py-6 px-8 w-full  border h-fit ">
-                                <h2 className=" heading uppercase text-xs font-bold tracking-widest text-gray-600 ml-1">Order Summary</h2>
-
-                                <div className="details flex flex-col gap-2 border bg-neutral-950/40 p-4 rounded-xl border-neutral-900/50">
-                                    <div className="flex justify-between items-center text-sm font-medium text-neutral-400">
-                                        <span>Subtotal ({productsInCart?.length} items)</span>
-                                        <span className="font-mono text-neutral-200">₹{subTotal}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm font-medium text-neutral-400">
-                                        <span>Estimated Shipping</span>
-                                        {shippingCost > 0 ?
-                                            <span className="font-mono text-neutral-200">₹{shippingCost}</span> :
-                                            <span className="font-mono text-emerald-400 text-xs font-bold uppercase tracking-wide bg-emerald-500/5 px-2 py-0.5 rounded border border-emerald-500/10">Free</span>}
-
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm font-medium text-neutral-400">
-                                        <span>Tax (GST {gstPercentage}%)</span>
-                                        <span className="font-mono text-neutral-200">₹{gstPrice}</span>
-                                    </div>
-
-                                    <div className="h-px bg-neutral-900 my-1 " />
-
-                                    <div className="flex justify-between items-center pt-1">
-                                        <span className="text-sm font-bold text-neutral-200">Total Amount</span>
-                                        <span className="text-lg font-bold font-mono text-white tracking-tight">₹{totalAmount}</span>
-                                    </div>
-
-                                </div>
-
-
-
-
-
-                                <div className="flex items-center gap-2.5">
-                                    <input
-                                        type="text"
-                                        className="h-10 px-3.5 rounded-xl flex-1 text-xs bg-neutral-950 border border-neutral-900 text-white placeholder-neutral-600 focus:border-emerald-500/60 focus:ring-4 focus:ring-emerald-500/5 transition-all duration-200 outline-none"
-                                        placeholder="Promo or voucher code..."
-                                    />
-                                    <button className="h-10 px-4 rounded-xl text-xs font-semibold bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-95 shrink-0">
-                                        Apply
-                                    </button>
-                                </div>
-
-                                <div className="flex flex-col gap-2 pt-2">
-                                    <button className="w-full h-11 flex justify-center items-center rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-sm tracking-wide shadow-md cursor-pointer transition-colors active:scale-[0.99]">                                            Proceed to Checkout
-                                    </button>
-                                    <button onClick={()=>{navigate('/products')}} className="w-full h-11 flex justify-center items-center rounded-xl bg-neutral-950 hover:bg-neutral-900 border border-neutral-900 text-neutral-400 hover:text-neutral-200 text-sm font-medium cursor-pointer transition-all active:scale-[0.99]">
-                                        Continue Shopping
-                                    </button>
-                                </div>
-
-                                <div className="flex flex-col gap-2 pt-3 border-t border-neutral-900 text-[11px] text-neutral-500 font-medium pl-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-emerald-500/60 text-xs">•</span>
-                                        <span>Free shipping on all orders over ₹4,000</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-emerald-500/60 text-xs">•</span>
-                                        <span>No-questions-asked 30-day return policy</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-emerald-500/60 text-xs">•</span>
-                                        <span>Secure bank checkout via 256-bit SSL encryption</span>
-                                    </div>
-                                </div>
-
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-1 ">
+                            <div className="flex items-center gap-3">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
+                                <h1 className="text-lg sm:text-xl font-mono font-bold tracking-wider text-neutral-200 uppercase">
+                                    Shopping Cart
+                                </h1>
                             </div>
+                            <span className="text-xs font-mono text-neutral-400 bg-neutral-900 border border-neutral-800/80 px-3 py-1 rounded-full">
+                                {productsInCart.length} {productsInCart.length === 1 ? 'Item' : 'Items'}
+                            </span>
                         </div>
 
+                        {/* Main Layout Grid */}
+                        <div className="left-right-section grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
+                            {/* Products Scroll Container */}
+                            <div className="lg:col-span-7 flex flex-col gap-4 w-full max-h-120 overflow-y-auto pr-1 sm:pr-2 scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent">
+                                {productsInCart?.map((p) => (
+                                    <ShoppingCartProduct
+                                        key={p?.product?._id}
+                                        id={p?.product?._id}
+                                        name={p?.product?.name}
+                                        price={p?.product?.price}
+                                        quantity={p?.quantity}
+                                        image={p?.product?.images?.[0]?.url}
+                                        stock={p?.product?.stock}
+                                        onClick={() => { navigate(`/products/${p?.product?._id}`) }}
+                                        handleDelete={() => { handleDelete(p?.product?._id) }}
+                                    />
+                                ))}
+                            </div>
 
+                            {/* Mobile Divider */}
+                            <div className="lg:hidden border-t border-neutral-800/80 w-full my-1" />
+
+                            {/* Right Column: Order Summary Anchor */}
+                            <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
+                                <OrderSummaryCard />
+                            </div>
+
+                        </div>
                     </div>
-
-
                 </div>
-            </div>}
+            )}
 
 
 

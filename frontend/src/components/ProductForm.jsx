@@ -6,6 +6,24 @@ import { Controller, set, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 
 const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmit, handleAiSubmit = null }) => {
+    const categories = [
+        "Electronics",
+        "Fashion",
+        "Home & Kitchen",
+        "Beauty & Personal Care",
+        "Books",
+        "Sports & Fitness",
+        "Toys & Games",
+        "Grocery",
+        "Health",
+        "Automotive",
+        "Jewelry",
+        "Pet Supplies",
+        "Office Supplies",
+        "Footwear",
+        "Accessories",
+        "Others"
+    ]
 
 
     const navigate = useNavigate();
@@ -226,7 +244,7 @@ const ProductForm = ({ isEditing = false, initialData = null, isLoading, onSubmi
                                     name='category'
                                     control={control}
                                     render={({ field }) => {
-                                        return <HeadLessComboBox value={field.value} onChange={field.onChange} />
+                                        return <HeadLessComboBox value={field.value} onChange={field.onChange} options={categories}/>
                                     }}
                                 />
                             </div>

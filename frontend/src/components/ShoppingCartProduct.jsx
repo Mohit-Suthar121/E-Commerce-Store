@@ -17,12 +17,10 @@ const ShoppingCartProduct = ({
     handleDelete
 }) => {
 
-
     const timerRef = useRef(null);
     const totalPrice = price * quantity;
     const setQuantity = useCartStore((state) => state.setQuantity);
-    const isFirstRender = useRef(true);
-    const user = useAuthStore((state)=>state.user)
+    const user = useAuthStore((state) => state.user);
 
     // Standardized Indian Rupee (₹) Formatter
     const formatCurrency = (amount) => {
@@ -33,143 +31,131 @@ const ShoppingCartProduct = ({
         }).format(amount);
     };
 
-
     const handleIncrease = async () => {
-        if(quantity>=stock) return;
-        const newQuantity = quantity+1;
+        if (quantity >= stock) return;
+        const newQuantity = quantity + 1;
         setQuantity(id, newQuantity);
         updateQuantity(newQuantity);
-
     }
 
     const handleDecrease = async () => {
         if (quantity <= 1) return;
-        const newQuantity = quantity-1;
+        const newQuantity = quantity - 1;
         setQuantity(id, newQuantity);
         updateQuantity(newQuantity);
     }
 
-    const updateQuantity =  (newQuantity) => {
-        if(!user) return;
+    const updateQuantity = (newQuantity) => {
+        if (!user) return;
         if (timerRef.current) {
             clearTimeout(timerRef.current);
         }
         const timer = setTimeout(async () => {
-            const data = {
-                quantity:newQuantity
-            }
+            const data = { quantity: newQuantity }
             try {
                 const response = await API.patch(`/v1/cart/product/${id}/update-quantity`, data);
-                console.log("the item which got updated is: ", response.data);
-                notifySuccess("quantitiy updated successfully!")
-
+                notifySuccess("Quantity updated successfully!");
             } catch (error) {
-                console.error("couldn't update the quantity!", error?.response?.data || error);
+                console.error("Couldn't update the quantity!", error?.response?.data || error);
                 notifyFailure(error?.response?.data || error);
             }
-
         }, 500)
 
         timerRef.current = timer;
     }
 
-
-    
-
-
-    
-    useEffect(()=>{
-        return ()=>{
-            if(timerRef.current){
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) {
                 clearTimeout(timerRef.current);
             }
         }
-    },[])
-
-
+    }, [])
 
     return (
         <div
             onClick={onClick}
-            className='w-full rounded-2xl flex sm:flex-row flex-col items-center gap-4 py-3.5 px-4 bg-[#09090b] border-neutral-800/80 border cursor-pointer group hover:border-neutral-700/80 transition-all duration-200 justify-between'
+            className="w-full rounded-2xl p-4 sm:p-5 bg-[#09090b] border border-neutral-800/80 hover:border-neutral-700/80 hover:bg-[#0c0c0e] transition-all duration-200 cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg"
         >
-            {/* Left Side: Product Image & Info */}
-            <div className="left-side-wrapper flex items-center gap-4 w-full sm:w-auto flex-1 min-w-0">
-                <div className="product-image w-14 h-14 md:w-16 md:h-16 rounded-xl bg-neutral-950 border border-neutral-800/80 p-1 flex items-center justify-center shrink-0 group-hover:scale-105 transition-all duration-200 overflow-hidden">
-                    <img className='max-w-full max-h-full object-contain rounded-lg' src={image} alt={name} />
+            {/* Left Side: Larger Thumbnail & Details */}
+            <div className="flex items-center gap-4.5 w-full sm:w-auto flex-1 min-w-0">
+                {/* Enlarged Image Container (w-20 sm:w-22) */}
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-neutral-950 border border-neutral-800/80 p-2 flex items-center justify-center shrink-0 group-hover:scale-[1.03] transition-transform duration-200 overflow-hidden shadow-inner">
+                    <img className="max-w-full max-h-full object-contain rounded-xl" src={image} alt={name} />
                 </div>
 
-                <div className="product-name-and-price flex flex-col flex-1 min-w-0 gap-1">
-                    <h4 className="heading w-full truncate font-medium text-sm text-neutral-200 group-hover:text-white transition-colors">
+                {/* Info Section */}
+                <div className="flex flex-col flex-1 min-w-0 gap-1.5">
+                    <h4 className="w-full truncate font-medium text-base text-neutral-200 group-hover:text-emerald-400 transition-colors">
                         {name}
                     </h4>
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span className="price font-mono text-xs text-neutral-400">
-                            Unit: <span className="text-neutral-300 font-semibold">{formatCurrency(price)}</span>
+                    
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                        <span className="font-mono text-xs text-neutral-400">
+                            Unit: <span className="text-neutral-200 font-semibold">{formatCurrency(price)}</span>
                         </span>
-                        {/* Stock Count Pill */}
-                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-md font-medium">
+                        
+                        {/* Stock Pill */}
+                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-medium">
                             {stock} in stock
                         </span>
                     </div>
                 </div>
             </div>
 
-            <div className="seperator-line flex h-px w-full border-t border-neutral-900 sm:hidden" />
+            {/* Mobile Divider */}
+            <div className="w-full h-px bg-neutral-800/60 sm:hidden" />
 
-            {/* Right Side: Stepper, Subtotal & Actions */}
-            <div className="flex sm:gap-6 gap-4 items-center justify-between sm:justify-end w-full sm:w-auto">
-
-                {/* 🔢 Interactive Quantity Stepper */}
+            {/* Right Side: Stepper, Total & Action */}
+            <div className="flex items-center justify-between sm:justify-end gap-5 w-full sm:w-auto shrink-0">
+                
+                {/* Quantity Stepper */}
                 <div
-                    className="product-quantity flex items-center h-10 bg-neutral-950 border border-neutral-800/80 rounded-xl p-1 shrink-0"
-                    onClick={(e) => e.stopPropagation()} // Prevents triggering product detail navigation
+                    className="flex items-center h-11 bg-neutral-950 border border-neutral-800/80 rounded-xl p-1 shrink-0"
+                    onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Decrement Button */}
                     <button
                         type="button"
                         onClick={handleDecrease}
                         disabled={quantity <= 1}
                         aria-label="Decrease quantity"
-                        className="w-7 h-full flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800/80 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-colors cursor-pointer select-none font-mono text-sm font-bold active:scale-95"
+                        className="w-8 h-full flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800/80 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-colors cursor-pointer font-mono text-sm font-bold active:scale-95"
                     >
                         -
                     </button>
 
-                    {/* Quantity Value */}
-                    <span className="w-8 text-center text-xs font-mono font-bold text-white select-none">
+                    <span className="w-9 text-center text-xs font-mono font-bold text-white select-none">
                         {quantity}
                     </span>
 
-                    {/* Increment Button */}
                     <button
                         type="button"
                         onClick={handleIncrease}
                         disabled={quantity >= stock}
                         aria-label="Increase quantity"
-                        className="w-7 h-full flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800/80 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-colors cursor-pointer select-none font-mono text-sm font-bold active:scale-95"
+                        className="w-8 h-full flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800/80 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-colors cursor-pointer font-mono text-sm font-bold active:scale-95"
                     >
                         +
                     </button>
                 </div>
 
                 {/* Subtotal Display */}
-                <div className="product-total-price font-semibold flex flex-col sm:items-end items-start min-w-[75px]">
-                    <span className='text-[9px] font-mono text-neutral-500 uppercase tracking-wider mb-0.5'>Total</span>
-                    <span className='font-mono text-sm text-neutral-100 font-bold tracking-tight'>
+                <div className="flex flex-col items-start sm:items-end min-w-[85px]">
+                    <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">Subtotal</span>
+                    <span className="font-mono text-base text-emerald-400 font-bold tracking-tight">
                         {formatCurrency(totalPrice)}
                     </span>
                 </div>
 
-                {/* Remove Item Button */}
+                {/* Delete Button */}
                 <button
                     type="button"
                     onClick={(e) => {
-                        e.stopPropagation(); // Stops card click
+                        e.stopPropagation();
                         handleDelete();
                     }}
                     aria-label="Remove product"
-                    className="remove-button flex text-neutral-500 cursor-pointer p-2.5 rounded-xl bg-neutral-950 border border-neutral-800/80 justify-center items-center hover:border-red-500/40 hover:bg-red-500/5 hover:text-red-400 transition-all duration-200 active:scale-95 shrink-0"
+                    className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800/80 text-neutral-400 hover:text-rose-400 hover:border-rose-500/40 hover:bg-rose-500/10 transition-all duration-200 cursor-pointer active:scale-95 shrink-0"
                 >
                     <DeleteIcon currentColor="currentColor" className="w-4 h-4" />
                 </button>
@@ -178,4 +164,4 @@ const ShoppingCartProduct = ({
     )
 }
 
-export default ShoppingCartProduct;
+export default ShoppingCartProduct
