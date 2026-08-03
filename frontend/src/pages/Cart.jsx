@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
 import { useAuthStore } from '../store/auth.store';
-import OrderSummaryCard from '../components/orderSummaryCard';
+import OrderSummaryCard from '../components/OrderSummaryCard';
+
 
 const Cart = () => {
     const deleteProductFromCart = useCartStore((state) => state.deleteProductFromCart);

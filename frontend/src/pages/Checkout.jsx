@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import AddEditAddressCard from '../components/AddEditAddressCard'
-import OrderSummaryCard from '../components/orderSummaryCard'
+import OrderSummaryCard from '../components/OrderSummaryCard'
 import AddressCard from '../components/AddressCard'
 import { API } from '../api/axiosInstance'
 import { notifyFailure, notifySuccess } from '../utils/Toastify'
