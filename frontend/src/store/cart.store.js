@@ -44,6 +44,7 @@ export const useCartStore = create(
 
             currentAddress:null,
             addresses:[],
+            setAddresses:(newAddresses)=>set({addresses:newAddresses})
 
             
         })),

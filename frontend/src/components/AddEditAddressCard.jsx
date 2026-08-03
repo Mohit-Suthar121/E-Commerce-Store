@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { Controller, useForm } from "react-hook-form"
 import HeadLessComboBox from './HeadLessComboBox'
 
-const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingAddress, initialData }) => {
+const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingAddress, initialData,onSubmit,isLoading }) => {
     const handleCancel = () => {
         if (setAddNewAddress) setAddNewAddress(false)
         if (setIsEditingAddress) setIsEditingAddress(false)
@@ -23,16 +23,26 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
         handleSubmit,
         watch,
         control,
+        reset,
         formState: { errors },
     } = useForm({
-        defaultValues:{
-            state:"Delhi"
+        defaultValues: {
+            state: "Delhi"
         }
     })
 
     useEffect(() => {
         if (initialData) {
-            rese
+            reset({
+                firstName: initialData.name.split(" ")[0],
+                lastName:initialData.name.split(" ")[1],
+                email:initialData.email,
+                phoneNo:initialData.phoneNo,
+                street:initialData.shippingAddress.street,
+                city:initialData.shippingAddress.city,
+                zipCode:initialData.shippingAddress.zipCode,
+                state:initialData.shippingAddress.state
+            })
         }
     }, [])
 
@@ -58,17 +68,17 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
             </div>
 
             {/* Form Fields */}
-            <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
 
                 {/* First & Last Name */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                        <label className=" text-xs font-medium text-neutral-400 pl-0.5 tracking-wide flex">
-                            <div className="relative text  w-fit ">
+                         <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit flex">
+
+                            <div className="text flex relative">
                                 First Name
                                 <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
                             </div>
-
                             <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
                                 {errors?.firstName?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.firstName?.message}</div>}
                             </div>
@@ -99,6 +109,7 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                     <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide">Last Name</label>
                         <input
+                        {...register("lastName")}
                             type="text"
                             className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-800/80 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 outline-none w-full"
                             placeholder="e.g. Sharma"
@@ -109,9 +120,17 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                 {/* Email & Phone */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit">Email Address
-                            
+                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit flex">
+
+                            <div className="text flex relative">
+
+                                Email Address
                                 <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
+                            </div>
+                            <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
+                                {errors?.email?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.email?.message}</div>}
+                            </div>
+
                         </label>
                         <input
                             {...register("email", {
@@ -132,9 +151,18 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                         />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit">Phone Number
-                            
+                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit flex">
+
+                            <div className="text flex relative">
+
+                                Phone Number
                                 <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
+                            </div>
+                            <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
+                               
+                                {errors?.phoneNo?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.phoneNo?.message}</div>}
+                            </div>
+
                         </label>
                         <input
                             {...register("phoneNo", {
@@ -156,9 +184,18 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
 
                 {/* Street Address */}
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit">Street Address
-                        
-                                <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
+                    <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit flex">
+
+                        <div className="text flex relative">
+
+                            Street Address
+                            <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
+                        </div>
+                        <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
+                            
+                                {errors?.street?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.street?.message}</div>}
+                        </div>
+
                     </label>
                     <input
                         {...register("street", {
@@ -182,9 +219,18 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                 {/* City & Zip Code */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit">City
-                            
+                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit flex">
+
+                            <div className="text flex relative">
+
+                                City
                                 <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
+                            </div>
+                            <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
+                                
+                                {errors?.city?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.city?.message}</div>}
+                            </div>
+
                         </label>
                         <input
                             {...register("city", {
@@ -209,9 +255,18 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                         />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit">Zip / Postal Code
-                            
+                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit flex">
+
+                            <div className="text flex relative">
+
+                                Zip Code
                                 <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
+                            </div>
+                            <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
+                                
+                                {errors?.zipCode?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.zipCode?.message}</div>}
+                            </div>
+
                         </label>
                         <input
 
@@ -235,12 +290,12 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                     <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide">State</label>
                         <Controller
-                        name='state'
-                        control={control}
-                        render={({field})=>(
+                            name='state'
+                            control={control}
+                            render={({ field }) => (
 
-                            <HeadLessComboBox value={field.value} onChange={field.onChange} options={INDIAN_STATES}  />
-                        )}
+                                <HeadLessComboBox value={field.value} onChange={field.onChange} options={INDIAN_STATES} />
+                            )}
                         />
                     </div>
                     <div className="flex flex-col gap-1.5">
@@ -265,10 +320,11 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                         type="submit"
                         className="flex-1 h-11 flex justify-center items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] cursor-pointer active:scale-[0.99]"
                     >
-                        <span>Save and Continue</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                        {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : isEditing ? "Save Changes" : 
+                        <span>Add Address</span>}
+                       {!isLoading && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                        </svg>
+                        </svg>}
                     </button>
 
                     <button

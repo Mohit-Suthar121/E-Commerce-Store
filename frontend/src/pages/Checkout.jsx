@@ -1,12 +1,61 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AddEditAddressCard from '../components/AddEditAddressCard'
 import OrderSummaryCard from '../components/orderSummaryCard'
 import AddressCard from '../components/AddressCard'
+import { API } from '../api/axiosInstance'
+import { notifyFailure, notifySuccess } from '../utils/Toastify'
+import { useCartStore } from '../store/cart.store'
 
 const CheckoutPage = () => {
-    const [address, setAddress] = useState("add1")
     const [addNewAddress, setAddNewAddress] = useState(false)
     const [isEditingAddress, setIsEditingAddress] = useState(false)
+    const [isLoading,setIsLoading] = useState(false);
+    
+    const setAddresses = useCartStore((state)=>state.setAddresses);
+    const addresses = useCartStore((state)=>state.addresses);
+    const initialSelectedAddress = addresses.find((add)=>add?.isDefault)?._id
+    const [selectedAddress, setSelectedAddress] = useState(initialSelectedAddress);
+
+
+
+    const fetchAddresses = async()=>{
+        try {
+            const response = await API.get("/v1/user/addresses/get-all-addresses");
+            console.log("the received addresses are",response.data.addresses);
+            setAddresses(response.data.addresses);
+        } catch (error) {
+            console.error("error fetching the addresses",error?.response?.data|| error);
+        }
+    }
+
+    const handleAddNewAddress = async(data)=>{
+        try {
+            setIsLoading(true);
+            const newData = {
+                name:data.firstName + data.lastName,
+                email:data.email,
+                phoneNo:data.phoneNo,
+                street:data.street,
+                city:data.city,
+                zipCode:data.zipCode,
+                state:data.state
+            }
+            const response = await API.post("/v1/user/addresses/add-address",newData);
+            console.log("address added successfully!", response.data);
+            notifySuccess("address added successfully")
+        } catch (error) {
+            console.error("couldn't add address!",error?.response?.data || error);
+            notifyFailure(error?.response?.data)
+        }finally{
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(()=>{
+        fetchAddresses()
+    },[])
+
+
 
     return (
         <div className="w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-6 sm:p-10 lg:p-12">
@@ -35,13 +84,22 @@ const CheckoutPage = () => {
 
                             {/* Saved Addresses Scroll List */}
                             <div className="address-div flex flex-col gap-3.5 w-full max-h-[520px] overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent p-5">
-                                <AddressCard
-                                    id={"add1"} 
-                                    setAddress={setAddress} 
-                                    isSelected={address === "add1"} 
+                                {addresses.map((address)=><AddressCard
+                                key={address?._id}
+                                    id={address?._id} 
+                                    setSelectedAddress={setSelectedAddress} 
+                                    isSelected={selectedAddress === address?._id} 
                                     setIsEditingAddress={setIsEditingAddress} 
-                                />
-                                <AddressCard
+                                    fullName={address?.name}
+                                    city={address?.city}
+                                    email={address?.email}
+                                    phone={address?.phoneNo}
+                                    state={address?.state}
+                                    street={address?.street}
+                                    zipcode={address?.zipCode}
+                                />)}
+                               
+                                {/* <AddressCard
                                     id={"add2"} 
                                     setAddress={setAddress} 
                                     isSelected={address === "add2"} 
@@ -52,7 +110,7 @@ const CheckoutPage = () => {
                                     setAddress={setAddress} 
                                     isSelected={address === "add3"} 
                                     setIsEditingAddress={setIsEditingAddress} 
-                                />
+                                /> */}
                             </div>
 
                             {/* Action Buttons */}
@@ -84,6 +142,8 @@ const CheckoutPage = () => {
                         /* Form View (Add or Edit) */
                         <div className="w-full">
                             <AddEditAddressCard 
+                                isLoading={isLoading}
+                                onSubmit={handleAddNewAddress}
                                 setAddNewAddress={setAddNewAddress} 
                                 isEditing={isEditingAddress} 
                                 setIsEditingAddress={setIsEditingAddress} 
