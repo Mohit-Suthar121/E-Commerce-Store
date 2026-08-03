@@ -4,33 +4,16 @@ import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import clsx from 'clsx'
 import { useState } from 'react'
 
-const HeadLessComboBox = ({value, onChange}) => {
+const HeadLessComboBox = ({value, onChange,options}) => {
 
-    const categories = [
-        "Electronics",
-        "Fashion",
-        "Home & Kitchen",
-        "Beauty & Personal Care",
-        "Books",
-        "Sports & Fitness",
-        "Toys & Games",
-        "Grocery",
-        "Health",
-        "Automotive",
-        "Jewelry",
-        "Pet Supplies",
-        "Office Supplies",
-        "Footwear",
-        "Accessories",
-        "Others"  
-    ]
+    
     const [query, setQuery] = useState('')
 
-    const filteredCategories =
+    const filteredOptions =
         query === ''
-            ? categories
-            : categories.filter((category) => {
-                return category.toLowerCase().includes(query.toLowerCase())
+            ? options
+            : options.filter((option) => {
+                return option.toLowerCase().includes(query.toLowerCase())
             })
     return (
         <div className="w-full">
@@ -41,7 +24,7 @@ const HeadLessComboBox = ({value, onChange}) => {
                             'w-full h-10 rounded-xl border border-neutral-900 bg-neutral-950 py-1.5 pr-8 pl-3.5 text-sm text-neutral-200 placeholder-neutral-700',
                             'transition-all duration-200 outline-none focus:border-emerald-500/60 focus:ring-4 focus:ring-emerald-500/5'
                         )}
-                        displayValue={(category) => category}
+                        displayValue={(option) => option}
                         onChange={(event) => setQuery(event.target.value)}
                     />
                     <ComboboxButton className="group absolute inset-y-0 right-0 px-2.5 flex items-center">
@@ -58,14 +41,14 @@ const HeadLessComboBox = ({value, onChange}) => {
                         'max-h-60! overflow-y-auto scrollbar-design'
                     )}
                 >
-                    {filteredCategories.map((category, index) => (
+                    {filteredOptions.map((option, index) => (
                         <ComboboxOption
                             key={index}
-                            value={category}
+                            value={option}
                             className="group flex cursor-default items-center gap-2 rounded-lg px-3 py-1.5 select-none data-focus:bg-emerald-500/10"
                         >
                             <CheckIcon className="invisible size-4 fill-emerald-500 group-data-selected:visible" />
-                            <div className="text-sm text-neutral-200 group-data-selected:text-white group-data-selected:font-medium">{category}</div>
+                            <div className="text-sm text-neutral-200 group-data-selected:text-white group-data-selected:font-medium">{option}</div>
                         </ComboboxOption>
                     ))}
                 </ComboboxOptions>

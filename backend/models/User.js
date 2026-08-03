@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+
+import { addressSchema } from "./address.model.js";
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -20,66 +22,50 @@ const userSchema = new mongoose.Schema({
         minlength: [6, "Password must consist of at least 6 characters"],
         select: false
     },
-    phoneNo:{
-        type:String,
-        trim:true,
-        default:""
+    phoneNo: {
+        type: String,
+        trim: true,
+        default: ""
     },
-    profilePic:{
-        url:{
-            type:String,
-            default:""
+    profilePic: {
+        url: {
+            type: String,
+            default: ""
         },
-        publicId:{
-            type:String,
-            default:null
+        publicId: {
+            type: String,
+            default: null
         }
     },
-    shippingAddress:{
-        street:{
-            type:String,
-            trim:true,
-            default:""
-        },
-        city:{
-            type:String,
-            trim:true,
-            default:""
-        },
-        zipCode:{
-            type:String,
-            trim:true,
-            default:""
-        }
-    },
+    shippingAddresses: [addressSchema],
     role: {
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
     },
-    isVerified:{
-        type:Boolean,
-        default:false
+    isVerified: {
+        type: Boolean,
+        default: false
     },
     otpCode: {
         type: String,
         default: null,
-        select:false
+        select: false
     },
     otpExpires: {
         type: Date,
         default: null,
-        select:false
+        select: false
     }
 
 }, { timestamps: true })
 
 
-userSchema.pre('save', async function(){
+userSchema.pre('save', async function () {
     if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    
+
 
 })
 
