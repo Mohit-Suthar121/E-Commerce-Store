@@ -1,22 +1,20 @@
 import React, { useEffect } from 'react'
-import { Controller, useForm } from "react-hook-form"
+
 import HeadLessComboBox from './HeadLessComboBox'
+import { Controller, useForm } from "react-hook-form"
 
-const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingAddress, initialData,onSubmit,isLoading }) => {
-    const handleCancel = () => {
-        if (setAddNewAddress) setAddNewAddress(false)
-        if (setIsEditingAddress) setIsEditingAddress(false)
-    }
+const AddressForm = ({ isEditing, onSubmit,initialData,setAddNewAddress,setIsEditingAddress,isLoading }) => {
 
-    const INDIAN_STATES = [
-        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-        "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
-        "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
-        "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
-        "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-        "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
-        "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
-    ];
+
+     const INDIAN_STATES = [
+            "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+            "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+            "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+            "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+            "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+            "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
+            "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+        ];
 
     const {
         register,
@@ -31,22 +29,25 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
         }
     })
 
-    useEffect(() => {
+      useEffect(() => {
         if (initialData) {
             reset({
                 firstName: initialData.name.split(" ")[0],
                 lastName:initialData.name.split(" ")[1],
                 email:initialData.email,
                 phoneNo:initialData.phoneNo,
-                street:initialData.shippingAddress.street,
-                city:initialData.shippingAddress.city,
-                zipCode:initialData.shippingAddress.zipCode,
-                state:initialData.shippingAddress.state
+                street:initialData.street,
+                city:initialData.city,
+                zipCode:initialData.zipCode,
+                state:initialData.state
             })
         }
     }, [])
 
-
+    const handleCancel = () => {
+        if (setAddNewAddress) setAddNewAddress(false)
+        if (setIsEditingAddress) setIsEditingAddress(null)
+    }
     return (
         <div className="w-full max-w-xl bg-[#09090b] border border-neutral-800/80 rounded-2xl p-6 sm:p-7 flex flex-col gap-6 shadow-xl">
 
@@ -73,7 +74,7 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                 {/* First & Last Name */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                         <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit flex">
+                        <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide relative w-fit flex">
 
                             <div className="text flex relative">
                                 First Name
@@ -109,7 +110,7 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                     <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-medium text-neutral-400 pl-0.5 tracking-wide">Last Name</label>
                         <input
-                        {...register("lastName")}
+                            {...register("lastName")}
                             type="text"
                             className="h-11 px-4 rounded-xl text-sm bg-neutral-950 border border-neutral-800/80 text-white placeholder-neutral-600 focus:border-emerald-500/80 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 outline-none w-full"
                             placeholder="e.g. Sharma"
@@ -159,7 +160,7 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                                 <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
                             </div>
                             <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
-                               
+
                                 {errors?.phoneNo?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.phoneNo?.message}</div>}
                             </div>
 
@@ -192,8 +193,8 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                             <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
                         </div>
                         <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
-                            
-                                {errors?.street?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.street?.message}</div>}
+
+                            {errors?.street?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.street?.message}</div>}
                         </div>
 
                     </label>
@@ -227,7 +228,7 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                                 <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
                             </div>
                             <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
-                                
+
                                 {errors?.city?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.city?.message}</div>}
                             </div>
 
@@ -263,7 +264,7 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                                 <div className="absolute -right-2 top-0 text-lg text-red-400 -translate-y-1/4 translate-x-1/2 w-fit ">*</div>
                             </div>
                             <div className=" relative errors flex-1 items-start flex gap-2 ml-4">
-                                
+
                                 {errors?.zipCode?.message && <div className=" text-xs text-red-400 w-fit truncate">{errors?.zipCode?.message}</div>}
                             </div>
 
@@ -320,9 +321,9 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
                         type="submit"
                         className="flex-1 h-11 flex justify-center items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] cursor-pointer active:scale-[0.99]"
                     >
-                        {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : isEditing ? "Save Changes" : 
-                        <span>Add Address</span>}
-                       {!isLoading && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                        {isLoading ? <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" /> : isEditing ? "Save Changes" :
+                            <span>Add Address</span>}
+                        {!isLoading && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                         </svg>}
                     </button>
@@ -342,4 +343,4 @@ const AddEditAddressCard = ({ setAddNewAddress, isEditing = false, setIsEditingA
     )
 }
 
-export default AddEditAddressCard
+export default AddressForm

@@ -44,7 +44,11 @@ export const useCartStore = create(
 
             currentAddress:null,
             addresses:[],
-            setAddresses:(newAddresses)=>set({addresses:newAddresses})
+            setAddresses:(newAddresses)=>set({addresses:newAddresses}),
+            updateAddress:(id,data)=>set((state)=>({
+                addresses:state.addresses.map((address)=>address?._id===id?{...address,...data}:address)
+            }))
+
 
             
         })),
