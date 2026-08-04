@@ -13,6 +13,7 @@ const CheckoutPage = () => {
     const setAddresses = useCartStore((state) => state.setAddresses);
     const addresses = useCartStore((state) => state.addresses);
     const updateAddress = useCartStore((state)=>state.updateAddress);
+    const deleteAddress = useCartStore((state)=>state.deleteAddress);
     const [selectedAddress, setSelectedAddress] = useState(null);
     
 
@@ -67,6 +68,19 @@ const CheckoutPage = () => {
             return data
         }
         else return null
+    }
+
+    const handleDeleteAddress=async(id)=>{
+        try {
+            const repsonse = await API.delete(`/v1/user/addresses/delete-address/${id}`);
+            deleteAddress(id);
+            notifySuccess("address deleted successfully!");
+            console.log("the deletable address's id is: ",id)
+            console.log("the left address in the cart are: ",addresses);
+        } catch (error) {
+            console.error("couldn't delete address",error?.response?.data || error);
+            notifyFailure(error?.response?.data || error)
+        }
     }
 
     useEffect(() => {
@@ -133,6 +147,7 @@ const CheckoutPage = () => {
                                     state={address?.state}
                                     street={address?.street}
                                     zipcode={address?.zipCode}
+                                    onDelete={handleDeleteAddress}
                                 />)}
 
                             </div>

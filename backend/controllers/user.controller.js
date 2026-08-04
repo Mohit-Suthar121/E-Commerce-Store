@@ -181,3 +181,35 @@ export const editAddress = async (req, res) => {
         })
     }
 }
+
+
+export const deleteAddress = async(req,res)=>{
+    try {
+        const userId = req.userId;
+        const id = req.params.id;
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(404).json({
+                message:"user not found!"
+            })
+        }
+        const index = user.shippingAddresses.findIndex((address)=>address._id.toString()===id);
+        if(index===-1){
+            return res.status(404).json({
+                message:"address not found!"
+            })
+        }
+        const [deletedAddress] = user.shippingAddresses.splice(index,1);
+        await user.save();
+        return res.status(200).json({
+            message:"address deleted successfully!",
+            deletedAddress
+        })
+        
+    } catch (error) {
+        console.error("Internal server error",error);
+        return res.status(500).json({
+            message:"Internal server error"
+        })
+    }
+}
