@@ -6,6 +6,7 @@ import { notifyFailure, notifySuccess } from '../utils/Toastify'
 import { useCartStore } from '../store/cart.store'
 import AddressForm from '../components/AddressForm'
 import FinalSelectedAddressCard from '../components/FinalSelectedAddressCard'
+import CheckoutOrderItemsCard from '../components/CheckoutOrderItemsCard'
 
 const CheckoutPage = () => {
     const [addNewAddress, setAddNewAddress] = useState(false)
@@ -16,8 +17,10 @@ const CheckoutPage = () => {
     const addresses = useCartStore((state) => state.addresses);
     const updateAddress = useCartStore((state) => state.updateAddress);
     const deleteAddress = useCartStore((state) => state.deleteAddress);
+    const productsInCart = useCartStore((state) => state.productsInCart);
     const [selectedAddress, setSelectedAddress] = useState(null);
 
+    console.log("the products is cart", productsInCart)
 
     useEffect(() => {
         const initialSelectedAddress = addresses.find((add) => add?.isDefault)
@@ -188,7 +191,14 @@ const CheckoutPage = () => {
                         </div>
 
 
-                    ) : !addNewAddress && !isEditingAddress && finalSelectedAddress ? (<FinalSelectedAddressCard address={finalSelectedAddress} onChange={() => { setFinalSelectedAddress(null) }} />
+                    ) : !addNewAddress && !isEditingAddress && finalSelectedAddress ? (
+                        <div className='flex flex-col gap-4' >
+
+                            <FinalSelectedAddressCard address={finalSelectedAddress} onChange={() => { setFinalSelectedAddress(null) }} />
+                            <CheckoutOrderItemsCard items={productsInCart} />
+                        </div>
+
+
                     ) : addNewAddress ? (
                         /* Form View (Add or Edit) */
                         <div className="w-full">
@@ -216,8 +226,8 @@ const CheckoutPage = () => {
                 </div>
 
                 {/* Right Column: Order Summary Card Sticky Anchor */}
-                 <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
-                    <OrderSummaryCard isDisabledButton={finalSelectedAddress?false:true} />
+                <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
+                    <OrderSummaryCard isDisabledButton={finalSelectedAddress ? false : true} />
                 </div>
 
             </div>
