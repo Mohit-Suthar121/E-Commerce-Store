@@ -5,17 +5,19 @@ import { API } from '../api/axiosInstance'
 import { notifyFailure, notifySuccess } from '../utils/Toastify'
 import { useCartStore } from '../store/cart.store'
 import AddressForm from '../components/AddressForm'
+import FinalSelectedAddressCard from '../components/FinalSelectedAddressCard'
 
 const CheckoutPage = () => {
     const [addNewAddress, setAddNewAddress] = useState(false)
     const [isEditingAddress, setIsEditingAddress] = useState(null)
     const [isLoading, setIsLoading] = useState(false);
+    const [finalSelectedAddress, setFinalSelectedAddress] = useState(null);
     const setAddresses = useCartStore((state) => state.setAddresses);
     const addresses = useCartStore((state) => state.addresses);
-    const updateAddress = useCartStore((state)=>state.updateAddress);
-    const deleteAddress = useCartStore((state)=>state.deleteAddress);
+    const updateAddress = useCartStore((state) => state.updateAddress);
+    const deleteAddress = useCartStore((state) => state.deleteAddress);
     const [selectedAddress, setSelectedAddress] = useState(null);
-    
+
 
     useEffect(() => {
         const initialSelectedAddress = addresses.find((add) => add?.isDefault)
@@ -70,37 +72,42 @@ const CheckoutPage = () => {
         else return null
     }
 
-    const handleDeleteAddress=async(id)=>{
+    const handleDeleteAddress = async (id) => {
         try {
             const repsonse = await API.delete(`/v1/user/addresses/delete-address/${id}`);
             deleteAddress(id);
             notifySuccess("address deleted successfully!");
-            console.log("the deletable address's id is: ",id)
-            console.log("the left address in the cart are: ",addresses);
+            console.log("the deletable address's id is: ", id)
+            console.log("the left address in the cart are: ", addresses);
         } catch (error) {
-            console.error("couldn't delete address",error?.response?.data || error);
+            console.error("couldn't delete address", error?.response?.data || error);
             notifyFailure(error?.response?.data || error)
         }
+    }
+
+    const getFinalAddress = (id) => {
+        const selectedAddress = addresses.find((address) => address?._id === id);
+        return selectedAddress ? selectedAddress : null;
     }
 
     useEffect(() => {
         fetchAddresses()
     }, [])
 
-    const handleEditAddress = async(data,addressId)=>{
+    const handleEditAddress = async (data, addressId) => {
         try {
             setIsLoading(true)
-            const payload = {...data,name:data.firstName + " "+data.lastName};
+            const payload = { ...data, name: data.firstName + " " + data.lastName };
             delete payload.firstName;
             delete payload.lastName;
-            const response = await API.patch(`/v1/user/addresses/edit-address/${addressId}`,payload);
-            updateAddress(addressId,payload);
+            const response = await API.patch(`/v1/user/addresses/edit-address/${addressId}`, payload);
+            updateAddress(addressId, payload);
             console.log("the address updated successfully!")
             notifySuccess("address updated successfully!")
         } catch (error) {
-            console.error("counldn't update the address",error?.response?.data || error);
+            console.error("counldn't update the address", error?.response?.data || error);
             notifyFailure(error?.response?.data || error)
-        }finally{
+        } finally {
             setIsLoading(false);
             setIsEditingAddress(null)
         }
@@ -116,7 +123,8 @@ const CheckoutPage = () => {
                 {/* Left Column: Address Management Section */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
 
-                    {!addNewAddress && !isEditingAddress ? (
+                    {!addNewAddress && !isEditingAddress && !finalSelectedAddress ? (
+
                         <div className="select-or-change-address flex flex-col gap-4 mb-5 ">
 
                             {/* Section Header */}
@@ -166,6 +174,7 @@ const CheckoutPage = () => {
 
                                 {/* Deliver to Selected Address CTA */}
                                 <button
+                                    onClick={() => { setFinalSelectedAddress(getFinalAddress(selectedAddress)) }}
                                     type="button"
                                     className="deliver-here font-semibold bg-emerald-500 hover:bg-emerald-400 text-black rounded-2xl py-3.5 px-4 flex justify-center items-center gap-2 text-sm cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] transition-all duration-200 mt-1"
                                 >
@@ -177,25 +186,28 @@ const CheckoutPage = () => {
                             </div>
 
                         </div>
+
+
+                    ) : !addNewAddress && !isEditingAddress && finalSelectedAddress ? (<FinalSelectedAddressCard address={finalSelectedAddress} onChange={() => { setFinalSelectedAddress(null) }} />
                     ) : addNewAddress ? (
                         /* Form View (Add or Edit) */
                         <div className="w-full">
                             <AddressForm
-                            initialData={null}
-                            isEditing={false}
-                            isLoading={isLoading}
-                            onSubmit={handleAddNewAddress}
-                            setAddNewAddress={setAddNewAddress}
-                            
+                                initialData={null}
+                                isEditing={false}
+                                isLoading={isLoading}
+                                onSubmit={handleAddNewAddress}
+                                setAddNewAddress={setAddNewAddress}
+
                             />
                         </div>
                     ) : (<div className="w-full">
                         <AddressForm
-                        initialData={getInitialData(isEditingAddress)}
-                        isLoading={isLoading}
-                        onSubmit={(data)=>handleEditAddress(data,isEditingAddress)}
-                        isEditing={true}
-                        setIsEditingAddress={setIsEditingAddress}
+                            initialData={getInitialData(isEditingAddress)}
+                            isLoading={isLoading}
+                            onSubmit={(data) => handleEditAddress(data, isEditingAddress)}
+                            isEditing={true}
+                            setIsEditingAddress={setIsEditingAddress}
                         />
                     </div>)
 
@@ -204,8 +216,8 @@ const CheckoutPage = () => {
                 </div>
 
                 {/* Right Column: Order Summary Card Sticky Anchor */}
-                <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
-                    <OrderSummaryCard />
+                 <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
+                    <OrderSummaryCard isDisabledButton={finalSelectedAddress?false:true} />
                 </div>
 
             </div>

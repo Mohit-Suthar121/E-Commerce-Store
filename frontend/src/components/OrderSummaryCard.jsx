@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useCartStore } from '../store/cart.store';
 import { useNavigate } from 'react-router-dom';
 
-const OrderSummaryCard = () => {
+const OrderSummaryCard = ({isDisabledButton = false}) => {
 
 
     const productsInCart = useCartStore((state) => state.productsInCart);
@@ -92,8 +92,9 @@ const OrderSummaryCard = () => {
             {/* Primary Action Button */}
             <button
                 type="button"
+                disabled={isDisabledButton}
                 onClick={()=>{navigate('/checkout')}}
-                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1"
+                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
             >
                 <span>Proceed to Checkout</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
