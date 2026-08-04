@@ -83,7 +83,7 @@ const AddressCard = ({
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
-                        if (setIsEditingAddress) setIsEditingAddress(true);
+                        if (setIsEditingAddress) setIsEditingAddress(id);
                     }}
                     aria-label="Edit address"
                     className="flex cursor-pointer p-2 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-500 justify-center items-center hover:border-purple-500/30 hover:bg-purple-500/5 hover:text-purple-400 transition-all duration-200 active:scale-95"

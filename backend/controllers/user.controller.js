@@ -83,54 +83,101 @@ export const addAddress = async (req, res) => {
         const userId = req.userId;
         const { name, email, street, city, zipCode, state, phoneNo } = req.body;
         const user = await User.findById(userId);
-        if(!user){
+        if (!user) {
             return res.status(404).json({
-                message:"user not found!"
+                message: "user not found!"
             })
         }
-        user.shippingAddresses.forEach((address)=>{
+        user.shippingAddresses.forEach((address) => {
             address.isDefault = false;
         })
 
-        const isDefaultAddress = user.shippingAddresses.length===0;
+        const isDefaultAddress = user.shippingAddresses.length === 0;
 
         const newAddress = {
-            name, email, street, city, zipCode, state, phoneNo,isDefault:isDefaultAddress
+            name, email, street, city, zipCode, state, phoneNo, isDefault: isDefaultAddress
         }
 
         user.shippingAddresses.push(newAddress)
 
         await user.save();
         return res.status(200).json({
-            message:"address added successfully!",
-            addresses:user.shippingAddresses
+            message: "address added successfully!",
+            addresses: user.shippingAddresses
         })
+
     } catch (error) {
-        console.error("Internal server error",error);
+        console.error("Internal server error", error);
         return res.status(500).json({
-            message:"Internal server error"
+            message: "Internal server error"
         })
     }
 }
 
 
-export const getAddresses = async(req,res)=>{
+export const getAddresses = async (req, res) => {
     try {
         const userId = req.userId;
         const user = await User.findById(userId);
-        if(!user){
+        if (!user) {
             return res.status(404).json({
-                message:"user Not found!"
+                message: "user Not found!"
             })
         }
         return res.status(200).json({
-            message:"addressed found successfully!",
-            addresses:user.shippingAddresses
+            message: "addressed found successfully!",
+            addresses: user.shippingAddresses
         })
     } catch (error) {
+        console.error("Internal server error", error);
+        return res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+}
+
+
+export const editAddress = async (req, res) => {
+    try {
+        const userId = req.userId;
+        const id = req.params.id;
+        const { name, phoneNo, email, street, city, zipCode, state } = req.body;
+        const user = await User.findById(userId);
+
+        console.log("the data received is: ",{ name, phoneNo, email, street, city, zipCode, state })
+        if(!user){
+            return res.status(404).json({
+                message:"user not found!"
+            })
+        }
+
+        const toEditAddress = user.shippingAddresses.find((address) => address._id.toString() === id);
+        if(!toEditAddress){
+            return res.status(404).json({
+                message:"address not found!"
+            })
+        }
+
+        Object.assign(toEditAddress, {
+            name,
+            phoneNo,
+            email,
+            street,
+            city,
+            zipCode,
+            state
+        })
+
+        await user.save();
+        return res.status(200).json({
+            message:"address updated successfully",
+            address:toEditAddress
+        })
+
+    } catch (error) {
         console.error("Internal server error",error);
-     return res.status(500).json({
-        message:"Internal server error"
-     })   
+        return res.status(500).json({
+            message:"Internal server error"
+        })
     }
 }
