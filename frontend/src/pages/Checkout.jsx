@@ -7,6 +7,7 @@ import { useCartStore } from '../store/cart.store'
 import AddressForm from '../components/AddressForm'
 import FinalSelectedAddressCard from '../components/FinalSelectedAddressCard'
 import CheckoutOrderItemsCard from '../components/CheckoutOrderItemsCard'
+import { useAuthStore } from '../store/auth.store'
 
 const CheckoutPage = () => {
     const [addNewAddress, setAddNewAddress] = useState(false)
@@ -19,6 +20,7 @@ const CheckoutPage = () => {
     const deleteAddress = useCartStore((state) => state.deleteAddress);
     const productsInCart = useCartStore((state) => state.productsInCart);
     const [selectedAddress, setSelectedAddress] = useState(null);
+    const user = useAuthStore((state) => state.user);
 
     console.log("the products is cart", productsInCart)
 
@@ -116,6 +118,75 @@ const CheckoutPage = () => {
         }
     }
 
+
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            if (window.Razorpay) {
+                resolve(true);
+                return;
+            }
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        })
+
+    }
+
+    const handlePayNow = async (amount) => {
+        const isLoaded = await loadRazorpayScript();
+        if (!isLoaded) {
+            notifyFailure("Razorpay SDK failed to load. Check your connection");
+            return
+        }
+
+        try {
+            const response = await API.post("/v1/payment/create-order", { amount });
+            const order = response.data.order;
+
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: order.amount,
+                currency: order.currency,
+                order_id: order.id,
+                name: "SHORTCART",
+                description: 'Test Transaction',
+                handler: async (response) => {
+                    try {
+                        const verity = await API.post("/v1/payment/verify-payment", {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                        })
+                        if (verity.data.success) {
+                            notifySuccess("Payment Successfull")
+                        }
+
+                    } catch (error) {
+                        notifyFailure("Payment failed!")
+                    }
+                },
+                prefill: {
+                    name: user.name,
+                    email: user.email,
+                    contact: user.phoneNo,
+                },
+                theme: {
+                    color: '#10b981', // Emerald green theme accent
+                },
+
+            }
+
+            const razorpayWindow = new window.Razorpay(options);
+            razorpayWindow.open();
+
+        } catch (error) {
+            console.error('Payment Error:', error);
+            notifyFailure('Could not initiate payment');
+        }
+
+    }
 
     return (
         <div className="w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-6 sm:p-10 lg:p-12">
@@ -227,7 +298,7 @@ const CheckoutPage = () => {
 
                 {/* Right Column: Order Summary Card Sticky Anchor */}
                 <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
-                    <OrderSummaryCard isDisabledButton={finalSelectedAddress ? false : true} />
+                    <OrderSummaryCard isDisabledButton={finalSelectedAddress ? false : true} isCartButton={false} handlePayNow={handlePayNow} />
                 </div>
 
             </div>

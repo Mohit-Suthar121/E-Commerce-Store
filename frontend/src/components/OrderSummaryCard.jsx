@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useCartStore } from '../store/cart.store';
 import { useNavigate } from 'react-router-dom';
 
-const OrderSummaryCard = ({isDisabledButton = false}) => {
+const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true,handlePayNow }) => {
 
 
     const productsInCart = useCartStore((state) => state.productsInCart);
@@ -90,17 +90,29 @@ const OrderSummaryCard = ({isDisabledButton = false}) => {
             </div>
 
             {/* Primary Action Button */}
-            <button
+            {isCartButton ? <button
                 type="button"
                 disabled={isDisabledButton}
-                onClick={()=>{navigate('/checkout')}}
+                onClick={() => { navigate('/checkout') }}
                 className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
             >
                 <span>Proceed to Checkout</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
-            </button>
+            </button> : <button
+                type="button"
+                disabled={isDisabledButton}
+                onClick={handlePayNow}
+                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
+            >
+                <span>Pay Now!</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+            </button>}
+
+
 
             {/* Trust Badges / Perks Section */}
             <div className="other-info flex flex-col gap-2.5 pt-4 border-t border-neutral-900 text-xs text-neutral-400">
