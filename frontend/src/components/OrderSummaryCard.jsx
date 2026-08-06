@@ -103,7 +103,7 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true,handle
             </button> : <button
                 type="button"
                 disabled={isDisabledButton}
-                onClick={handlePayNow}
+                onClick={()=>{handlePayNow(totalAmount)}}
                 className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
             >
                 <span>Pay Now!</span>

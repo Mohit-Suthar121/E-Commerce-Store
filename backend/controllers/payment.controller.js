@@ -9,6 +9,7 @@ export const createOrder = async (req, res) => {
     try {
 
         const { amount } = req.body;
+        console.log("the received amount is: ",amount)
         if (!amount || amount <= 0) {
             return res.status(400).json({
                 success: false,
@@ -16,16 +17,19 @@ export const createOrder = async (req, res) => {
             })
         }
         const options = {
-            amount: amount * 100, // Razorpay expects amount in paise (1 INR = 100 paise)
+            amount: Math.round(amount * 100), // Razorpay expects amount in paise (1 INR = 100 paise)
             currency: 'INR',
             receipt: `receipt_${Date.now()}`,
         }
+        console.log("the received another amount is: ",amount)
+
         const order = await razorpay.orders.create(options);
         res.status(200).json({
             success: true,
             order
         })
     } catch (error) {
+        console.error("Internal server error: ",error)
         res.status(500).json({
             success: false,
             message: "Internal server error!"
