@@ -13,7 +13,7 @@ export const createOrder = async (req, res) => {
         const userId = req.userId;
         const { addressId } = req.body;
 
-        
+
         if (!addressId) {
             return res.status(400).json({
                 success: false,
@@ -23,16 +23,16 @@ export const createOrder = async (req, res) => {
 
         const user = await User.findById(userId);
 
-        if(!user){
+        if (!user) {
             return res.status(404).json({
-                success:false,
-                message:"user not found",
+                success: false,
+                message: "user not found",
             })
         }
 
         const cart = await Cart.findOne({ user: userId }).populate("items.product");
-        
-        if (!cart || cart.items.length==0) {
+
+        if (!cart || cart.items.length == 0) {
             return res.status(404).json({
                 success: false,
                 message: "cart not found!"
@@ -40,7 +40,7 @@ export const createOrder = async (req, res) => {
         }
 
         const shippingAddress = user.shippingAddresses.find((add) => add._id.toString() === addressId);
-        
+
 
         if (!shippingAddress) {
             return res.status(404).json({
@@ -74,7 +74,7 @@ export const createOrder = async (req, res) => {
         const razorpayOrder = await razorpay.orders.create(options);
 
         const orderedItems = cart.items.map((item) => {
-            const gstAmount = item.product.gstRate / 100 * item.product.price*item.quantity;
+            const gstAmount = item.product.gstRate / 100 * item.product.price * item.quantity;
             return {
                 product: item.product._id,
                 quantity: item.quantity,
@@ -106,7 +106,7 @@ export const createOrder = async (req, res) => {
             success: true,
             message: "order generated and saved to mongoDb as well",
             order: razorpayOrder,
-            mongoOrderId:order._id
+            mongoOrderId: order._id
         })
 
 
@@ -119,33 +119,52 @@ export const createOrder = async (req, res) => {
     }
 }
 
-export const verifyPayment = (req, res) => {
+
+
+export const verifyPayment = async (req, res) => {
     try {
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature,mongoOrderId } = req.body;
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
             return res.status(400).json({
                 status: false,
                 message: "missing payment details"
             })
         }
-        const body = razorpay_order_id + '|' + razorpay_payment_id;
+        
+        const order = await Order.findById(mongoOrderId);
+        
+        if(!order){
+            return res.status(404).json({
+                success:false,
+                message:"Order not found!"
+            })
+        }
 
+        const body = razorpay_order_id + '|' + razorpay_payment_id;
         const verifiedString = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest("hex");
 
         const isVerified = verifiedString === razorpay_signature;
-        if (isVerified) {
-
-            return res.status(200).json({
-                success: true,
-                message: "payment verified succesfully!"
-            })
-        }
-        else {
+        if (!isVerified) {
+            order.paymentInfo.status="failed";
+            await order.save();
             return res.status(400).json({
                 success: false,
                 message: "Invalid payment signature"
             })
         }
+
+        order.paymentInfo.razorpayPaymentId = razorpay_payment_id;
+        order.paymentInfo.razorpaySignature = razorpay_signature;
+        order.paymentInfo.status = "paid";
+        order.paymentInfo.paidAt = Date.now();
+        await order.save();
+
+
+        res.status(200).json({
+            success: true,
+            message: "payment verified succesfully!"
+        })
+
     } catch (error) {
         console.error("Internal server error: ", error);
         return res.status(500).json({
