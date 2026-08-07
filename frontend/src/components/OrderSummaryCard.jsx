@@ -68,7 +68,7 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true,handle
 
                 {/* Tax */}
                 <div className="tax flex justify-between items-center text-neutral-300">
-                    <span className="text-neutral-400">Estimated GST ({gstPercentage}%)</span>
+                    <span className="text-neutral-400">Estimated GST</span>
                     <span className="font-mono font-medium text-neutral-200">
                         {formatCurrency(gstPrice)}
                     </span>

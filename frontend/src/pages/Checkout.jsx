@@ -17,8 +17,9 @@ const CheckoutPage = () => {
     const setAddresses = useCartStore((state) => state.setAddresses);
     const addresses = useCartStore((state) => state.addresses);
     const updateAddress = useCartStore((state) => state.updateAddress);
-    const deleteAddress = useCartStore((state) => state.deleteAddress);
     const productsInCart = useCartStore((state) => state.productsInCart);
+    const setCurrentAddress = useCartStore((state)=>state.setCurrentAddress);
+    const currentAddress = useCartStore((state)=>state.currentAddress);
     const [selectedAddress, setSelectedAddress] = useState(null);
     const user = useAuthStore((state) => state.user);
 
@@ -30,6 +31,7 @@ const CheckoutPage = () => {
         console.log("all the addresses are: ", addresses)
         if (initialSelectedAddress) {
             setSelectedAddress(initialSelectedAddress._id);
+            setCurrentAddress(initialSelectedAddress);
         }
     }, [addresses])
 
@@ -79,9 +81,9 @@ const CheckoutPage = () => {
 
     const handleDeleteAddress = async (id) => {
         try {
-            const repsonse = await API.delete(`/v1/user/addresses/delete-address/${id}`);
-            deleteAddress(id);
-            notifySuccess("address deleted successfully!");
+            const response = await API.delete(`/v1/user/addresses/delete-address/${id}`);
+            setAddresses(response.data.addresses);
+            notifySuccess("address deleted successfully!");``
             console.log("the deletable address's id is: ", id)
             console.log("the left address in the cart are: ", addresses);
         } catch (error) {
@@ -134,7 +136,9 @@ const CheckoutPage = () => {
 
     }
 
-    const handlePayNow = async (amount) => {
+    // while checking out, we will send the addressId to the backend, so that it easily access, which order is this and all that
+    const handlePayNow = async () => {
+        if(!finalSelectedAddress) return;
         const isLoaded = await loadRazorpayScript();
         if (!isLoaded) {
             notifyFailure("Razorpay SDK failed to load. Check your connection");
@@ -142,7 +146,9 @@ const CheckoutPage = () => {
         }
 
         try {
-            const response = await API.post("/v1/payment/create-order", { amount });
+            
+            const addressId = finalSelectedAddress?._id;
+            const response = await API.post("/v1/payment/create-order", { addressId });
             const order = response.data.order;
 
             const options = {
@@ -188,6 +194,22 @@ const CheckoutPage = () => {
 
     }
 
+    const handleFinalizeAddress = async()=>{
+        const finalizedAddress = getFinalAddress(selectedAddress);
+        console.log("the finalized address is: ",finalizedAddress)
+        if(!finalizedAddress) {
+            console.log("if is running");
+            return;
+        }
+        console.log("i'm running")
+        setFinalSelectedAddress(finalizedAddress);
+        setCurrentAddress(finalizedAddress);
+    }
+
+    useEffect(()=>{
+        console.log("the current selected address is: ",currentAddress)
+    },[currentAddress])
+
     return (
         <div className="w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-6 sm:p-10 lg:p-12">
 
@@ -222,6 +244,7 @@ const CheckoutPage = () => {
                                     setSelectedAddress={setSelectedAddress}
                                     isSelected={selectedAddress === address?._id}
                                     setIsEditingAddress={setIsEditingAddress}
+                                    isDefault={address?.isDefault}
                                     fullName={address?.name}
                                     city={address?.city}
                                     email={address?.email}
@@ -248,7 +271,7 @@ const CheckoutPage = () => {
 
                                 {/* Deliver to Selected Address CTA */}
                                 <button
-                                    onClick={() => { setFinalSelectedAddress(getFinalAddress(selectedAddress)) }}
+                                    onClick={handleFinalizeAddress}
                                     type="button"
                                     className="deliver-here font-semibold bg-emerald-500 hover:bg-emerald-400 text-black rounded-2xl py-3.5 px-4 flex justify-center items-center gap-2 text-sm cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] transition-all duration-200 mt-1"
                                 >

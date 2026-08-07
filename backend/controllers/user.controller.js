@@ -88,9 +88,6 @@ export const addAddress = async (req, res) => {
                 message: "user not found!"
             })
         }
-        user.shippingAddresses.forEach((address) => {
-            address.isDefault = false;
-        })
 
         const isDefaultAddress = user.shippingAddresses.length === 0;
 
@@ -200,10 +197,16 @@ export const deleteAddress = async(req,res)=>{
             })
         }
         const [deletedAddress] = user.shippingAddresses.splice(index,1);
+        const isDefaultAddress = deletedAddress.isDefault;
+
+        if(isDefaultAddress && user.shippingAddresses.length>0){
+            user.shippingAddresses[user.shippingAddresses.length-1].isDefault = true;
+        }
+
         await user.save();
         return res.status(200).json({
             message:"address deleted successfully!",
-            deletedAddress
+            addresses:user.shippingAddresses
         })
         
     } catch (error) {

@@ -14,6 +14,12 @@ const productSchema = new mongoose.Schema({
         required:[true,"Product's price is required"],
         min:[0,"price cannot be negative"]
     },
+    gstRate:{
+        type:Number,
+        required:true,
+        min:0,
+        max:100,
+    },
     stock:{
         type:Number,
         required:[true,"Product stock volume is required"],

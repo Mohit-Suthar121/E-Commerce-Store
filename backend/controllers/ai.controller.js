@@ -3,10 +3,10 @@ import { createNewProduct } from "../services/ai.service.js";
 import { searchProductImagesSerper } from "../services/serper.service.js";
 import { searchProductImages } from "../services/unsplash.service.js";
 
-export const generateProduct = async(req, res) => {
-    try {
-        const { name, price, stock, category, subCategory, brandName, productDesc } = req.body;
-        const addNewProductPrompt = `You are an expert e-commerce product catalog assistant.
+export const generateProduct = async (req, res) => {
+  try {
+    const { name, price, stock, category, subCategory, brandName, productDesc } = req.body;
+    const addNewProductPrompt = `You are an expert e-commerce product catalog assistant.
 
 You are given a JSON object in the following format:
 
@@ -45,6 +45,7 @@ The output must follow this schema exactly:
   "subCategory": "string",
   "brandName": "string",
   "productDesc": "string",
+  "gstRate":"number",
   "highlights": [
     {
       "title": "string",
@@ -155,40 +156,40 @@ Do NOT generate:
 
 Return ONLY the JSON object.`
 
-        const response = await createNewProduct(addNewProductPrompt);
-        const product = JSON.parse(response);
-        console.log("the response is: ",response)
-        
-        const  { name:newName, price:newPrice, stock:newStock, category:newCategory, subCategory:newSubCategory, brandName:newBrandName, productDesc:newProductDesc,highlights:newHighlights,imageSearchQuery } = product;
-        
-        let productImages = await searchProductImages(imageSearchQuery);
-        if(productImages.length==0){
-          productImages = await searchProductImagesSerper(imageSearchQuery);
-        }
+    const response = await createNewProduct(addNewProductPrompt);
+    const product = JSON.parse(response);
+    console.log("the response is: ", response)
 
-        const newProduct = await Product.create({
-            name:newName,
-            price:newPrice,
-            stock:newStock,
-            category:newCategory,
-            subCategory:newSubCategory,
-            brandName:newBrandName,
-            productDesc:newProductDesc,
-            highlights:newHighlights,
-            images:productImages            
-        })
+    const { name: newName, price: newPrice, stock: newStock, category: newCategory, subCategory: newSubCategory, brandName: newBrandName, productDesc: newProductDesc, highlights: newHighlights, imageSearchQuery } = product;
 
-        console.log("the saved product to the mongoDb is: ",newProduct);
-        return res.status(200).json({
-            message:"product generated successfully and saved to the mongoDb!",
-            newProduct
-        })
-
-    } catch (error) {
-        console.error("some error occured!",error);
-        return res.status(500).json({
-            message:"Internal server error!"
-        })
-        
+    let productImages = await searchProductImages(imageSearchQuery);
+    if (productImages.length == 0) {
+      productImages = await searchProductImagesSerper(imageSearchQuery);
     }
+
+    const newProduct = await Product.create({
+      name: newName,
+      price: newPrice,
+      stock: newStock,
+      category: newCategory,
+      subCategory: newSubCategory,
+      brandName: newBrandName,
+      productDesc: newProductDesc,
+      highlights: newHighlights,
+      images: productImages
+    })
+
+    console.log("the saved product to the mongoDb is: ", newProduct);
+    return res.status(200).json({
+      message: "product generated successfully and saved to the mongoDb!",
+      newProduct
+    })
+
+  } catch (error) {
+    console.error("some error occured!", error);
+    return res.status(500).json({
+      message: "Internal server error!"
+    })
+
+  }
 }

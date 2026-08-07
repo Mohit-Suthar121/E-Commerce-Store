@@ -3,59 +3,98 @@ import { addressSchema } from "./address.model.js";
 
 
 const orderedItemSchema = new mongoose.Schema({
-    product:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'Product',
-        required:true
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true
     },
-    name:{
-        type:String,
-        required:true,
+    name: {
+        type: String,
+        required: true,
     },
-    quantity:{
-        type:Number,
-        required:true,
-        min:1
+    quantity: {
+        type: Number,
+        required: true,
+        min: 1
     },
-    price:{
-        type:Number,
-        required:true,
+    price: {
+        type: Number,
+        required: true,
     },
-    image:{
-        type:String,
-        required:true
+    gstRate: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 100
+    },
+    gstAmount: {
+        type: Number,
+        required: true,
+        min: 0,
+    },
+    image: {
+        type: String,
+        required: true
     }
 })
 
 const orderSchema = new mongoose.Schema({
 
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'User',
-        required:true,
-        index:true
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        index: true
     },
-    shippingAddress:addressSchema,
-    orderItems:[orderedItemSchema],
-    paymentInfo:{
-        razorpayOrderId:{type:String,required:true},
+    shippingAddress: {
+        type:addressSchema,
+        required:true
+    },
+
+    orderedItems: {
+        type: [orderedItemSchema],
+        required:true
+    },
+    paymentInfo: {
+        razorpayOrderId: { type: String, required: true },
         razorpayPaymentId: { type: String },
         razorpaySignature: { type: String },
-        status:{
-            type:String,
-            enum:["pending","paid","failed"],
-            default:"pending"
+        status: {
+            type: String,
+            enum: ["pending", "paid", "failed"],
+            default: "pending"
         },
-        paidAt:{type:Date}
+        paidAt: { type: Date }
     },
-    orderStatus:{
-        type:String,
-        enum:["Processing","Shipped","Delivered","Cancelled"],
-        default:"Processing"
+    orderStatus: {
+        type: String,
+        enum: ["Processing", "Shipped", "Delivered", "Cancelled"],
+        default: "Processing"
     },
-    deliveredAt:{
-        type:Date
+    shippingCost: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    subtotal:{
+        type:Number,
+        required:true,
+        min:0
+    },
+    totalAmount:{
+        type:Number,
+        required:true,
+        min:0
+        
+    },
+    totalGst: {
+        type:Number,
+        required:true,
+        min:0
+    },
+    deliveredAt: {
+        type: Date
     }
-},{timestamps:true})
+}, { timestamps: true })
 
-export const Order = mongoose.model("order",orderSchema);
+export const Order = mongoose.model("order", orderSchema);
