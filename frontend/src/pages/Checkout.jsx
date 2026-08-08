@@ -150,6 +150,7 @@ const CheckoutPage = () => {
             const addressId = finalSelectedAddress?._id;
             const response = await API.post("/v1/payment/create-order", { addressId });
             const order = response.data.order;
+            const mongoOrderId = response.data.mongoOrderId;
 
             const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -164,6 +165,7 @@ const CheckoutPage = () => {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
+                            mongoOrderId
                         })
                         if (verity.data.success) {
                             notifySuccess("Payment Successfull")

@@ -1,9 +1,38 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import OrderInfoCardMobileScreen from '../components/OrderInfoCardMobileScreen'
+import {useQuery}  from '@tanstack/react-query'
+import { API } from '../api/axiosInstance'
 
 const AdminOrdersPage = () => {
+    const [page,setPage] = useState(1)
+
+    const fetchOrders = async (page)=>{
+        const response = await API.get();
+    }
+
+    
+    const {data} = useQuery({
+        queryKey:['orders',1],
+        queryFn:(page)=>{fetchOrders(page)}
+    })
     
     const [orders, setOrders] = useState([
+        {
+            orderId: "isjgi0erwhjt84u0258",
+            user: "rohansingh2983@gmail.com",
+            products: 3,
+            totalAmount: 20000,
+            status: "paid", // Can be "paid", "failed", or "pending"
+            date: "20/6/2025"
+        },
+        {
+            orderId: "axkld892jsdklfj9012",
+            user: "amansharma@gmail.com",
+            products: 1,
+            totalAmount: 4500,
+            status: "pending",
+            date: "21/6/2025"
+        },
         {
             orderId: "isjgi0erwhjt84u0258",
             user: "rohansingh2983@gmail.com",

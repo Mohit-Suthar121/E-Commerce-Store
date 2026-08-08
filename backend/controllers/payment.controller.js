@@ -62,12 +62,12 @@ export const createOrder = async (req, res) => {
             subtotal += itemSubtotal;
             gstPrice += itemSubtotal * item.product.gstRate / 100;
         })
-
-        const shippingCost = subtotal >= 1000 ? 0 : 40;
-        const totalAmount = subtotal + gstPrice + shippingCost;
+        gstPrice = Math.round(gstPrice);
+        const shippingCost = Math.round(subtotal) >= 1000 ? 0 : 40;
+        const totalAmount = Math.round( subtotal + gstPrice + shippingCost);
 
         const options = {
-            amount: Math.round(totalAmount * 100), // Razorpay expects amount in paise (1 INR = 100 paise)
+            amount: totalAmount * 100, // Razorpay expects amount in paise (1 INR = 100 paise)
             currency: 'INR',
             receipt: `receipt_${Date.now()}`,
         }
@@ -124,7 +124,7 @@ export const createOrder = async (req, res) => {
 export const verifyPayment = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature,mongoOrderId } = req.body;
-        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !mongoOrderId) {
             return res.status(400).json({
                 status: false,
                 message: "missing payment details"
