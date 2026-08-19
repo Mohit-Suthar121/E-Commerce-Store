@@ -37,7 +37,7 @@ const orderedItemSchema = new mongoose.Schema({
         required: true
     }
 })
-
+ 
 const orderSchema = new mongoose.Schema({
 
     user: {
@@ -96,5 +96,7 @@ const orderSchema = new mongoose.Schema({
         type: Date
     }
 }, { timestamps: true })
+
+
 
 export const Order = mongoose.model("order", orderSchema);
