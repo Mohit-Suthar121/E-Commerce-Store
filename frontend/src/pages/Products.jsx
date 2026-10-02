@@ -20,8 +20,7 @@ const Products = () => {
     const [inputMaxPriceValue, setInputMaxPriceValue] = useState(999999);
     const [maxPriceValue, setMaxPriceValue] = useState(999999)
     const [currentPage, setCurrentPage] = useState(1);
-    const [productsPerPage, setProductsPerPage] = useState(getProductsPerPage());
-    const [isLoading, setIsLoading] = useState(false);
+    // const [productsPerPage, setProductsPerPage] = useState(getProductsPerPage());
     const [showFilter, setShowFilter] = useState(false);
     const [category, setCategory] = useState("all");
     const [searchValue, setSearchValue] = useState("");
@@ -32,25 +31,17 @@ const Products = () => {
     const navigate = useNavigate();
 
 
-    const {data,error} = useQuery({
-        queryKey:["products",currentPage],
+    const {data,isLoading, error} = useQuery({
+        queryKey:["products",currentPage,searchValue,category,brandName,minPriceValue,maxPriceValue],
         queryFn:getAllProducts
     })
 
     async function getAllProducts() {
 
-        try {
-            setIsLoading(true);
             console.log("The category:", category)
             const response = await API.get(`/v1/product/get-all-products?limit=8&page=${currentPage}&search=${searchValue}&category=${category}&brandName=${brandName}&minPrice=${minPriceValue}&maxPrice=${maxPriceValue}`);
             console.log("The products received from the backend are: ", response.data);
             return response.data;
-        } catch (error) {
-            console.error("Some error occured!", error);
-
-        } finally {
-            setIsLoading(false);
-        }
     }
 
     const handleChange = (fieldName) => (e) => {

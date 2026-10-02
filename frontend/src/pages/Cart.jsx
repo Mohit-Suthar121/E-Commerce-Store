@@ -8,13 +8,14 @@ import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
 import { useAuthStore } from '../store/auth.store';
 import OrderSummaryCard from '../components/OrderSummaryCard';
+import { useQuery } from '@tanstack/react-query';
 
 
 const Cart = () => {
     const deleteProductFromCart = useCartStore((state) => state.deleteProductFromCart);
     const user = useAuthStore((state) => state.user);
     const navigate = useNavigate();
-    const productsInCart = useCartStore((state) => state.productsInCart);
+    const itemsInCart = useCartStore((state) => state.productsInCart);
 
     const handleDelete = async (id) => {
         if (!user) {
@@ -32,11 +33,48 @@ const Cart = () => {
     }
 
 
+    const fetchCart = async () => {
+        const response = await API.get("/v1/cart/get-cart");
+        console.log("the cart is: ", response.data.cart);
+
+        return response.data.cart.items;
+        // setProducts(response.data.cart.items);
+    }
+
+   
+
+
+    const fetchProducts = async()=>{
+        const data = {
+            fetchedProducts: itemsInCart
+        }
+        const response = await API.post("/v1/product/get-products-by-ids",data);
+        console.log("the response has been received successfully: ",response.data);
+        return response.data.products;
+    }
+
+    
+     const {data:serverCartItems,isLoading:isServerItemsLoading} = useQuery({
+        queryKey: ["serverCart"],
+        queryFn:fetchCart,
+        enabled:!!user
+    })
+
+    const {data:guestCartItems,isLoading:isGuestItemsLoading} = useQuery({
+        queryKey:["guestCart"],
+        queryFn:fetchProducts,
+        enabled:!user
+    })
+
+    const productsInCart = user?serverCartItems:guestCartItems;
+    console.log("the productsInCart finally are: ",productsInCart)
+
+
     return (
         <div className='w-full h-screen flex flex-col'>
             <Navbar />
 
-            {productsInCart?.length > 0 && (
+            {(!isServerItemsLoading && !isGuestItemsLoading) && productsInCart?.length > 0 && (
                 <div className="maincontent w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-4 sm:p-8 lg:p-12">
                     <div className="w-full max-w-6xl flex flex-col gap-6 ">
 
@@ -88,7 +126,7 @@ const Cart = () => {
 
 
 
-            {(!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
+            {(!isServerItemsLoading && !isGuestItemsLoading )&& (!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
                 <div className="no-items-box flex flex-col gap-2  justify-center items-center">
 
                     <div className="cart-logo p-4 rounded-full bg-neutral-900 border border-neutral-800">
@@ -104,6 +142,8 @@ const Cart = () => {
 
                 </div>
             </div>}
+
+            {(isServerItemsLoading || isGuestItemsLoading) && <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" />}
 
 
 

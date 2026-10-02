@@ -5,7 +5,6 @@ import NextArrow from '../icons/NextArrow'
 import CartLogo from '../icons/CartLogo'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { API } from '../api/axiosInstance'
-import { useProductStore } from '../store/product.store'
 import { notifyFailure, notifySuccess } from '../utils/Toastify'
 import { useAuthStore } from '../store/auth.store'
 import { useCartStore } from '../store/cart.store'
@@ -14,8 +13,6 @@ import { useQuery } from '@tanstack/react-query'
 const ProductDetailPage = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    // const currentProduct = useProductStore((state) => state.currentProduct);
-    // const setCurrentProduct = useProductStore((state) => state.setCurrentProduct);
     const [errorMessage, setErrorMessage] = useState("")
     const [quantity, setQuantity] = useState(1);
     const { id } = useParams();
@@ -25,25 +22,40 @@ const ProductDetailPage = () => {
     const setProducts = useCartStore((state)=>state.setProducts);
     const navigate = useNavigate();
 
+
     const {data:currentProduct} = useQuery({
         queryKey:["product",id],
         queryFn:fetchProduct
     })
 
+
+    async function fetchCart (){
+        try {
+            const response = await API.get("/v1/cart/get-cart");
+            return response.data.cart;
+        } catch (error) {
+            console.error("some error occured fetching the cart!");
+            throw error
+
+        }
+    }
+
     async function fetchProduct() {
         try {
             setIsLoading(true);
             const response = await API.get(`/v1/product/get-product/${id}`);
-            return response.data;
-            // setCurrentProduct(response.data.product);
             console.log("the current Product:", response.data.product)
 
-            productsInCart.forEach((p) => {
-                console.log("the products in the cart: ", p.product);
-                if (p?.product?._id === response.data.product?._id) {
-                    setQuantity(p?.quantity);
-                }
-            })
+
+            // SET the quantity of the product , like handle it later 
+
+            // productsInCart.forEach((p) => {
+            //     console.log("the products in the cart: ", p.product);
+            //     if (p?.product?._id === response.data.product?._id) {
+            //         setQuantity(p?.quantity);
+            //     }
+            // })........................................................................................
+            return response.data.product;
 
         } catch (error) {
             console.error("some error occured!", error);
@@ -64,10 +76,10 @@ const ProductDetailPage = () => {
         setQuantity(value);
     }
 
-    const handleAddToCart = async (productId) => {
+    const handleAddToCart = async () => {
         setIsLoading(true);
         setErrorMessage("");
-        if (quantity > data?.product?.stock) {
+        if (quantity > currentProduct?.stock) {
             setErrorMessage(`Only ${currentProduct?.stock} units left in stock`)
             return;
         }
@@ -79,16 +91,16 @@ const ProductDetailPage = () => {
         if (!user) {
             // check if the product already exists in the store, if yes , then increase it's count;
             const productData = {
-                product: currentProduct,
+                productId: currentProduct._id,
                 quantity
             }
             addProductToCart(productData);
-
             console.log("the product successfully added to cart since the user was not logged in:")
             setIsLoading(false);
             notifySuccess("product added to cart successfully!")
             navigate("/cart")
         }
+
 
         else {
             const productData = {
@@ -98,7 +110,8 @@ const ProductDetailPage = () => {
             try {
                 const response = await API.post("/v1/cart/add-to-cart", productData);
                 console.log("the products set in the cart are: ",response.data.cart.items);
-                setProducts(response.data.cart.items);
+                // setProducts(response.data.cart.items);
+                // you don't need setProducts here since we are redirecting the user to the cart.jsx page after the successfull attempt, so that cart page automatically does the part of setting the products
                 console.log("the response from the backend is: ", response.data);
                 notifySuccess("product added to cart successfully!")
                 navigate("/cart")
@@ -111,6 +124,12 @@ const ProductDetailPage = () => {
         }
 
     }
+
+    const {data:cart} = useQuery({
+        queryKey:["cart"],
+        queryFn:fetchCart,
+        enabled:!!user
+    })
 
     return (
         <div className="w-full min-h-screen flex flex-col bg-[#060606] text-neutral-200 font-sans antialiased select-none">

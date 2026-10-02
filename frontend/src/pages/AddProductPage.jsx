@@ -49,8 +49,8 @@ const AddProductPage = () => {
         notifySuccess("product generated successfully!");
         navigate("/products")
       } catch (error) {
-        console.error("couldn't generate using ai: ",error?.response || error)
-        notifyFailure("coudn't generate product!")
+        console.error("couldn't generate using ai: ",error?.response?.data?.message)
+        notifyFailure(error?.response?.data?.message || "some error occured!")
       }finally{
         setIsLoading(false);
       }

@@ -55,6 +55,7 @@ const Verify = () => {
 
     }
 
+
     const handleKeyDown = (e, index) => {
         console.log("the key pressed is: ", e.key)
 

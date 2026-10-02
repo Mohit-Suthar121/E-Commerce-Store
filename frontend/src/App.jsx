@@ -34,15 +34,10 @@ function App() {
   const fetchUser = useAuthStore((state) => state.fetchUser);
   const email = useAuthStore((state)=>state.email);
   const setProducts = useCartStore((state)=>state.setProducts);
-  const fetchCart = async()=>{
-    const response = await API.get("/v1/cart/get-cart");
-    console.log("the cart is: ",response.data.cart);
-    setProducts(response.data.cart.items);
-  }
+  
 
   useEffect(() => {
     fetchUser();
-    fetchCart();
   }, [])
   return (
     <MainLayout>

@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zyrok Team | Cosmic Discord Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #9e00ff;
+      --primary-light: #c366ff;
+      --secondary: #00f9d5;
+      --secondary-light: #66fff0;
+      --accent: #ff00aa;
+      --accent-light: #ff66cc;
+      --dark: #0d0d2b;
+      --darker: #0b0a26;
+      --light: rgba(255,255,255,0.95);
+      --lighter: rgba(255,255,255,0.7);
+      --neon-glow: 0 0 15px currentColor;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(270deg, var(--darker), var(--dark), var(--darker));
+      background-size: 600% 600%;
+      animation: backgroundRGB 30s ease infinite;
+      color: var(--light);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    @keyframes backgroundRGB {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Cosmic Aurora Effect */
+    .cosmic-aurora {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(120deg, rgba(0,255,255,0.08), rgba(255,0,255,0.06), rgba(0,255,128,0.08)),
+        linear-gradient(240deg, rgba(158,0,255,0.05), rgba(0,249,213,0.04), rgba(255,0,170,0.05));
+      mix-blend-mode: screen;
+      animation: auroraFlow 30s ease-in-out infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @keyframes auroraFlow {
+      0% { background-position: 0% 50%, 100% 50%; }
+      50% { background-position: 100% 50%, 0% 50%; }
+      100% { background-position: 0% 50%, 100% 50%; }
+    }
+
+    /* Cosmic Nebula Clouds */
+    .cosmic-nebula {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(100px);
+      animation: nebulaFloat 60s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.4;
+    }
+
+    .nebula-1 { 
+      top: 10%; 
+      left: 20%; 
+      background: radial-gradient(circle, rgba(0,255,255,0.15), transparent 70%); 
+      animation-delay: 0s; 
+    }
+    .nebula-2 { 
+      bottom: 10%; 
+      right: 20%; 
+      background: radial-gradient(circle, rgba(255,0,255,0.15), transparent 70%); 
+      animation-delay: 20s; 
+    }
+    .nebula-3 { 
+      top: 30%; 
+      right: 30%; 
+      background: radial-gradient(circle, rgba(0,255,128,0.15), transparent 70%); 
+      animation-delay: 40s; 
+    }
+
+    @keyframes nebulaFloat {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.5) translate(100px, 100px); }
+    }
+
+    /* Twinkling Stars Background */
+    .cosmic-stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .cosmic-star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: starTwinkle var(--duration) infinite ease-in-out;
+      filter: drop-shadow(0 0 3px currentColor);
+    }
+
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.2; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Tiny Sparkle Stars */
+    .sparkle-stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .sparkle-star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0;
+      animation: sparkleFloat linear infinite;
+      filter: drop-shadow(0 0 2px currentColor);
+    }
+
+    @keyframes sparkleFloat {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(0.5);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.8;
+      }
+      90% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg) scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* Celestial Planets */
+    .celestial-planet {
+      position: fixed;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 30px rgba(255,255,255,0.3));
+      z-index: 1;
+      animation: celestialOrbit var(--orbit-duration) linear infinite;
+    }
+
+    .planet-saturn {
+      width: 200px;
+      height: 200px;
+      top: 15%;
+      left: 10%;
+      background: radial-gradient(circle at 30% 30%, #ffcc66, #cc6600);
+      --orbit-duration: 120s;
+    }
+
+    .planet-saturn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(30deg);
+      width: 300px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      filter: blur(5px);
+    }
+
+    .moon {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      background: #ddd;
+      border-radius: 50%;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+      animation: moonOrbit 15s linear infinite;
+      transform-origin: 100px 100px;
+    }
+
+    @keyframes moonOrbit {
+      0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+    }
+
+    @keyframes celestialOrbit {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(50px) rotate(360deg); }
+    }
+
+    /* Quantum Particles */
+    .quantum-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .quantum-particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      animation: quantumFloat linear infinite;
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    @keyframes quantumFloat {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(0.5);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(720deg) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    /* Cosmic Mouse Follower */
+    .cosmic-mouse {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(158,0,255,0.2), transparent 70%);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      filter: blur(20px);
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.1s;
+      z-index: 1;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 30px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 20px;
+      position: relative;
+    }
+
+    .hero-content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 4.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+      background-size: 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientFlow 12s ease infinite;
+      margin-bottom: 30px;
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(158, 0, 255, 0.5);
+    }
+
+    .hero-subtitle {
+      font-size: 1.5rem;
+      color: var(--lighter);
+      margin-bottom: 50px;
+      font-weight: 300;
+      letter-spacing: 1px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Cosmic Button */
+    .cosmic-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      padding: 20px 40px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+      box-shadow: 
+        0 5px 30px rgba(158, 0, 255, 0.6),
+        0 0 0 1px rgba(255,255,255,0.1);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+      border: none;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .cosmic-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    .cosmic-btn:hover {
+      transform: translateY(-5px) scale(1.03);
+      box-shadow: 
+        0 10px 40px rgba(158, 0, 255, 0.8),
+        0 0 0 1px rgba(255,255,255,0.2);
+    }
+
+    .cosmic-btn:hover::before {
+      opacity: 1;
+    }
+
+    .cosmic-btn i {
+      font-size: 1.3rem;
+      transition: transform 0.3s ease;
+    }
+
+    .cosmic-btn:hover i {
+      transform: translateX(5px);
+    }
+
+    /* Command Sections */
+    .command-section {
+      padding: 150px 0;
+      position: relative;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--secondary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .section-subtitle {
+      font-size: 1.3rem;
+      color: var(--lighter);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Holographic Command Grid */
+    .holographic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 40px;
+    }
+
+    /* Holographic Card */
+    .holographic-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      padding: 35px;
+      backdrop-filter: blur(20px);
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .holographic-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to bottom right,
+        rgba(158, 0, 255, 0.1),
+        rgba(0, 249, 213, 0.1),
+        rgba(255, 0, 170, 0.1)
+      );
+      transform: rotate(30deg);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .holographic-card:hover {
+      transform: translateY(-15px);
+      box-shadow: 
+        0 20px 50px rgba(158, 0, 255, 0.4),
+        inset 0 0 30px rgba(255,255,255,0.1);
+      border-color: rgba(158, 0, 255, 0.3);
+    }
+
+    .holographic-card:hover::before {
+      opacity: 0.5;
+      animation: holographicShine 3s linear infinite;
+    }
+
+    @keyframes holographicShine {
+      0% { transform: rotate(30deg) translate(-30%, -30%); }
+      100% { transform: rotate(30deg) translate(30%, 30%); }
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .category-icon {
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(var(--neon-glow));
+    }
+
+    .category-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--light);
+    }
+
+    /* Command List */
+    .command-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .command-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 18px;
+      border-radius: 15px;
+      border-left: 4px solid var(--primary);
+      transition: all 0.4s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .command-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(158,0,255,0.1), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+
+    .command-item:hover {
+      background: rgba(0, 0, 0, 0.4);
+      transform: translateX(10px);
+      box-shadow: 0 10px 25px rgba(158, 0, 255, 0.3);
+    }
+
+    .command-item:hover::before {
+      transform: translateX(0);
+    }
+
+    .command-name {
+      font-weight: 600;
+      color: var(--secondary);
+      margin-bottom: 8px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1rem;
+    }
+
+    .command-desc {
+      font-size: 0.95rem;
+      color: var(--lighter);
+      line-height: 1.6;
+    }
+
+    /* Footer */
+    .cosmic-footer {
+      background: rgba(10, 10, 26, 0.9);
+      padding: 60px 0 40px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+
+    .footer-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .footer-text {
+      color: var(--lighter);
+      margin-bottom: 30px;
+      font-size: 1rem;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin-top: 30px;
+    }
+
+    .social-link {
+      color: var(--light);
+      font-size: 1.5rem;
+      transition: all 0.4s ease;
+    }
+
+    .social-link:hover {
+      color: var(--secondary);
+      transform: translateY(-5px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .hero-title {
+        font-size: 4rem;
+      }
+      
+      .section-title {
+        font-size: 3rem;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .hero-title {
+        font-size: 3.5rem;
+      }
+      
+      .holographic-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 3rem;
+      }
+      
+      .section-title {
+        font-size: 2.5rem;
+      }
+      
+      .cosmic-btn {
+        padding: 18px 36px;
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.2rem;
+      }
+      
+      .holographic-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .holographic-card {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Cosmic Background Elements -->
+  <div class="cosmic-aurora"></div>
+  <div class="cosmic-nebula nebula-1"></div>
+  <div class="cosmic-nebula nebula-2"></div>
+  <div class="cosmic-nebula nebula-3"></div>
+  <div class="cosmic-stars" id="cosmic-stars"></div>
+  <div class="sparkle-stars" id="sparkle-stars"></div>
+  
+  <!-- Celestial Bodies -->
+  <div class="celestial-planet planet-saturn">
+    <div class="moon"></div>
+  </div>
+  
+  <!-- Quantum Effects -->
+  <div class="quantum-particles" id="quantum-particles"></div>
+  <div class="cosmic-mouse" id="cosmic-mouse"></div>
+
+  <div class="container">
+    <section class="hero">
+      <div class="hero-content">
+        <h1 class="hero-title">Zyrok Team</h1>
+        <p class="hero-subtitle">Experience the cosmic power of the ultimate Discord bot</p>
+        <a href="https://discord.com/oauth2/authorize?client_id=1383659368276430949&permissions=8&integration_type=0&scope=bot+applications.commands" class="cosmic-btn">
+          <i class="fas fa-rocket"></i> Launch to Discord
+        </a>
+      </div>
+    </section>
+
+    <section class="command-section">
+      <div class="section-header">
+        <h2 class="section-title">Cosmic Command Matrix</h2>
+        <p class="section-subtitle">Harness the full power of Zyrok with these stellar commands</p>
+      </div>
+      
+      <div class="holographic-grid">
+        <!-- Ticket System -->
+        <div class="holographic-card">
+          <div class="category-header">
+            <div class="category-icon">🎟️</div>
+            <h3 class="category-title">Ticket System</h3>
+          </div>
+          <div class="command-list">
+            <div class="command-item">
+              <div class="command-name">!ticket msg &lt;message&gt;</div>
+              <div class="command-desc">Set custom message for ticket panel</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!setoptions general:💬, support:🛠️</div>
+              <div class="command-desc">Configure dropdown options with emojis</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!setviewer @role</div>
+              <div class="command-desc">Assign role to view all tickets</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!setticketcategory &lt;id&gt;</div>
+              <div class="command-desc">Set category where tickets will be created</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!deployticketpanel</div>
+              <div class="command-desc">Activate your ticket panel</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Application System -->
+        <div class="holographic-card">
+          <div class="category-header">
+            <div class="category-icon">📋</div>
+            <h3 class="category-title">Application System</h3>
+          </div>
+          <div class="command-list">
+            <div class="command-item">
+              <div class="command-name">!app msg &lt;message&gt;</div>
+              <div class="command-desc">Set application panel message</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!addoptions Role:🛡️</div>
+              <div class="command-desc">Add role selection buttons</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!setappchannel &lt;id&gt;</div>
+              <div class="command-desc">Designate application channel</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!deployapp</div>
+              <div class="command-desc">Launch application panel</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!ques1 &lt;question&gt;</div>
+              <div class="command-desc">Configure application questions</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Moderation -->
+        <div class="holographic-card">
+          <div class="category-header">
+            <div class="category-icon">⚠️</div>
+            <h3 class="category-title">Moderation</h3>
+          </div>
+          <div class="command-list">
+            <div class="command-item">
+              <div class="command-name">!warn @user [reason]</div>
+              <div class="command-desc">Issue warning to a user</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!warnings @user</div>
+              <div class="command-desc">View user's warning history</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!warnlimit &lt;number&gt;</div>
+              <div class="command-desc">Set automatic kick threshold</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mini-Games -->
+        <div class="holographic-card">
+          <div class="category-header">
+            <div class="category-icon">🎮</div>
+            <h3 class="category-title">Mini-Games</h3>
+          </div>
+          <div class="command-list">
+            <div class="command-item">
+              <div class="command-name">!rps @user</div>
+              <div class="command-desc">Challenge to Rock Paper Scissors</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!guess</div>
+              <div class="command-desc">Number guessing challenge</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!math</div>
+              <div class="command-desc">Solve math problems</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!trivia</div>
+              <div class="command-desc">Test your knowledge</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!type</div>
+              <div class="command-desc">Typing speed competition</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- DM & Embeds -->
+        <div class="holographic-card">
+          <div class="category-header">
+            <div class="category-icon">📩</div>
+            <h3 class="category-title">DM & Embeds</h3>
+          </div>
+          <div class="command-list">
+            <div class="command-item">
+              <div class="command-name">!dm @role &lt;message&gt;</div>
+              <div class="command-desc">Send message to role members</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!embed &lt;color&gt; &lt;message&gt;</div>
+              <div class="command-desc">Create beautiful embeds</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Utilities -->
+        <div class="holographic-card">
+          <div class="category-header">
+            <div class="category-icon">ℹ️</div>
+            <h3 class="category-title">Utilities</h3>
+          </div>
+          <div class="command-list">
+            <div class="command-item">
+              <div class="command-name">!userinfo @user</div>
+              <div class="command-desc">View detailed user profile</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!serverinfo</div>
+              <div class="command-desc">Get server statistics</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!ping</div>
+              <div class="command-desc">Check bot response time</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!prems @role</div>
+              <div class="command-desc">Grant full bot access</div>
+            </div>
+            <div class="command-item">
+              <div class="command-name">!help</div>
+              <div class="command-desc">Display command list</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <footer class="cosmic-footer">
+      <div class="footer-content">
+        <p class="footer-text">&copy; 2025 Zyrok Team. Crafted with <i class="fas fa-heart" style="color: var(--accent);"></i> in the cosmic realm of Discord bots.</p>
+        <div class="social-links">
+          <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Create cosmic stars background
+    const cosmicStars = document.getElementById('cosmic-stars');
+    for (let i = 0; i < 300; i++) {
+      const star = document.createElement('div');
+      star.className = 'cosmic-star';
+      const size = Math.random() * 3 + 1;
+      star.style.width = star.style.height = `${size}px`;
+      star.style.left = `${Math.random() * 100}vw`;
+      star.style.top = `${Math.random() * 100}vh`;
+      star.style.color = `hsl(${Math.random() * 60 + 180}, 100%, 80%)`;
+      star.style.setProperty('--duration', `${Math.random() * 10 + 5}s`);
+      cosmicStars.appendChild(star);
+    }
+
+    // Create tiny sparkle stars
+    const sparkleStars = document.getElementById('sparkle-stars');
+    function createSparkleStar() {
+      const star = document.createElement('div');
+      star.className = 'sparkle-star';
+      const size = Math.random() * 2 + 1;
+      star.style.width = star.style.height = `${size}px`;
+      star.style.left = `${Math.random() * 100}vw`;
+      star.style.bottom = `-${size}px`;
+      star.style.color = `hsl(${Math.random() * 360}, 100%, 80%)`;
+      star.style.animationDuration = `${Math.random() * 20 + 10}s`;
+      star.style.animationDelay = `${Math.random() * 5}s`;
+      sparkleStars.appendChild(star);
+      
+      setTimeout(() => {
+        star.remove();
+      }, (Math.random() * 20 + 10) * 1000);
+    }
+    
+    // Initial sparkles
+    for (let i = 0; i < 30; i++) {
+      setTimeout(createSparkleStar, i * 300);
+    }
+    
+    // Continuous sparkle creation
+    setInterval(createSparkleStar, 500);
+
+    // Quantum Particles System
+    const particlesContainer = document.getElementById('quantum-particles');
+    const particleColors = [
+      '#9e00ff', '#00f9d5', '#ff00aa', '#66ff00', '#ffcc00'
+    ];
+    
+    function createQuantumParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'quantum-particle';
+      const size = Math.random() * 8 + 2;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.left = `${Math.random() * 100}vw`;
+      particle.style.bottom = `-${size}px`;
+      particle.style.color = particleColors[Math.floor(Math.random() * particleColors.length)];
+      particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+      particle.style.animationDelay = `${Math.random() * 5}s`;
+      particlesContainer.appendChild(particle);
+      
+      setTimeout(() => {
+        particle.remove();
+      }, (Math.random() * 20 + 10) * 1000);
+    }
+    
+    // Initial particles
+    for (let i = 0; i < 30; i++) {
+      setTimeout(createQuantumParticle, i * 300);
+    }
+    
+    // Continuous particle creation
+    setInterval(createQuantumParticle, 500);
+
+    // Cosmic Mouse Follower
+    const cosmicMouse = document.getElementById('cosmic-mouse');
+    document.addEventListener('mousemove', (e) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      // Update mouse follower position
+      cosmicMouse.style.left = `${x}px`;
+      cosmicMouse.style.top = `${y}px`;
+      cosmicMouse.style.opacity = '0.3';
+      
+      // Parallax effect for Saturn
+      const saturn = document.querySelector('.planet-saturn');
+      const xPercent = x / window.innerWidth;
+      const yPercent = y / window.innerHeight;
+      saturn.style.transform = `translate(${-xPercent * 30}px, ${-yPercent * 30}px) rotate(${xPercent * 30}deg)`;
+      
+      // Parallax for nebulas
+      document.querySelector('.nebula-1').style.transform = `scale(1.3) translate(${xPercent * 50}px, ${yPercent * 50}px)`;
+      document.querySelector('.nebula-2').style.transform = `scale(1.3) translate(${-xPercent * 50}px, ${-yPercent * 50}px)`;
+      document.querySelector('.nebula-3').style.transform = `scale(1.3) translate(${xPercent * 30}px, ${-yPercent * 30}px)`;
+    });
+
+    // Hide mouse follower when not moving
+    let mouseTimeout;
+    document.addEventListener('mousemove', () => {
+      clearTimeout(mouseTimeout);
+      mouseTimeout = setTimeout(() => {
+        cosmicMouse.style.opacity = '0';
+      }, 1000);
+    });
+
+    // Holographic card tilt effect
+    const cards = document.querySelectorAll('.holographic-card');
+    cards.forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const angleX = (y - centerY) / 20;
+        const angleY = (centerX - x) / 20;
+        
+        card.style.transform = `
+          translateY(-15px)
+          rotateX(${angleX}deg)
+          rotateY(${angleY}deg)
+        `;
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'translateY(-15px)';
+      });
+    });
+
+    // Smooth scroll for navigation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
+    });
+  </script>
+</body>
+</html>

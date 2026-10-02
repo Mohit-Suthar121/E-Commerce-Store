@@ -1,23 +1,66 @@
 import React, { useState } from 'react'
 import { useCartStore } from '../store/cart.store';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '../store/auth.store';
+import { API } from '../api/axiosInstance';
 
 const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true,handlePayNow }) => {
 
 
-    const productsInCart = useCartStore((state) => state.productsInCart);
+    const productsWithIdandQuantity = useCartStore((state) => state.productsInCart);
     const [shippingCost, setShippingCost] = useState(0);
     const navigate = useNavigate();
+    const user = useAuthStore((state)=>state.user);
     let subTotal = 0;
+
+        const fetchProducts = async ()=>{
+        const response = await API.get("/v1/cart/products");
+        console.log("the response is: ",response.data)
+        return response.data.products;
+
+    }
+
+    const fetchProductsByIds = async()=>{
+        const productIds = {
+            fetchedProducts:productsWithIdandQuantity
+        }
+        const response = await API.post("/v1/product/get-products-by-ids",productIds);
+        console.log("the guest Products are: ",response.data);
+        return response.data.products;
+    }
+     const {data:serverProducts} = useQuery({
+        queryKey:["serverOrders"],
+        queryFn:fetchProducts,
+        enabled:!!user,
+    })
+
+    const {data:guestProducts} = useQuery({
+        queryKey:["guestOrders"],
+        queryFn:fetchProductsByIds,
+        enabled:!user,
+    })
+    const cartProducts = user?serverProducts:guestProducts;
+    const productsInCart = cartProducts || [];
+
+    
+
+    
+
+
+   
+
     if (productsInCart?.length > 0) {
 
         productsInCart.forEach((p) => {
             subTotal += p.quantity * p.product.price;
         });
     }
+
     console.log("the products in cart are: ", productsInCart)
     // const gstPrice = subTotal * gstPercentage / 100;
     let gstPrice = 0;
+
     productsInCart.forEach((p)=>{
         gstPrice += p.product.price*p.quantity*p.product.gstRate/100
     })
@@ -32,6 +75,9 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true,handle
             maximumFractionDigits: 0
         }).format(amount);
     };
+
+
+
 
     return (
         <div className="w-full max-w-md bg-[#09090b] border border-neutral-800/80 rounded-2xl p-6 flex flex-col justify-between gap-6 shadow-xl">
