@@ -10,27 +10,30 @@ cloudinary.config({
 
 console.log(process.env.CLOUDINARY_CLOUD_NAME)
 console.log(process.env.CLOUDINARY_API_KEY)
-    console.log(process.env.CLOUDINARY_API_SECRET)
-    console.log(cloudinary.config());
+console.log(process.env.CLOUDINARY_API_SECRET)
+console.log(cloudinary.config());
 
-export const uploadToCloudinary = async (file) => {
-    console.log("The cloudinary has got the file as: ",file)
-    try {
-        console.log("before base64")
-        const fileBase64 = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-        console.log("after base64")
-        const uploadResponse = await cloudinary.uploader.upload(fileBase64, {
-            folder: 'shortcart_avatars',
-            transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }]
-        })
-        console.log("The cloudinary uploadResponse: ",uploadResponse)
-        return uploadResponse;
-    } catch (error) {
-        throw error
-    }
+export const uploadToCloudinary = (file) => {
+    return new Promise((resolve, reject) => {
+        const uploadResponse = cloudinary.uploader.upload_stream(
+            {
+                folder: 'shortcart_images',
+                transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }]
+            },
+            (error, result) => {
+                if (error) return reject(error);
+                resolve(result)
+            }
+        )
+
+        uploadResponse.end(file.buffer);
+
+
+    })
+
 }
 
-export const deleteFromCloudinary = async(publicId)=>{
+export const deleteFromCloudinary = async (publicId) => {
     try {
         await cloudinary.uploader.destroy(publicId);
     } catch (error) {

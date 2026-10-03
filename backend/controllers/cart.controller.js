@@ -160,3 +160,28 @@ export const deleteFromCart = async(req,res)=>{
         })
     }
 }
+
+
+export const getProducts = async(req,res)=>{
+    try {
+        const userId = req.userId;
+        const cart = await Cart.findOne({user:userId});
+        if(!cart) return res.json(404).json({
+            message:"Cart not found!"
+        })
+        const products = cart.items.populate("product");
+
+
+        return res.status(201).json({
+            message:"cart and products fetched successfully!",
+            products
+        })
+
+
+    } catch (error) {
+        console.error("Internal server Error!");
+        return res.status(500).json({
+            message:"Internal server error!"
+        })
+    }
+}

@@ -154,13 +154,14 @@ Do NOT generate:
 - timestamps
 - any fields not defined in the schema
 
+
 Return ONLY the JSON object.`
 
     const response = await createNewProduct(addNewProductPrompt);
     const product = JSON.parse(response);
     console.log("the response is: ", response)
 
-    const { name: newName, price: newPrice, stock: newStock, category: newCategory, subCategory: newSubCategory, brandName: newBrandName, productDesc: newProductDesc, highlights: newHighlights, imageSearchQuery } = product;
+    const { name: newName, price: newPrice, stock: newStock, category: newCategory, subCategory: newSubCategory, brandName: newBrandName, productDesc: newProductDesc, highlights: newHighlights, imageSearchQuery,gstRate } = product;
 
     let productImages = await searchProductImages(imageSearchQuery);
     if (productImages.length == 0) {
@@ -176,6 +177,7 @@ Return ONLY the JSON object.`
       brandName: newBrandName,
       productDesc: newProductDesc,
       highlights: newHighlights,
+      gstRate,
       images: productImages
     })
 
@@ -186,9 +188,10 @@ Return ONLY the JSON object.`
     })
 
   } catch (error) {
-    console.error("some error occured!", error);
+    console.error("some error occured! and the error is: ", error);
+    console.error("and the error code is: ",error?.error?.code)
     return res.status(500).json({
-      message: "Internal server error!"
+      message:"Internal server error!",
     })
 
   }

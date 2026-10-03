@@ -45,11 +45,6 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true,handle
 
     
 
-    
-
-
-   
-
     if (productsInCart?.length > 0) {
 
         productsInCart.forEach((p) => {
