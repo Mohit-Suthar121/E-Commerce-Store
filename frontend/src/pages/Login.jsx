@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { API } from '../api/axiosInstance'
 import { notifyFailure } from '../utils/Toastify'
-import { useAuthStore } from '../store/auth.store'
 import { useGoogleAuth } from '../hooks/useGoogleAuth'
 
 
@@ -12,7 +11,6 @@ import { useGoogleAuth } from '../hooks/useGoogleAuth'
 const Login = () => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm()
   const navigate = useNavigate();
-  const setEmail = useAuthStore((state) => state.setEmail);
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const handleGoogleLogin = useGoogleAuth(setServerError, setIsLoading);
@@ -21,7 +19,6 @@ const Login = () => {
       setIsLoading(true)
       console.log("The data is: ", data)
       const response = await API.post('/auth/login', data);
-      setEmail(data.email)
       console.log("the response after cliking login button: ", response.data);
       navigate("/verify")
     } catch (error) {

@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { API } from '../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/auth.store';
 import { notifyFailure } from '../utils/Toastify';
 import { Link } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -12,12 +11,9 @@ import { useGoogleAuth } from '../hooks/useGoogleAuth';
 const Signup = () => {
 
     const { register, handleSubmit, watch, formState: { errors } } = useForm()
-    const fetchUser = useAuthStore((state) => state.fetchUser);
     const [isLoading, setIsLoading] = useState(false);
     const [serverError, setServerError] = useState("");
     const navigate = useNavigate();
-    const setEmail = useAuthStore((state) => state.setEmail);
-    const setUser = useAuthStore((state) => state.setUser);
     const handleGoogleLogin = useGoogleAuth(setServerError,setIsLoading);
 
 
@@ -30,9 +26,9 @@ const Signup = () => {
                 password: data.password
             }
             const response = await API.post('/auth/register', finalPayload);
-            setEmail(data.email);
+
             console.log("The response after filling the registration form is: ", response);
-            navigate("/verify");
+            navigate("/verify",{state:{email:response.data.email}});
 
         } catch (error) {
             console.error("Internal server error: ", error.response?.data || error.message);

@@ -6,13 +6,13 @@ import CloseIcon from '../icons/CloseIcon'
 import HomeHamburgerContent from './HomeHamburgerContent'
 import DashboardHamburgerContent from './DashboardHamburgerContent'
 import fullLogo from '../assets/FullLogo.jpg'
-import { useAuthStore } from '../store/auth.store'
+import { useUser } from '../hooks/useCurrentUser'
 
 const Navbar = () => {
     const [showMenu, setShowMenu] = useState(false);
-    const user = useAuthStore((state) => state.user);
+    const {user} = useUser();
     const location = useLocation();
-
+    console.log("the user is: ",user);
     return (
         <div className="w-full h-16 sm:h-20 border-b border-neutral-900 bg-[#060606]/90 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 flex items-center select-none font-sans antialiased shrink-0 ">
 

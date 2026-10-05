@@ -4,7 +4,7 @@ import { ToastContainer, toast,Bounce } from 'react-toastify';
 
 const MainLayout = ({children}) => {
   return (
-    <div className='w-full h-screen flex flex-col'>
+    <div className='w-full h-screen flex flex-col '>
         {children}
          <ToastContainer
                 position="top-right"

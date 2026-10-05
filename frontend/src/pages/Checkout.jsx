@@ -7,7 +7,7 @@ import { useCartStore } from '../store/cart.store'
 import AddressForm from '../components/AddressForm'
 import FinalSelectedAddressCard from '../components/FinalSelectedAddressCard'
 import CheckoutOrderItemsCard from '../components/CheckoutOrderItemsCard'
-import { useAuthStore } from '../store/auth.store'
+import { useUser } from '../hooks/useCurrentUser'
 
 const CheckoutPage = () => {
     const [addNewAddress, setAddNewAddress] = useState(false)
@@ -21,8 +21,8 @@ const CheckoutPage = () => {
     const setCurrentAddress = useCartStore((state)=>state.setCurrentAddress);
     const currentAddress = useCartStore((state)=>state.currentAddress);
     const [selectedAddress, setSelectedAddress] = useState(null);
-    const user = useAuthStore((state) => state.user);
-
+    
+    const {user} = useUser();
     console.log("the products is cart", productsInCart)
 
     useEffect(() => {

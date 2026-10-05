@@ -1,15 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Navbar from '../components/Navbar'
-import HomeHamburgerContent from '../components/HomeHamburgerContent'
 import frontPageImage from '../icons/bannerPageMobile.jpg'
-import { useAuthStore } from '../store/auth.store'
 
 const Home = () => {
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
-  const setEmail = useAuthStore((state) => state.setEmail);
-
-
 
   const [bottomCard, setBottomCard] = useState([
     {

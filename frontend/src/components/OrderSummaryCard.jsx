@@ -2,48 +2,57 @@ import React, { useState } from 'react'
 import { useCartStore } from '../store/cart.store';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '../store/auth.store';
 import { API } from '../api/axiosInstance';
+import { useUser } from '../hooks/useCurrentUser';
 
-const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true,handlePayNow }) => {
+const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handlePayNow }) => {
 
 
     const productsWithIdandQuantity = useCartStore((state) => state.productsInCart);
     const [shippingCost, setShippingCost] = useState(0);
     const navigate = useNavigate();
-    const user = useAuthStore((state)=>state.user);
+    const {user} = useUser();
     let subTotal = 0;
+    console.log("the products with id and quantity are: ",productsWithIdandQuantity);
+    const ids = productsWithIdandQuantity.map((p)=>p.productId);
 
-        const fetchProducts = async ()=>{
+    const fetchProducts = async () => {
         const response = await API.get("/v1/cart/products");
-        console.log("the response is: ",response.data)
+        console.log("the response is: ", response.data)
         return response.data.products;
 
     }
 
-    const fetchProductsByIds = async()=>{
-        const productIds = {
-            fetchedProducts:productsWithIdandQuantity
-        }
-        const response = await API.post("/v1/product/get-products-by-ids",productIds);
-        console.log("the guest Products are: ",response.data);
-        return response.data.products;
+    // for guest products
+    const fetchProductsByIds = async () => {
+        const response = await API.post("/v1/product/get-products-by-ids", {productIds:ids});
+        // const productsWithIdandQuantity = response.data.products;
+        const productsWithQuantity = response.data.products.map((p) => {
+            const cartItem = {
+                product: p,
+                quantity: productsWithIdandQuantity.find((product) => product.productId === p._id.toString()).quantity
+            }
+            return cartItem
+        })
+        console.log("the guest Products are: ", productsWithQuantity);
+        return productsWithQuantity;
     }
-     const {data:serverProducts} = useQuery({
-        queryKey:["serverOrders"],
-        queryFn:fetchProducts,
-        enabled:!!user,
+
+    const { data: serverProducts } = useQuery({
+        queryKey: ["serverOrders"],
+        queryFn: fetchProducts,
+        enabled: !!user,
     })
 
-    const {data:guestProducts} = useQuery({
-        queryKey:["guestOrders"],
-        queryFn:fetchProductsByIds,
-        enabled:!user,
+    const { data: guestProducts } = useQuery({
+        queryKey: ["guestOrders", ids],
+        queryFn: fetchProductsByIds,
+        enabled: !user,
     })
-    const cartProducts = user?serverProducts:guestProducts;
+    const cartProducts = user ? serverProducts : guestProducts;
     const productsInCart = cartProducts || [];
 
-    
+
 
     if (productsInCart?.length > 0) {
 
@@ -56,8 +65,8 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true,handle
     // const gstPrice = subTotal * gstPercentage / 100;
     let gstPrice = 0;
 
-    productsInCart.forEach((p)=>{
-        gstPrice += p.product.price*p.quantity*p.product.gstRate/100
+    productsInCart.forEach((p) => {
+        gstPrice += p.product.price * p.quantity * p.product.gstRate / 100
     })
     const totalAmount = subTotal + gstPrice;
 

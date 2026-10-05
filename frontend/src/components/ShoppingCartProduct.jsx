@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react'
 import DeleteIcon from '../icons/DeleteIcon'
 import { useCartStore } from '../store/cart.store';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
-import { useAuthStore } from '../store/auth.store';
 import { API } from '../api/axiosInstance';
+import { useUser } from '../hooks/useCurrentUser';
 
 const ShoppingCartProduct = ({
     name,
@@ -20,7 +20,7 @@ const ShoppingCartProduct = ({
     const timerRef = useRef(null);
     const totalPrice = price * quantity;
     const setQuantity = useCartStore((state) => state.setQuantity);
-    const user = useAuthStore((state) => state.user);
+    const {user} = useUser();
 
     // Standardized Indian Rupee (₹) Formatter
     const formatCurrency = (amount) => {
@@ -33,6 +33,8 @@ const ShoppingCartProduct = ({
 
     const handleIncrease = async () => {
         if (quantity >= stock) return;
+
+        
         const newQuantity = quantity + 1;
         setQuantity(id, newQuantity);
         updateQuantity(newQuantity);

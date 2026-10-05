@@ -82,24 +82,24 @@ export const getProduct = async (req,res)=>{
 
 export const getProductsByIds = async (req,res)=>{
     try {
-        const {fetchedProducts} = req.body;
+        const {productIds} = req.body;
+        console.log("the product ids are: ",productIds);
 
-        const productIds = fetchedProducts.map((p)=>p.productId);
         const products = await Product.find({
             _id:{$in:productIds}
         });
 
-        const productsWithQuantity = products.map((p)=>{
-            const cartItem = {
-                product:p,
-                quantity:fetchedProducts.find((fp)=>fp.productId===p._id.toString()).quantity
-            }
-            return cartItem
-        })
+        // const productsWithQuantity = products.map((p)=>{
+        //     const cartItem = {
+        //         product:p,
+        //         quantity:fetchedProducts.find((fp)=>fp.productId===p._id.toString()).quantity
+        //     }
+        //     return cartItem
+        // })
         
         return res.status(200).json({
             message:products.length>0?"Products found successfully!":"No products found!",
-            products:productsWithQuantity
+            products
         })
 
 

@@ -1,19 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react'
 import PaymentSuccessIcon from '../icons/PaymentSuccessIcon'
 import { API } from '../api/axiosInstance';
-import { useAuthStore } from '../store/auth.store';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useUser } from '../hooks/useCurrentUser';
 
 
 const Verify = () => {
     const [otp, setOtp] = useState(["", "", "", ""]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    // const [currentIndex, setCurrentIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const inputRefs = useRef([]);
-    const email = useAuthStore((state) => state.email);
-    const setUser = useAuthStore((state)=>state.setUser);
     const navigate = useNavigate();
+    // const {user} = useUser();
+    const location = useLocation();
+    const email = location.state.email;
 
 
     const handleChange = (e, index) => {
@@ -23,16 +24,12 @@ const Verify = () => {
         setOtp(newOtp)
         if (index <= otp.length - 2) inputRefs.current[index + 1].focus();
         if (index === otp.length - 1) onSubmit(newOtp);
-
     }
+
 
     const onSubmit = async (enteredOtp) => {
         const otpToSend = enteredOtp.join("");
         if (otpToSend.length < 4) return;
-        if (!email) {
-            console.error("Email not found!");
-            return;
-        }
         try {
             setIsLoading(true);
 
@@ -40,10 +37,10 @@ const Verify = () => {
                 email,
                 otp: otpToSend
             }
+             
             const response = await API.post('/auth/verify', data);
             console.log("The response after enter the otp is:", response.data)
             notifySuccess("User Verified SuccessFully!");
-            setUser(response.data?.user);
             navigate("/")
 
         } catch (error) {

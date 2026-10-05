@@ -21,24 +21,14 @@ import AdminUserOrderDetails from './pages/AdminUserOrderDetails'
 import Signup from './pages/Signup'
 import Verify from './pages/Verify'
 import ProductDetailPage from './pages/ProductDetailPage'
-import { useAuthStore } from './store/auth.store'
 import AuthRoute from './routes/AuthRoute'
 import PageNotFound from './components/PageNotFound'
 import EditProductPage from './pages/EditProductPage'
-import { API } from './api/axiosInstance'
-import { useCartStore } from './store/cart.store'
 
 
 function App() {
 
-  const fetchUser = useAuthStore((state) => state.fetchUser);
-  const email = useAuthStore((state)=>state.email);
-  const setProducts = useCartStore((state)=>state.setProducts);
-  
 
-  useEffect(() => {
-    fetchUser();
-  }, [])
   return (
     <MainLayout>
       <Routes>

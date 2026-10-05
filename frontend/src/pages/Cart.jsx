@@ -6,16 +6,18 @@ import { useCartStore } from '../store/cart.store';
 import { useNavigate } from 'react-router-dom';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
-import { useAuthStore } from '../store/auth.store';
+import { useUser } from "../hooks/useCurrentUser.js"
 import OrderSummaryCard from '../components/OrderSummaryCard';
 import { useQuery } from '@tanstack/react-query';
 
 
 const Cart = () => {
     const deleteProductFromCart = useCartStore((state) => state.deleteProductFromCart);
-    const user = useAuthStore((state) => state.user);
+    const { user } = useUser();
     const navigate = useNavigate();
     const itemsInCart = useCartStore((state) => state.productsInCart);
+
+    const ids = itemsInCart.map((p) => p.productId);
 
     const handleDelete = async (id) => {
         if (!user) {
@@ -41,33 +43,42 @@ const Cart = () => {
         // setProducts(response.data.cart.items);
     }
 
-   
 
 
-    const fetchProducts = async()=>{
+
+    const fetchProducts = async () => {
         const data = {
-            fetchedProducts: itemsInCart
+            productIds: ids
         }
-        const response = await API.post("/v1/product/get-products-by-ids",data);
-        console.log("the response has been received successfully: ",response.data);
-        return response.data.products;
+        const response = await API.post("/v1/product/get-products-by-ids", data);
+        const productsWithQuantity = response.data.products.map((p) => {
+            const cartItem = {
+                product: p,
+                quantity: itemsInCart.find((product) => product.productId === p._id.toString()).quantity
+            }
+            return cartItem
+        })
+        console.log("the response has been received successfully: ", response.data);
+        return productsWithQuantity;
     }
 
-    
-     const {data:serverCartItems,isLoading:isServerItemsLoading} = useQuery({
+
+    const { data: serverCartItems, isLoading: isServerItemsLoading } = useQuery({
         queryKey: ["serverCart"],
-        queryFn:fetchCart,
-        enabled:!!user
+        queryFn: fetchCart,
+        enabled: !!user,
+        retry:false
+
     })
 
-    const {data:guestCartItems,isLoading:isGuestItemsLoading} = useQuery({
-        queryKey:["guestCart"],
-        queryFn:fetchProducts,
-        enabled:!user
+    const { data: guestCartItems, isLoading: isGuestItemsLoading } = useQuery({
+        queryKey: ["guestCart", ids],
+        queryFn: fetchProducts,
+        enabled: !user && ids.length > 0
     })
 
-    const productsInCart = user?serverCartItems:guestCartItems;
-    console.log("the productsInCart finally are: ",productsInCart)
+    const productsInCart = user ? serverCartItems : guestCartItems;
+    console.log("the productsInCart finally are: ", productsInCart)
 
 
     return (
@@ -126,7 +137,7 @@ const Cart = () => {
 
 
 
-            {(!isServerItemsLoading && !isGuestItemsLoading )&& (!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
+            {(!isServerItemsLoading && !isGuestItemsLoading) && (!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
                 <div className="no-items-box flex flex-col gap-2  justify-center items-center">
 
                     <div className="cart-logo p-4 rounded-full bg-neutral-900 border border-neutral-800">

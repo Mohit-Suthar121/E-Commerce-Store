@@ -21,7 +21,7 @@ export const createOrder = async (req, res) => {
             })
         }
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("shippingAddresses");
 
         if (!user) {
             return res.status(404).json({

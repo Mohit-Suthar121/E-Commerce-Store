@@ -165,11 +165,11 @@ export const deleteFromCart = async(req,res)=>{
 export const getProducts = async(req,res)=>{
     try {
         const userId = req.userId;
-        const cart = await Cart.findOne({user:userId});
+        const cart = await Cart.findOne({user:userId}).populate("items.product");
         if(!cart) return res.json(404).json({
             message:"Cart not found!"
         })
-        const products = cart.items.populate("product");
+        const products = cart.items;
 
 
         return res.status(201).json({
@@ -179,7 +179,7 @@ export const getProducts = async(req,res)=>{
 
 
     } catch (error) {
-        console.error("Internal server Error!");
+        console.error("Internal server Error! and the error is: ",error);
         return res.status(500).json({
             message:"Internal server error!"
         })

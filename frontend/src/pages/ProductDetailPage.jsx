@@ -6,9 +6,10 @@ import CartLogo from '../icons/CartLogo'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { API } from '../api/axiosInstance'
 import { notifyFailure, notifySuccess } from '../utils/Toastify'
-import { useAuthStore } from '../store/auth.store'
 import { useCartStore } from '../store/cart.store'
 import { useQuery } from '@tanstack/react-query'
+import { useUser } from '../hooks/useCurrentUser'
+
 
 const ProductDetailPage = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -16,7 +17,9 @@ const ProductDetailPage = () => {
     const [errorMessage, setErrorMessage] = useState("")
     const [quantity, setQuantity] = useState(1);
     const { id } = useParams();
-    const user = useAuthStore((state) => state.user);
+    
+    const {user} = useUser();
+
     const addProductToCart = useCartStore((state) => state.addProductToCart);
     const productsInCart = useCartStore((state) => state.productsInCart)
     const setProducts = useCartStore((state)=>state.setProducts);
