@@ -8,13 +8,13 @@ import { useUser } from '../hooks/useCurrentUser';
 const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handlePayNow }) => {
 
 
-    const productsWithIdandQuantity = useCartStore((state) => state.productsInCart);
+    const guestProductsInCart = useCartStore((state) => state.guestProductsInCart);
     const [shippingCost, setShippingCost] = useState(0);
     const navigate = useNavigate();
     const {user} = useUser();
     let subTotal = 0;
-    console.log("the products with id and quantity are: ",productsWithIdandQuantity);
-    const ids = productsWithIdandQuantity.map((p)=>p.productId);
+    console.log("the products with id and quantity are: ",guestProductsInCart);
+    const ids = guestProductsInCart.map((p)=>p.productId);
 
     const fetchProducts = async () => {
         const response = await API.get("/v1/cart/products");
@@ -26,11 +26,11 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handl
     // for guest products
     const fetchProductsByIds = async () => {
         const response = await API.post("/v1/product/get-products-by-ids", {productIds:ids});
-        // const productsWithIdandQuantity = response.data.products;
+        // const guestProductsInCart = response.data.products;
         const productsWithQuantity = response.data.products.map((p) => {
             const cartItem = {
                 product: p,
-                quantity: productsWithIdandQuantity.find((product) => product.productId === p._id.toString()).quantity
+                quantity: guestProductsInCart.find((product) => product.productId === p._id.toString()).quantity
             }
             return cartItem
         })

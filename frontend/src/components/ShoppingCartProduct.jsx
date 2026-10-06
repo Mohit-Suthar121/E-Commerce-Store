@@ -4,6 +4,7 @@ import { useCartStore } from '../store/cart.store';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
 import { useUser } from '../hooks/useCurrentUser';
+import { useQueryClient } from '@tanstack/react-query';
 
 const ShoppingCartProduct = ({
     name,
@@ -19,8 +20,15 @@ const ShoppingCartProduct = ({
 
     const timerRef = useRef(null);
     const totalPrice = price * quantity;
-    const setQuantity = useCartStore((state) => state.setQuantity);
+    const GuestsetQuantity = useCartStore((state) => state.GuestsetQuantity);
+    const guestProductsInCart = useCartStore((state)=>state.guestProductsInCart);
     const {user} = useUser();
+    const queryClient = useQueryClient();
+    // const {guestCartItems} = useCart();
+
+    // console.log("the guest cart items are: ",guestCartItems);
+    console.log("the guest cart items which is in the store are: ",guestProductsInCart)
+
 
     // Standardized Indian Rupee (₹) Formatter
     const formatCurrency = (amount) => {
@@ -31,40 +39,47 @@ const ShoppingCartProduct = ({
         }).format(amount);
     };
 
-    const handleIncrease = async () => {
-        if (quantity >= stock) return;
+    
+    const handleIncrease = () => {
 
-        
-        const newQuantity = quantity + 1;
-        setQuantity(id, newQuantity);
-        updateQuantity(newQuantity);
+        if (quantity >= stock) return;
+        updateQuantity(quantity+1);
     }
 
-    const handleDecrease = async () => {
+    const handleDecrease = () => {
         if (quantity <= 1) return;
-        const newQuantity = quantity - 1;
-        setQuantity(id, newQuantity);
-        updateQuantity(newQuantity);
+        updateQuantity(quantity-1);
     }
 
     const updateQuantity = (newQuantity) => {
-        if (!user) return;
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
+        // for guest user: 
+        if (!user){
+            GuestsetQuantity(id,newQuantity);
+            return;
         }
+
+        queryClient.setQueryData(["serverCart"],(old)=> old?.map((item)=>item?.product?._id===id?{...item,quantity:newQuantity}:item))
+
+        debouncedUpdate(id,newQuantity);        
+    }
+
+    const debouncedUpdate = (id,newQuantity)=>{
+        if (timerRef.current) clearTimeout(timerRef.current);
+        
         const timer = setTimeout(async () => {
             const data = { quantity: newQuantity }
             try {
                 const response = await API.patch(`/v1/cart/product/${id}/update-quantity`, data);
                 notifySuccess("Quantity updated successfully!");
             } catch (error) {
+                queryClient.invalidateQueries(["serverCart"])
                 console.error("Couldn't update the quantity!", error?.response?.data || error);
                 notifyFailure(error?.response?.data || error);
             }
         }, 500)
 
         timerRef.current = timer;
-    }
+    }   
 
     useEffect(() => {
         return () => {

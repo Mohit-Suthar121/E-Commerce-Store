@@ -20,9 +20,7 @@ const ProductDetailPage = () => {
     
     const {user} = useUser();
 
-    const addProductToCart = useCartStore((state) => state.addProductToCart);
-    const productsInCart = useCartStore((state) => state.productsInCart)
-    const setProducts = useCartStore((state)=>state.setProducts);
+    const guestAddProductToCart = useCartStore((state) => state.guestAddProductToCart);
     const navigate = useNavigate();
 
 
@@ -48,16 +46,6 @@ const ProductDetailPage = () => {
             setIsLoading(true);
             const response = await API.get(`/v1/product/get-product/${id}`);
             console.log("the current Product:", response.data.product)
-
-
-            // SET the quantity of the product , like handle it later 
-
-            // productsInCart.forEach((p) => {
-            //     console.log("the products in the cart: ", p.product);
-            //     if (p?.product?._id === response.data.product?._id) {
-            //         setQuantity(p?.quantity);
-            //     }
-            // })........................................................................................
             return response.data.product;
 
         } catch (error) {
@@ -97,7 +85,7 @@ const ProductDetailPage = () => {
                 productId: currentProduct._id,
                 quantity
             }
-            addProductToCart(productData);
+            guestAddProductToCart(productData);
             console.log("the product successfully added to cart since the user was not logged in:")
             setIsLoading(false);
             notifySuccess("product added to cart successfully!")
@@ -113,8 +101,6 @@ const ProductDetailPage = () => {
             try {
                 const response = await API.post("/v1/cart/add-to-cart", productData);
                 console.log("the products set in the cart are: ",response.data.cart.items);
-                // setProducts(response.data.cart.items);
-                // you don't need setProducts here since we are redirecting the user to the cart.jsx page after the successfull attempt, so that cart page automatically does the part of setting the products
                 console.log("the response from the backend is: ", response.data);
                 notifySuccess("product added to cart successfully!")
                 navigate("/cart")

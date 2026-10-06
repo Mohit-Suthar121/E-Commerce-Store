@@ -8,16 +8,14 @@ import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
 import { useUser } from "../hooks/useCurrentUser.js"
 import OrderSummaryCard from '../components/OrderSummaryCard';
-import { useQuery } from '@tanstack/react-query';
+import { useCart } from '../hooks/useCart.js';
 
 
 const Cart = () => {
-    const deleteProductFromCart = useCartStore((state) => state.deleteProductFromCart);
+    const deleteProductFromCart = useCartStore((state) => state.GuestDeleteProductFromCart);
     const { user } = useUser();
     const navigate = useNavigate();
-    const itemsInCart = useCartStore((state) => state.productsInCart);
 
-    const ids = itemsInCart.map((p) => p.productId);
 
     const handleDelete = async (id) => {
         if (!user) {
@@ -35,49 +33,10 @@ const Cart = () => {
     }
 
 
-    const fetchCart = async () => {
-        const response = await API.get("/v1/cart/get-cart");
-        console.log("the cart is: ", response.data.cart);
-
-        return response.data.cart.items;
-        // setProducts(response.data.cart.items);
-    }
 
 
-
-
-    const fetchProducts = async () => {
-        const data = {
-            productIds: ids
-        }
-        const response = await API.post("/v1/product/get-products-by-ids", data);
-        const productsWithQuantity = response.data.products.map((p) => {
-            const cartItem = {
-                product: p,
-                quantity: itemsInCart.find((product) => product.productId === p._id.toString()).quantity
-            }
-            return cartItem
-        })
-        console.log("the response has been received successfully: ", response.data);
-        return productsWithQuantity;
-    }
-
-
-    const { data: serverCartItems, isLoading: isServerItemsLoading } = useQuery({
-        queryKey: ["serverCart"],
-        queryFn: fetchCart,
-        enabled: !!user,
-        retry:false
-
-    })
-
-    const { data: guestCartItems, isLoading: isGuestItemsLoading } = useQuery({
-        queryKey: ["guestCart", ids],
-        queryFn: fetchProducts,
-        enabled: !user && ids.length > 0
-    })
-
-    const productsInCart = user ? serverCartItems : guestCartItems;
+    const {items:productsInCart,isLoading} = useCart();
+    // const productsInCart = user ? serverCartItems : guestCartItems;
     console.log("the productsInCart finally are: ", productsInCart)
 
 
@@ -85,7 +44,7 @@ const Cart = () => {
         <div className='w-full h-screen flex flex-col'>
             <Navbar />
 
-            {(!isServerItemsLoading && !isGuestItemsLoading) && productsInCart?.length > 0 && (
+            {!isLoading && productsInCart?.length > 0 && (
                 <div className="maincontent w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-4 sm:p-8 lg:p-12">
                     <div className="w-full max-w-6xl flex flex-col gap-6 ">
 
@@ -137,7 +96,7 @@ const Cart = () => {
 
 
 
-            {(!isServerItemsLoading && !isGuestItemsLoading) && (!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
+            {!isLoading && (!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
                 <div className="no-items-box flex flex-col gap-2  justify-center items-center">
 
                     <div className="cart-logo p-4 rounded-full bg-neutral-900 border border-neutral-800">
@@ -154,7 +113,7 @@ const Cart = () => {
                 </div>
             </div>}
 
-            {(isServerItemsLoading || isGuestItemsLoading) && <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" />}
+            {isLoading && <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" />}
 
 
 

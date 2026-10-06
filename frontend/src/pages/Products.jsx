@@ -20,7 +20,6 @@ const Products = () => {
     const [inputMaxPriceValue, setInputMaxPriceValue] = useState(999999);
     const [maxPriceValue, setMaxPriceValue] = useState(999999)
     const [currentPage, setCurrentPage] = useState(1);
-    // const [productsPerPage, setProductsPerPage] = useState(getProductsPerPage());
     const [showFilter, setShowFilter] = useState(false);
     const [category, setCategory] = useState("all");
     const [searchValue, setSearchValue] = useState("");
