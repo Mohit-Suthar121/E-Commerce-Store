@@ -6,8 +6,10 @@ import PreviousArrow from '../icons/PreviousArrow';
 import NextArrow from '../icons/NextArrow';
 import { API } from '../api/axiosInstance';
 import { Rings } from 'react-loader-spinner';
-import { useProductStore } from '../store/product.store';
+// import { useProductStore } from '../store/product.store';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import NoProductsFound from '../components/NoProductsFound';
 
 const Products = () => {
     const getProductsPerPage = () => {
@@ -19,8 +21,6 @@ const Products = () => {
     const [inputMaxPriceValue, setInputMaxPriceValue] = useState(999999);
     const [maxPriceValue, setMaxPriceValue] = useState(999999)
     const [currentPage, setCurrentPage] = useState(1);
-    const [productsPerPage, setProductsPerPage] = useState(getProductsPerPage());
-    const [isLoading, setIsLoading] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
     const [category, setCategory] = useState("all");
     const [searchValue, setSearchValue] = useState("");
@@ -28,29 +28,20 @@ const Products = () => {
     const [inputBrandName, setInputBrandName] = useState("");
     const [brandName, setBrandName] = useState("");
     const timerRef = useRef();
-    const currentProducts = useProductStore((state) => state.currentProducts);
-    const setCurrentProducts = useProductStore((state) => state.setCurrentProducts);
-    const totalPages = useProductStore((state) => state.totalPages);
-    const setTotalPages = useProductStore((state) => state.setTotalPages);
     const navigate = useNavigate();
+
+
+    const {data,isLoading, error} = useQuery({
+        queryKey:["products",currentPage,searchValue,category,brandName,minPriceValue,maxPriceValue],
+        queryFn:getAllProducts
+    })
 
     async function getAllProducts() {
 
-        try {
-            setIsLoading(true);
             console.log("The category:", category)
             const response = await API.get(`/v1/product/get-all-products?limit=8&page=${currentPage}&search=${searchValue}&category=${category}&brandName=${brandName}&minPrice=${minPriceValue}&maxPrice=${maxPriceValue}`);
             console.log("The products received from the backend are: ", response.data);
-            setCurrentProducts(response.data.products);
-            setTotalPages(response.data.totalPages);
-
-
-        } catch (error) {
-            console.error("Some error occured!", error);
-
-        } finally {
-            setIsLoading(false);
-        }
+            return response.data;
     }
 
     const handleChange = (fieldName) => (e) => {
@@ -219,11 +210,12 @@ const Products = () => {
 
 
 
-                {!isLoading && <div className="right-section flex-1 flex flex-col gap-4 justify-start w-full lg:w-fit ">
+                {(!isLoading && data?.products.length>0)?<div className="right-section flex-1 flex flex-col gap-4 justify-start w-full lg:w-fit ">
 
                     <div className={`cards flex flex-col items-center md:grid md:place-items-center md:grid-cols-2 md:gap-2 md:items-center md:justify-center lg:grid lg:grid-cols-3 2xl:grid-cols-4 gap-4 `}>
+                    
 
-                        {currentProducts.map((product) => <ProductCard stock={product?.stock} name={product?.name} price={product?.price} brandName={product?.brandName} category={product?.category} productDesc={product?.productDesc} image={product?.images[0]?.url} key={product._id} onClick={()=>{handleShowProduct(product?._id)}}/>)}
+                        {data?.products?.map((product) => <ProductCard stock={product?.stock} name={product?.name} price={product?.price} brandName={product?.brandName} category={product?.category} productDesc={product?.productDesc} image={product?.images[0]?.url} key={product._id} onClick={()=>{handleShowProduct(product?._id)}}/>)}
 
                     </div>
 
@@ -236,14 +228,15 @@ const Products = () => {
                             <PreviousArrow currentColor={"white"} className={"w-4 h-4"} />
                         </button>
 
-                        <div className='font-semibold' >Page {currentPage} of {totalPages} </div>
+                        <div className='font-semibold' >Page {currentPage} of {data?.totalPages} </div>
 
-                        <button onClick={() => { setCurrentPage(currentPage => currentPage + 1) }} disabled={currentPage == totalPages} className="next-button px-4 py-2 text-sm capitalize font-semibold bg-neutral-900 border-neutral-800 rounded-lg cursor-pointer active:scale-95 border hover:brightness-110 hover:border-gray-500 transition-all duration-300 disabled:brightness-50 disabled:hover:border-neutral-800 ">
+                        <button onClick={() => { setCurrentPage(currentPage => currentPage + 1) }} disabled={currentPage == data?.totalPages} className="next-button px-4 py-2 text-sm capitalize font-semibold bg-neutral-900 border-neutral-800 rounded-lg cursor-pointer active:scale-95 border hover:brightness-110 hover:border-gray-500 transition-all duration-300 disabled:brightness-50 disabled:hover:border-neutral-800 ">
                             <NextArrow currentColor={"white"} className={"w-4 h-4"} />
                         </button>
                     </div>
 
-                </div>}
+                </div>:<NoProductsFound onReset={handleResetFilters} />}
+                
 
 
                 {isLoading && <div className="loader-div flex-1 h-full flex justify-center items-center">

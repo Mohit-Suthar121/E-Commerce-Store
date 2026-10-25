@@ -21,29 +21,15 @@ import AdminUserOrderDetails from './pages/AdminUserOrderDetails'
 import Signup from './pages/Signup'
 import Verify from './pages/Verify'
 import ProductDetailPage from './pages/ProductDetailPage'
-import { useAuthStore } from './store/auth.store'
 import AuthRoute from './routes/AuthRoute'
 import PageNotFound from './components/PageNotFound'
 import EditProductPage from './pages/EditProductPage'
-import { API } from './api/axiosInstance'
-import { useCartStore } from './store/cart.store'
+import ProtectedRoute from './components/ProtectedRoute'
 
 
 function App() {
 
-  const fetchUser = useAuthStore((state) => state.fetchUser);
-  const email = useAuthStore((state)=>state.email);
-  const setProducts = useCartStore((state)=>state.setProducts);
-  const fetchCart = async()=>{
-    const response = await API.get("/v1/cart/get-cart");
-    console.log("the cart is: ",response.data.cart);
-    setProducts(response.data.cart.items);
-  }
 
-  useEffect(() => {
-    fetchUser();
-    fetchCart();
-  }, [])
   return (
     <MainLayout>
       <Routes>
@@ -52,15 +38,14 @@ function App() {
         <Route path='products/:id' element={<ProductDetailPage />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/profile' element={<Profile />} />
-        <Route path='/checkout' element={<Checkout />} />
+        <Route path='/checkout' element={<ProtectedRoute redirectTo='/checkout' ><Checkout /> </ProtectedRoute> } />
         <Route path='/order-success' element={<OrderSuccess />} />
-
+        
         <Route element={<AuthRoute />} >
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Signup />} />
             <Route path='/verify' element={<Verify />} />
         </Route>
-
 
         <Route path='/dashboard' element={<Dashboard />}>
           <Route index element={<Navigate to="sales" replace />} />
@@ -74,7 +59,6 @@ function App() {
         </Route>
 
         <Route path='/admin/products/edit-product/:id' element={<EditProductPage/>} />
-
         <Route path='*' element={<PageNotFound/>}/>
 
       </Routes>

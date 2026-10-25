@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({
 export async function createNewProduct(prompt){
     try {
         const response = await ai.models.generateContent({
-            model:"models/gemini-3.6-flash",
+            model:"models/gemini-3.1-flash-lite",
             contents:prompt,
         })
 

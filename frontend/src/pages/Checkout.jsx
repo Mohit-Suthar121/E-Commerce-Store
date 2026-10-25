@@ -5,17 +5,25 @@ import { API } from '../api/axiosInstance'
 import { notifyFailure, notifySuccess } from '../utils/Toastify'
 import { useCartStore } from '../store/cart.store'
 import AddressForm from '../components/AddressForm'
+import FinalSelectedAddressCard from '../components/FinalSelectedAddressCard'
+import CheckoutOrderItemsCard from '../components/CheckoutOrderItemsCard'
+import { useUser } from '../hooks/useCurrentUser'
 
 const CheckoutPage = () => {
     const [addNewAddress, setAddNewAddress] = useState(false)
     const [isEditingAddress, setIsEditingAddress] = useState(null)
     const [isLoading, setIsLoading] = useState(false);
+    const [finalSelectedAddress, setFinalSelectedAddress] = useState(null);
     const setAddresses = useCartStore((state) => state.setAddresses);
     const addresses = useCartStore((state) => state.addresses);
-    const updateAddress = useCartStore((state)=>state.updateAddress);
-    const deleteAddress = useCartStore((state)=>state.deleteAddress);
+    const updateAddress = useCartStore((state) => state.updateAddress);
+    const guestProductsInCart = useCartStore((state) => state.guestProductsInCart);
+    const setCurrentAddress = useCartStore((state)=>state.setCurrentAddress);
+    const currentAddress = useCartStore((state)=>state.currentAddress);
     const [selectedAddress, setSelectedAddress] = useState(null);
     
+    const {user} = useUser();
+    console.log("the products is cart", guestProductsInCart)
 
     useEffect(() => {
         const initialSelectedAddress = addresses.find((add) => add?.isDefault)
@@ -23,6 +31,7 @@ const CheckoutPage = () => {
         console.log("all the addresses are: ", addresses)
         if (initialSelectedAddress) {
             setSelectedAddress(initialSelectedAddress._id);
+            setCurrentAddress(initialSelectedAddress);
         }
     }, [addresses])
 
@@ -70,42 +79,138 @@ const CheckoutPage = () => {
         else return null
     }
 
-    const handleDeleteAddress=async(id)=>{
+    const handleDeleteAddress = async (id) => {
         try {
-            const repsonse = await API.delete(`/v1/user/addresses/delete-address/${id}`);
-            deleteAddress(id);
-            notifySuccess("address deleted successfully!");
-            console.log("the deletable address's id is: ",id)
-            console.log("the left address in the cart are: ",addresses);
+            const response = await API.delete(`/v1/user/addresses/delete-address/${id}`);
+            setAddresses(response.data.addresses);
+            notifySuccess("address deleted successfully!");``
+            console.log("the deletable address's id is: ", id)
+            console.log("the left address in the cart are: ", addresses);
         } catch (error) {
-            console.error("couldn't delete address",error?.response?.data || error);
+            console.error("couldn't delete address", error?.response?.data || error);
             notifyFailure(error?.response?.data || error)
         }
+    }
+
+    const getFinalAddress = (id) => {
+        const selectedAddress = addresses.find((address) => address?._id === id);
+        return selectedAddress ? selectedAddress : null;
     }
 
     useEffect(() => {
         fetchAddresses()
     }, [])
 
-    const handleEditAddress = async(data,addressId)=>{
+    const handleEditAddress = async (data, addressId) => {
         try {
             setIsLoading(true)
-            const payload = {...data,name:data.firstName + " "+data.lastName};
+            const payload = { ...data, name: data.firstName + " " + data.lastName };
             delete payload.firstName;
             delete payload.lastName;
-            const response = await API.patch(`/v1/user/addresses/edit-address/${addressId}`,payload);
-            updateAddress(addressId,payload);
+            const response = await API.patch(`/v1/user/addresses/edit-address/${addressId}`, payload);
+            updateAddress(addressId, payload);
             console.log("the address updated successfully!")
             notifySuccess("address updated successfully!")
         } catch (error) {
-            console.error("counldn't update the address",error?.response?.data || error);
+            console.error("counldn't update the address", error?.response?.data || error);
             notifyFailure(error?.response?.data || error)
-        }finally{
+        } finally {
             setIsLoading(false);
             setIsEditingAddress(null)
         }
     }
 
+
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            if (window.Razorpay) {
+                resolve(true);
+                return;
+            }
+            const script = document.createElement("script");
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        })
+
+    }
+
+    // while checking out, we will send the addressId to the backend, so that it easily access, which order is this and all that
+    const handlePayNow = async () => {
+        if(!finalSelectedAddress) return;
+        const isLoaded = await loadRazorpayScript();
+        if (!isLoaded) {
+            notifyFailure("Razorpay SDK failed to load. Check your connection");
+            return
+        }
+
+        try {
+            
+            const addressId = finalSelectedAddress?._id;
+            const response = await API.post("/v1/payment/create-order", { addressId });
+            const order = response.data.order;
+            const mongoOrderId = response.data.mongoOrderId;
+
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: order.amount,
+                currency: order.currency,
+                order_id: order.id,
+                name: "SHORTCART",
+                description: 'Test Transaction',
+                handler: async (response) => {
+                    try {
+                        const verity = await API.post("/v1/payment/verify-payment", {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            mongoOrderId
+                        })
+                        if (verity.data.success) {
+                            notifySuccess("Payment Successfull")
+                        }
+
+                    } catch (error) {
+                        notifyFailure("Payment failed!")
+                    }
+                },
+                prefill: {
+                    name: user.name,
+                    email: user.email,
+                    contact: user.phoneNo,
+                },
+                theme: {
+                    color: '#10b981', // Emerald green theme accent
+                },
+
+            }
+
+            const razorpayWindow = new window.Razorpay(options);
+            razorpayWindow.open();
+
+        } catch (error) {
+            console.error('Payment Error:', error);
+            notifyFailure('Could not initiate payment');
+        }
+
+    }
+
+    const handleFinalizeAddress = async()=>{
+        const finalizedAddress = getFinalAddress(selectedAddress);
+        console.log("the finalized address is: ",finalizedAddress)
+        if(!finalizedAddress) {
+            console.log("if is running");
+            return;
+        }
+        console.log("i'm running")
+        setFinalSelectedAddress(finalizedAddress);
+        setCurrentAddress(finalizedAddress);
+    }
+
+    useEffect(()=>{
+        console.log("the current selected address is: ",currentAddress)
+    },[currentAddress])
 
     return (
         <div className="w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-6 sm:p-10 lg:p-12">
@@ -116,7 +221,8 @@ const CheckoutPage = () => {
                 {/* Left Column: Address Management Section */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
 
-                    {!addNewAddress && !isEditingAddress ? (
+                    {!addNewAddress && !isEditingAddress && !finalSelectedAddress ? (
+
                         <div className="select-or-change-address flex flex-col gap-4 mb-5 ">
 
                             {/* Section Header */}
@@ -140,6 +246,7 @@ const CheckoutPage = () => {
                                     setSelectedAddress={setSelectedAddress}
                                     isSelected={selectedAddress === address?._id}
                                     setIsEditingAddress={setIsEditingAddress}
+                                    isDefault={address?.isDefault}
                                     fullName={address?.name}
                                     city={address?.city}
                                     email={address?.email}
@@ -166,6 +273,7 @@ const CheckoutPage = () => {
 
                                 {/* Deliver to Selected Address CTA */}
                                 <button
+                                    onClick={handleFinalizeAddress}
                                     type="button"
                                     className="deliver-here font-semibold bg-emerald-500 hover:bg-emerald-400 text-black rounded-2xl py-3.5 px-4 flex justify-center items-center gap-2 text-sm cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] transition-all duration-200 mt-1"
                                 >
@@ -177,25 +285,35 @@ const CheckoutPage = () => {
                             </div>
 
                         </div>
+
+
+                    ) : !addNewAddress && !isEditingAddress && finalSelectedAddress ? (
+                        <div className='flex flex-col gap-4' >
+
+                            <FinalSelectedAddressCard address={finalSelectedAddress} onChange={() => { setFinalSelectedAddress(null) }} />
+                            <CheckoutOrderItemsCard items={guestProductsInCart} />
+                        </div>
+
+
                     ) : addNewAddress ? (
                         /* Form View (Add or Edit) */
                         <div className="w-full">
                             <AddressForm
-                            initialData={null}
-                            isEditing={false}
-                            isLoading={isLoading}
-                            onSubmit={handleAddNewAddress}
-                            setAddNewAddress={setAddNewAddress}
-                            
+                                initialData={null}
+                                isEditing={false}
+                                isLoading={isLoading}
+                                onSubmit={handleAddNewAddress}
+                                setAddNewAddress={setAddNewAddress}
+
                             />
                         </div>
                     ) : (<div className="w-full">
                         <AddressForm
-                        initialData={getInitialData(isEditingAddress)}
-                        isLoading={isLoading}
-                        onSubmit={(data)=>handleEditAddress(data,isEditingAddress)}
-                        isEditing={true}
-                        setIsEditingAddress={setIsEditingAddress}
+                            initialData={getInitialData(isEditingAddress)}
+                            isLoading={isLoading}
+                            onSubmit={(data) => handleEditAddress(data, isEditingAddress)}
+                            isEditing={true}
+                            setIsEditingAddress={setIsEditingAddress}
                         />
                     </div>)
 
@@ -205,7 +323,7 @@ const CheckoutPage = () => {
 
                 {/* Right Column: Order Summary Card Sticky Anchor */}
                 <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
-                    <OrderSummaryCard />
+                    <OrderSummaryCard isDisabledButton={finalSelectedAddress ? false : true} isCartButton={false} handlePayNow={handlePayNow} />
                 </div>
 
             </div>

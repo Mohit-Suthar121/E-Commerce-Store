@@ -79,3 +79,34 @@ export const getProduct = async (req,res)=>{
         })
     }
 }
+
+export const getProductsByIds = async (req,res)=>{
+    try {
+        const {productIds} = req.body;
+        console.log("the product ids are: ",productIds);
+
+        const products = await Product.find({
+            _id:{$in:productIds}
+        });
+
+        // const productsWithQuantity = products.map((p)=>{
+        //     const cartItem = {
+        //         product:p,
+        //         quantity:fetchedProducts.find((fp)=>fp.productId===p._id.toString()).quantity
+        //     }
+        //     return cartItem
+        // })
+        
+        return res.status(200).json({
+            message:products.length>0?"Products found successfully!":"No products found!",
+            products
+        })
+
+
+    } catch (error) {
+        console.error("Internal server error! and the error is: ",error);
+        return res.status(500).json({
+            message:"Internal server error!"
+        })
+    }
+}

@@ -5,38 +5,48 @@ import NextArrow from '../icons/NextArrow'
 import CartLogo from '../icons/CartLogo'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { API } from '../api/axiosInstance'
-import { useProductStore } from '../store/product.store'
 import { notifyFailure, notifySuccess } from '../utils/Toastify'
-import { useAuthStore } from '../store/auth.store'
 import { useCartStore } from '../store/cart.store'
+import { useQuery } from '@tanstack/react-query'
+import { useUser } from '../hooks/useCurrentUser'
+
 
 const ProductDetailPage = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const currentProduct = useProductStore((state) => state.currentProduct);
-    const setCurrentProduct = useProductStore((state) => state.setCurrentProduct);
     const [errorMessage, setErrorMessage] = useState("")
     const [quantity, setQuantity] = useState(1);
     const { id } = useParams();
-    const user = useAuthStore((state) => state.user);
-    const addProductToCart = useCartStore((state) => state.addProductToCart);
-    const productsInCart = useCartStore((state) => state.productsInCart)
-    const setProducts = useCartStore((state)=>state.setProducts);
+    
+    const {user} = useUser();
+
+    const guestAddProductToCart = useCartStore((state) => state.guestAddProductToCart);
     const navigate = useNavigate();
+
+
+    const {data:currentProduct} = useQuery({
+        queryKey:["product",id],
+        queryFn:fetchProduct
+    })
+
+
+    async function fetchCart (){
+        try {
+            const response = await API.get("/v1/cart/get-cart");
+            return response.data.cart;
+        } catch (error) {
+            console.error("some error occured fetching the cart!");
+            throw error
+
+        }
+    }
 
     async function fetchProduct() {
         try {
             setIsLoading(true);
             const response = await API.get(`/v1/product/get-product/${id}`);
-            setCurrentProduct(response.data.product);
             console.log("the current Product:", response.data.product)
-
-            productsInCart.forEach((p) => {
-                console.log("the products in the cart: ", p.product);
-                if (p?.product?._id === response.data.product?._id) {
-                    setQuantity(p?.quantity);
-                }
-            })
+            return response.data.product;
 
         } catch (error) {
             console.error("some error occured!", error);
@@ -57,11 +67,11 @@ const ProductDetailPage = () => {
         setQuantity(value);
     }
 
-    const handleAddToCart = async (productId) => {
+    const handleAddToCart = async () => {
         setIsLoading(true);
         setErrorMessage("");
-        if (quantity > currentProduct.stock) {
-            setErrorMessage(`Only ${currentProduct.stock} units left in stock`)
+        if (quantity > currentProduct?.stock) {
+            setErrorMessage(`Only ${currentProduct?.stock} units left in stock`)
             return;
         }
         else if (quantity < 1) {
@@ -72,26 +82,25 @@ const ProductDetailPage = () => {
         if (!user) {
             // check if the product already exists in the store, if yes , then increase it's count;
             const productData = {
-                product: currentProduct,
+                productId: currentProduct._id,
                 quantity
             }
-            addProductToCart(productData);
-
+            guestAddProductToCart(productData);
             console.log("the product successfully added to cart since the user was not logged in:")
             setIsLoading(false);
             notifySuccess("product added to cart successfully!")
             navigate("/cart")
         }
 
+
         else {
             const productData = {
-                product: currentProduct._id,
+                product: currentProduct?._id,
                 quantity
             }
             try {
                 const response = await API.post("/v1/cart/add-to-cart", productData);
                 console.log("the products set in the cart are: ",response.data.cart.items);
-                setProducts(response.data.cart.items);
                 console.log("the response from the backend is: ", response.data);
                 notifySuccess("product added to cart successfully!")
                 navigate("/cart")
@@ -104,6 +113,12 @@ const ProductDetailPage = () => {
         }
 
     }
+
+    const {data:cart} = useQuery({
+        queryKey:["cart"],
+        queryFn:fetchCart,
+        enabled:!!user
+    })
 
     return (
         <div className="w-full min-h-screen flex flex-col bg-[#060606] text-neutral-200 font-sans antialiased select-none">
@@ -131,7 +146,7 @@ const ProductDetailPage = () => {
 
                         <div className="scrollwrapper overflow-x-auto lg:overflow-x-visible order-2 lg:order-1 flex p-1 scrollbar-none">
                             <div className="short-product-images flex flex-row lg:flex-col gap-3 mx-auto lg:mx-0">
-                                {currentProduct.images?.map((image, index) => (
+                                {currentProduct?.images?.map((image, index) => (
                                     <div
                                         key={image._id}
                                         onClick={() => setCurrentIndex(index)}
@@ -170,7 +185,7 @@ const ProductDetailPage = () => {
                                     if (currentIndex === images.length - 1) return;
                                     setCurrentIndex(currentIndex => currentIndex + 1)
                                 }}
-                                className={`right-button absolute right-4 top-1/2 -translate-y-1/2 flex lg:hidden w-11 h-11 rounded-xl bg-neutral-950/80 backdrop-blur-md border border-neutral-800 text-white justify-center items-center p-2.5 transition-all active:scale-95 z-10 ${currentIndex === currentProduct.images?.length - 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                                className={`right-button absolute right-4 top-1/2 -translate-y-1/2 flex lg:hidden w-11 h-11 rounded-xl bg-neutral-950/80 backdrop-blur-md border border-neutral-800 text-white justify-center items-center p-2.5 transition-all active:scale-95 z-10 ${currentIndex === currentProduct?.images?.length - 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
                                     }`}
                             >
                                 <NextArrow className="w-full h-full" currentColor="currentColor" />
@@ -183,18 +198,18 @@ const ProductDetailPage = () => {
 
                         <div className="flex flex-col gap-2">
                             <span className="product-type text-[10px] font-mono tracking-widest text-neutral-500 uppercase">
-                                {currentProduct.subCategory} // {currentProduct.brandName}
+                                {currentProduct?.subCategory} // {currentProduct?.brandName}
                             </span>
                             <h1 className="main-heading font-extrabold text-2xl md:text-3xl tracking-tighter text-neutral-100 leading-tight">
-                                {currentProduct.name}
+                                {currentProduct?.name}
                             </h1>
                             <p className="text-xs text-neutral-500 font-medium leading-relaxed tracking-tight mt-1 border-l-2 border-neutral-800 pl-3">
-                                {currentProduct.productDesc}
+                                {currentProduct?.productDesc}
                             </p>
                         </div>
 
                         <div className="price font-mono text-3xl font-bold text-white tracking-tight py-2 border-b border-neutral-900">
-                            ₹{Number(currentProduct.price).toLocaleString("en-US")}
+                            ₹{Number(currentProduct?.price).toLocaleString("en-US")}
                         </div>
 
                         <div className="scroll-wrapper py-2">
@@ -214,7 +229,7 @@ const ProductDetailPage = () => {
                                             <label className="tag text-xs font-mono uppercase tracking-wider text-neutral-500">Qty:</label>
                                             {/* Max Stock Pill */}
                                             <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-medium">
-                                                {currentProduct.stock} in stock
+                                                {currentProduct?.stock} in stock
                                             </span>
                                         </div>
                                     </div>
@@ -249,10 +264,10 @@ const ProductDetailPage = () => {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                if (quantity == currentProduct.stock) return;
+                                                if (quantity == currentProduct?.stock) return;
                                                 setQuantity((state) => state + 1);
                                             }}
-                                            disabled={quantity == currentProduct.stock}
+                                            disabled={quantity == currentProduct?.stock}
                                             type="button"
                                             className="w-8 h-full flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800/80 transition-colors cursor-pointer select-none font-mono text-base font-bold active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                                         >

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const OrderInfoCardMobileScreen = ({orderId,userGmail,itemsCount,totalPrice,paymentStatus,fulfillmentDate}) => {
+const OrderInfoCardMobileScreen = ({orderId,userGmail,itemsCount,totalPrice,paymentStatus,fulfillmentDate,onClick}) => {
 
     const statusConfig = {
         paid: "bg-emerald-500/[0.06] border-emerald-500/15 text-emerald-400",
@@ -9,7 +9,7 @@ const OrderInfoCardMobileScreen = ({orderId,userGmail,itemsCount,totalPrice,paym
     }
 
     return (
-        <div className=' flex sm:hidden flex-col border border-neutral-900 bg-[#0b0b0b] rounded-2xl' >
+        <div onClick={onClick} className=' flex sm:hidden flex-col border border-neutral-900 bg-[#0b0b0b] rounded-2xl' >
             <div className="order-id grid grid-cols-2 items-center border-b border-neutral-900">
                 <div className="order-id-text px-5 py-3.5 text-xs font-bold uppercase tracking-wider text-neutral-500">order id</div>
                 <div className="order-id-number px-5 py-4 text-xs font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors">#{orderId}</div>

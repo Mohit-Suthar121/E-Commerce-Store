@@ -6,28 +6,30 @@ import { Rings } from "react-loader-spinner";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationCard from "../components/DeleteConfirmationCard";
 import { notifyFailure, notifySuccess } from "../utils/Toastify";
-import { useAdminProductStore } from "../store/admin/product.store";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const AdminSideProducts = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
-    const setCurrentProducts = useAdminProductStore(
-        (state) => state.setCurrentProducts,
-    );
-    const totalPages = useAdminProductStore((state) => state.totalPages);
-    const setTotalPages = useAdminProductStore((state) => state.setTotalPages);
-    const currentProducts = useAdminProductStore((state) => state.currentProducts);
     const [searchValue, setSearchValue] = useState("");
     const [inputValue, setInputValue] = useState("");
     const timerRef = useRef();
     const [toDeleteProduct,setToDelelteProduct] = useState(null);
     const [showDeleteConfirmationCard,setShowDeleteConfirmationCard] = useState(false);
     const [priceSorting,setPriceSorting] = useState("");
+    const queryClient = useQueryClient();
+
+    
+
+    const {data,error} = useQuery({
+        queryKey:['admin-products',currentPage],
+        queryFn:fetchProducts
+    })
     
 
     const handleNextPage = () => {
-        if (currentPage === totalPages) return;
+        if (currentPage === data.totalPages) return;
         setCurrentPage((state) => state + 1);
     };
     const handlePreviousPage = () => {
@@ -43,8 +45,9 @@ const AdminSideProducts = () => {
             const response = await API.get(
                 `/v1/admin/product/get-all-products?limit=10&page=${currentPage}&search=${searchValue}&sortBy=${sortValue}`,
             );
-            setTotalPages(response.data.totalPages);
-            setCurrentProducts(response.data.products);
+
+            // setCurrentProducts(response.data.products);
+            return response.data;
             console.log("The response is: ", response.data);
         } catch (error) {
             console.error(
@@ -65,8 +68,7 @@ const AdminSideProducts = () => {
             const parsedObject = await response.json();
             const products = parsedObject.products;
             console.log("The dummy data is:", products);
-            setCurrentProducts(products);
-            setTotalPages(5);
+            // setCurrentProducts(products);
         } catch (error) {
             console.log("some error occured while fetching: ", error);
         } finally {
@@ -98,10 +100,10 @@ const AdminSideProducts = () => {
     async function handleShowDeleteWarning(id) {
         try {
             setShowDeleteConfirmationCard(true);
-            const product = currentProducts.find((product)=>product._id===id);
+            const product = data.products.find((product)=>product._id===id);
             setToDelelteProduct(product);
             
-        } catch (error) {
+        } catch (error) { 
             console.log("some error occured",error)
         }
     }
@@ -111,8 +113,9 @@ const AdminSideProducts = () => {
             setIsLoading(true);
             const id = toDeleteProduct._id;
             const response = await API.delete(`/v1/admin/product/delete-product/${id}`);
-            const remainingProducts = currentProducts.filter((product)=>product._id != id);
-            setCurrentProducts(remainingProducts);
+            queryClient.invalidateQueries({
+                queryKey:["admin-products"]
+            })
             console.log("Response after deleting the product is: ",response.data);
             notifySuccess("product deleted successfully!");
         } catch (error) {
@@ -219,15 +222,16 @@ const AdminSideProducts = () => {
             </div>
 
 
+
             <div className={`flex-1 w-full flex flex-col gap-3 mt-1 overflow-y-auto scrollbar-design min-h-0 scrollbar-gutter-stable ${isLoading ? "flex justify-center items-center" : ""}`}>
                 {!isLoading ? <div className="flex flex-col gap-3">
-                    {currentProducts.map((product, index) => (
+                    {data?.products?.map((product, index) => (
                         <AdminListedProductCard onClick={()=>{handleOpenProduct(product._id)}} product={product} key={index} onEdit={()=>{handleEdit(product._id)}} onDelete={()=>{handleShowDeleteWarning(product._id)}} />
                     ))}
 
                     <AdminPaginationController
                         currentPage={currentPage}
-                        totalPages={totalPages}
+                        totalPages={data.totalPages}
                         isLoading={isLoading}
                         onNext={handleNextPage}
                         onPrev={handlePreviousPage}
@@ -248,7 +252,6 @@ const AdminSideProducts = () => {
             setToDelelteProduct(null);
             setShowDeleteConfirmationCard(false);
            }} onConfirm={handleDelete} />}
-
 
 
 

@@ -4,54 +4,67 @@ import { persist } from "zustand/middleware";
 export const useCartStore = create(
     persist(
         (set) => ({
-            productsInCart: [],
-            setProducts: (newProducts) => set({ productsInCart: newProducts }),
+            // the cart will only store the product Id, and product quantity;
+            // the product object will look something like this: 
+            // {
+            //     productId:"ejfgiouerwh234",
+            //     quantity:34
+            // }
+
+            guestProductsInCart: [],
+            // guestSetProducts: (newProducts) => set({ guestProductsInCart: newProducts }),
 
             // if the product already exists, increament it's count
-            addProductToCart: (newProduct) => set((state) => {
+
+            guestAddProductToCart: (newProduct) => set((state) => {
 
                 // newProduct:{
-                //     product,
+                //     productId(initially it was product instead of productId),
                 //     quantity
                 // }
 
-                const existing = state.productsInCart.find((p) => p.product._id === newProduct.product._id)
+                const existing = state.guestProductsInCart.find((p) => p.productId === newProduct.productId);
+
                 if (existing) {
                     return {
-                        productsInCart: state.productsInCart.map((p) => {
-                            if (p.product._id === newProduct.product._id) {
-                                return { ...p, quantity: newProduct.quantity }
+                        guestProductsInCart: state.guestProductsInCart.map((p) => {
+                            if (p.productId === newProduct.productId) {
+                                return { ...p, quantity: p.quantity + newProduct.quantity }
                             } else return p;
                         })
                     }
 
                 }
+                
                 else return {
-                    productsInCart: [...state.productsInCart, newProduct]
+                    guestProductsInCart: [...state.guestProductsInCart, newProduct]
                 }
 
             }),
 
-            setQuantity: (productId, quantity) => set((state) => ({
-                productsInCart: state.productsInCart.map((item) => item.product._id === productId ? { ...item, quantity } : item)
-
-            })),
-
-            deleteProductFromCart:(productId)=> set((state)=>({
-                productsInCart:state.productsInCart.filter((item)=>item.product._id!==productId)
+            
+            GuestsetQuantity: (productId, newQuantity) => set((state) => ({
+                guestProductsInCart: state.guestProductsInCart.map((item) => item.productId === productId ? { ...item, quantity:newQuantity } : item)
             })),
 
 
+            GuestDeleteProductFromCart:(productId)=> set((state)=>({
+                guestProductsInCart:state.guestProductsInCart.filter((item)=>item.productId!==productId)
+            })),
+
+
+
+
+
+
+            // this address part should not stay here, only the cart things should stay here
             currentAddress:null,
             addresses:[],
             setAddresses:(newAddresses)=>set({addresses:newAddresses}),
             updateAddress:(id,data)=>set((state)=>({
                 addresses:state.addresses.map((address)=>address?._id===id?{...address,...data}:address)
             })),
-
-            deleteAddress:(id)=>set((state)=>({
-                addresses:state.addresses.filter((address)=>address?._id !== id)
-            }))
+            setCurrentAddress:(address)=>set({currentAddress:address})
 
 
             

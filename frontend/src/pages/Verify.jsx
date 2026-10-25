@@ -1,19 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react'
 import PaymentSuccessIcon from '../icons/PaymentSuccessIcon'
 import { API } from '../api/axiosInstance';
-import { useAuthStore } from '../store/auth.store';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
-import { useNavigate } from 'react-router-dom';
+import { redirect, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useUser } from '../hooks/useCurrentUser';
+import { useCartStore } from '../store/cart.store';
 
 
 const Verify = () => {
     const [otp, setOtp] = useState(["", "", "", ""]);
-    const [currentIndex, setCurrentIndex] = useState(0);
+    // const [currentIndex, setCurrentIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const inputRefs = useRef([]);
-    const email = useAuthStore((state) => state.email);
-    const setUser = useAuthStore((state)=>state.setUser);
     const navigate = useNavigate();
+    // const {user} = useUser();
+    const [searchParams] = useSearchParams();
+    const email = searchParams.get("email");
+    const redirect = searchParams.get("redirect") || "/";
+    const guestProductsInCart = useCartStore((state)=>state.guestProductsInCart);
 
 
     const handleChange = (e, index) => {
@@ -23,16 +27,12 @@ const Verify = () => {
         setOtp(newOtp)
         if (index <= otp.length - 2) inputRefs.current[index + 1].focus();
         if (index === otp.length - 1) onSubmit(newOtp);
-
     }
+
 
     const onSubmit = async (enteredOtp) => {
         const otpToSend = enteredOtp.join("");
         if (otpToSend.length < 4) return;
-        if (!email) {
-            console.error("Email not found!");
-            return;
-        }
         try {
             setIsLoading(true);
 
@@ -40,11 +40,19 @@ const Verify = () => {
                 email,
                 otp: otpToSend
             }
+             
             const response = await API.post('/auth/verify', data);
             console.log("The response after enter the otp is:", response.data)
+
+            // merge the cart if the user has one
+            if(guestProductsInCart.length>0){
+                console.log("the guestCart sent is: ",guestProductsInCart);
+                const mergeResponse = await API.post('/v1/cart/merge',{guestCart:guestProductsInCart});
+                console.log("the cart has been merged! and the data is: ",mergeResponse.data);
+
+            }
             notifySuccess("User Verified SuccessFully!");
-            setUser(response.data?.user);
-            navigate("/")
+            navigate(redirect);
 
         } catch (error) {
             console.error("Internal server Error: ", error?.response?.data || error.message);
@@ -54,6 +62,7 @@ const Verify = () => {
         }
 
     }
+
 
     const handleKeyDown = (e, index) => {
         console.log("the key pressed is: ", e.key)

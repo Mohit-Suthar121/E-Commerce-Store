@@ -6,7 +6,7 @@ export const getme = async (req, res) => {
 
     try {
         const userId = req.userId;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("shippingAddresses");
         console.log("The user Is; ", user);
         if (!user) return res.status(404).json({
             message: "User not found!",
@@ -30,23 +30,22 @@ export const getme = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        const { firstName, lastName, zipCode, city, phoneNo, street } = req.body;
+        const { firstName, lastName, phoneNo } = req.body;
         const userId = req.userId;
         const file = req.file;
         console.log("The file is: ", file)
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("shippingAddresses");
 
         if (!user) return res.status(404).json({
             message: "User not found",
             status: "failed"
         })
 
+        console.log("the fetched user with shippingAddresses: ",user)
+
         user.firstName = firstName;
         user.lastName = lastName;
         user.phoneNo = phoneNo;
-        user.shippingAddress.zipCode = zipCode;
-        user.shippingAddress.city = city;
-        user.shippingAddress.street = street;
 
 
         if (file) {
@@ -60,6 +59,7 @@ export const updateProfile = async (req, res) => {
         }
 
         await user.save();
+        console.log("the final user after updating the address is: ",user);
 
         return res.status(200).json({
             message: "Profile updated Successfully!",
@@ -82,15 +82,12 @@ export const addAddress = async (req, res) => {
     try {
         const userId = req.userId;
         const { name, email, street, city, zipCode, state, phoneNo } = req.body;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("shippingAddresses");
         if (!user) {
             return res.status(404).json({
                 message: "user not found!"
             })
         }
-        user.shippingAddresses.forEach((address) => {
-            address.isDefault = false;
-        })
 
         const isDefaultAddress = user.shippingAddresses.length === 0;
 
@@ -118,7 +115,7 @@ export const addAddress = async (req, res) => {
 export const getAddresses = async (req, res) => {
     try {
         const userId = req.userId;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("shippingAddresses");
         if (!user) {
             return res.status(404).json({
                 message: "user Not found!"
@@ -142,7 +139,7 @@ export const editAddress = async (req, res) => {
         const userId = req.userId;
         const id = req.params.id;
         const { name, phoneNo, email, street, city, zipCode, state } = req.body;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("shippingAddresses");
 
         console.log("the data received is: ",{ name, phoneNo, email, street, city, zipCode, state })
         if(!user){
@@ -187,7 +184,7 @@ export const deleteAddress = async(req,res)=>{
     try {
         const userId = req.userId;
         const id = req.params.id;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate("shippingAddresses");
         if(!user){
             return res.status(404).json({
                 message:"user not found!"
@@ -200,10 +197,16 @@ export const deleteAddress = async(req,res)=>{
             })
         }
         const [deletedAddress] = user.shippingAddresses.splice(index,1);
+        const isDefaultAddress = deletedAddress.isDefault;
+
+        if(isDefaultAddress && user.shippingAddresses.length>0){
+            user.shippingAddresses[user.shippingAddresses.length-1].isDefault = true;
+        }
+
         await user.save();
         return res.status(200).json({
             message:"address deleted successfully!",
-            deletedAddress
+            addresses:user.shippingAddresses
         })
         
     } catch (error) {

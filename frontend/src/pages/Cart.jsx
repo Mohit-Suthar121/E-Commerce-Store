@@ -6,15 +6,18 @@ import { useCartStore } from '../store/cart.store';
 import { useNavigate } from 'react-router-dom';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
-import { useAuthStore } from '../store/auth.store';
+import { useUser } from "../hooks/useCurrentUser.js"
 import OrderSummaryCard from '../components/OrderSummaryCard';
+import { useCart } from '../hooks/useCart.js';
+import NotLoggedInWarning from '../components/NotLoggedInWarning.jsx';
 
 
 const Cart = () => {
-    const deleteProductFromCart = useCartStore((state) => state.deleteProductFromCart);
-    const user = useAuthStore((state) => state.user);
+    const deleteProductFromCart = useCartStore((state) => state.GuestDeleteProductFromCart);
+    const [showLoggedInWarning, setShowLoggedInWarning] = useState(false);
+    const { user } = useUser();
     const navigate = useNavigate();
-    const productsInCart = useCartStore((state) => state.productsInCart);
+
 
     const handleDelete = async (id) => {
         if (!user) {
@@ -32,11 +35,27 @@ const Cart = () => {
     }
 
 
+
+
+    const { items: productsInCart, isLoading } = useCart();
+    // const productsInCart = user ? serverCartItems : guestCartItems;
+    console.log("the productsInCart finally are: ", productsInCart)
+
+
     return (
         <div className='w-full h-screen flex flex-col'>
             <Navbar />
 
-            {productsInCart?.length > 0 && (
+            {showLoggedInWarning && <div className="fixed w-screen h-screen backdrop-blur-2xl flex justify-center items-center z-100 ">
+                <NotLoggedInWarning parentPage={'/checkout'} setShowLoggedInWarning={setShowLoggedInWarning}/>
+            </div>}
+
+          
+
+
+
+
+            {!isLoading && productsInCart?.length > 0 && (
                 <div className="maincontent w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-4 sm:p-8 lg:p-12">
                     <div className="w-full max-w-6xl flex flex-col gap-6 ">
 
@@ -78,7 +97,7 @@ const Cart = () => {
 
                             {/* Right Column: Order Summary Anchor */}
                             <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
-                                <OrderSummaryCard />
+                                <OrderSummaryCard setShowLoggedInWarning={setShowLoggedInWarning} />
                             </div>
 
                         </div>
@@ -88,7 +107,7 @@ const Cart = () => {
 
 
 
-            {(!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
+            {!isLoading && (!productsInCart || productsInCart?.length == 0) && <div className="maincontent flex flex-1 justify-center items-center">
                 <div className="no-items-box flex flex-col gap-2  justify-center items-center">
 
                     <div className="cart-logo p-4 rounded-full bg-neutral-900 border border-neutral-800">
@@ -101,14 +120,18 @@ const Cart = () => {
 
                         <button className="start-shopping text-sm text-black font-semibold px-6 py-3 rounded-lg bg-white border border-neutral-800 cursor-pointer active:scale-95 hover:brightness-90  ">Start Shopping</button>
                     </div>
-
                 </div>
             </div>}
+
+
+            {isLoading && <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" />}
 
 
 
         </div>
     )
+
+
 }
 
 export default Cart

@@ -1,24 +1,75 @@
 import React, { useState } from 'react'
 import { useCartStore } from '../store/cart.store';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { API } from '../api/axiosInstance';
+import { useUser } from '../hooks/useCurrentUser';
 
-const OrderSummaryCard = () => {
+const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handlePayNow,setShowLoggedInWarning }) => {
 
 
-    const productsInCart = useCartStore((state) => state.productsInCart);
-    const [gstPercentage, setGstPercentage] = useState(3);
+    const guestProductsInCart = useCartStore((state) => state.guestProductsInCart);
     const [shippingCost, setShippingCost] = useState(0);
     const navigate = useNavigate();
+    const {user} = useUser();
     let subTotal = 0;
+    console.log("the products with id and quantity are: ",guestProductsInCart);
+    const ids = guestProductsInCart.map((p)=>p.productId);
+
+    const fetchProducts = async () => {
+        const response = await API.get("/v1/cart/products");
+        console.log("the response is: ", response.data)
+        return response.data.products;
+
+    }
+
+    // for guest products
+    const fetchProductsByIds = async () => {
+        const response = await API.post("/v1/product/get-products-by-ids", {productIds:ids});
+        // const guestProductsInCart = response.data.products;
+        const productsWithQuantity = response.data.products.map((p) => {
+            const cartItem = {
+                product: p,
+                quantity: guestProductsInCart.find((product) => product.productId === p._id.toString()).quantity
+            }
+            return cartItem
+        })
+        console.log("the guest Products are: ", productsWithQuantity);
+        return productsWithQuantity;
+    }
+
+    const { data: serverProducts } = useQuery({
+        queryKey: ["serverOrders"],
+        queryFn: fetchProducts,
+        enabled: !!user,
+    })
+
+    const { data: guestProducts } = useQuery({
+        queryKey: ["guestOrders", ids],
+        queryFn: fetchProductsByIds,
+        enabled: !user,
+    })
+    const cartProducts = user ? serverProducts : guestProducts;
+    const productsInCart = cartProducts || [];
+
+
+
     if (productsInCart?.length > 0) {
 
         productsInCart.forEach((p) => {
             subTotal += p.quantity * p.product.price;
         });
     }
+
     console.log("the products in cart are: ", productsInCart)
-    const gstPrice = subTotal * gstPercentage / 100;
+    // const gstPrice = subTotal * gstPercentage / 100;
+    let gstPrice = 0;
+
+    productsInCart.forEach((p) => {
+        gstPrice += p.product.price * p.quantity * p.product.gstRate / 100
+    })
     const totalAmount = subTotal + gstPrice;
+
 
     // Standardized Indian Rupee (₹) Formatter
     const formatCurrency = (amount) => {
@@ -28,6 +79,14 @@ const OrderSummaryCard = () => {
             maximumFractionDigits: 0
         }).format(amount);
     };
+
+    const handleCheckout=()=>{
+        if(user) navigate('/checkout');
+        else setShowLoggedInWarning(true);
+    }
+
+
+
 
     return (
         <div className="w-full max-w-md bg-[#09090b] border border-neutral-800/80 rounded-2xl p-6 flex flex-col justify-between gap-6 shadow-xl">
@@ -68,7 +127,7 @@ const OrderSummaryCard = () => {
 
                 {/* Tax */}
                 <div className="tax flex justify-between items-center text-neutral-300">
-                    <span className="text-neutral-400">Estimated GST ({gstPercentage}%)</span>
+                    <span className="text-neutral-400">Estimated GST</span>
                     <span className="font-mono font-medium text-neutral-200">
                         {formatCurrency(gstPrice)}
                     </span>
@@ -90,16 +149,29 @@ const OrderSummaryCard = () => {
             </div>
 
             {/* Primary Action Button */}
-            <button
+            {isCartButton ? <button
                 type="button"
-                onClick={()=>{navigate('/checkout')}}
-                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1"
+                disabled={isDisabledButton}
+                onClick={handleCheckout}
+                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
             >
                 <span>Proceed to Checkout</span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
-            </button>
+            </button> : <button
+                type="button"
+                disabled={isDisabledButton}
+                onClick={handlePayNow}
+                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
+            >
+                <span>Pay Now!</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+            </button>}
+
+
 
             {/* Trust Badges / Perks Section */}
             <div className="other-info flex flex-col gap-2.5 pt-4 border-t border-neutral-900 text-xs text-neutral-400">

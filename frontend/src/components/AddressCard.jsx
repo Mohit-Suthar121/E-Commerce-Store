@@ -3,6 +3,7 @@ import DeleteIcon from '../icons/DeleteIcon'
 
 const AddressCard = ({
     isSelected,
+    isDefault = false, 
     id,
     setSelectedAddress,
     setIsEditingAddress,
@@ -26,24 +27,35 @@ const AddressCard = ({
             } relative cursor-pointer ${!isSelected && "hover:scale-[1.01] hover:border-neutral-700"} transition-all duration-200`} 
         >
 
-            {/* Top Header: Name & Radio Indicator */}
-            <div className="flex items-center justify-between pr-20">
-                <div className="name-section flex gap-3 items-center">
+            {/* Top Header: Name, Default Tag & Radio Indicator */}
+            <div className="flex items-center justify-between pr-24">
+                <div className="name-section flex gap-3 items-center flex-wrap">
+                    {/* Radio Indicator */}
                     <div className={`before-name-circle w-4.5 h-4.5 rounded-full flex justify-center items-center shrink-0 ${isSelected
                         ? "border-emerald-500 bg-emerald-500 border"
                         : "border-neutral-700 bg-neutral-950 border"
                     }`}>
                         {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black" />}
                     </div>
+
+                    {/* Recipient Name */}
                     <div className="name font-semibold text-base tracking-wide text-gray-100">
                         {fullName}
                     </div>
+
+                    {/* 🏷️ DEFAULT BADGE */}
+                    {isDefault && (
+                        <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-md font-mono text-[10px] uppercase font-semibold tracking-wider flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.15)] select-none">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            Default
+                        </span>
+                    )}
                 </div>
             </div>
 
             {/* Phone & Email */}
             <div className="phone-and-email flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-400 font-medium tracking-wide pl-7">
-                <span className="phone-number text-neutral-300 font-normal">+91 {phone}</span>
+                <span className="phone-number text-neutral-300 font-normal">{phone}</span>
                 <span className="hidden sm:inline text-neutral-700">•</span>
                 <span className="email-address text-neutral-500 font-normal">{email}</span>
             </div>
@@ -110,4 +122,4 @@ const AddressCard = ({
     )
 }
 
-export default AddressCard
+export default AddressCard;
