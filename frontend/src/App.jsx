@@ -24,6 +24,7 @@ import ProductDetailPage from './pages/ProductDetailPage'
 import AuthRoute from './routes/AuthRoute'
 import PageNotFound from './components/PageNotFound'
 import EditProductPage from './pages/EditProductPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 
 function App() {
@@ -37,15 +38,14 @@ function App() {
         <Route path='products/:id' element={<ProductDetailPage />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/profile' element={<Profile />} />
-        <Route path='/checkout' element={<Checkout />} />
+        <Route path='/checkout' element={<ProtectedRoute redirectTo='/checkout' ><Checkout /> </ProtectedRoute> } />
         <Route path='/order-success' element={<OrderSuccess />} />
-
+        
         <Route element={<AuthRoute />} >
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Signup />} />
             <Route path='/verify' element={<Verify />} />
         </Route>
-
 
         <Route path='/dashboard' element={<Dashboard />}>
           <Route index element={<Navigate to="sales" replace />} />
@@ -59,7 +59,6 @@ function App() {
         </Route>
 
         <Route path='/admin/products/edit-product/:id' element={<EditProductPage/>} />
-
         <Route path='*' element={<PageNotFound/>}/>
 
       </Routes>

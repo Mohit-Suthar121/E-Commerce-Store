@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import PaymentSuccessIcon from '../icons/PaymentSuccessIcon'
 import { API } from '../api/axiosInstance';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { redirect, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useUser } from '../hooks/useCurrentUser';
+import { useCartStore } from '../store/cart.store';
 
 
 const Verify = () => {
@@ -13,8 +14,10 @@ const Verify = () => {
     const inputRefs = useRef([]);
     const navigate = useNavigate();
     // const {user} = useUser();
-    const location = useLocation();
-    const email = location.state.email;
+    const [searchParams] = useSearchParams();
+    const email = searchParams.get("email");
+    const redirect = searchParams.get("redirect") || "/";
+    const guestProductsInCart = useCartStore((state)=>state.guestProductsInCart);
 
 
     const handleChange = (e, index) => {
@@ -40,8 +43,16 @@ const Verify = () => {
              
             const response = await API.post('/auth/verify', data);
             console.log("The response after enter the otp is:", response.data)
+
+            // merge the cart if the user has one
+            if(guestProductsInCart.length>0){
+                console.log("the guestCart sent is: ",guestProductsInCart);
+                const mergeResponse = await API.post('/v1/cart/merge',{guestCart:guestProductsInCart});
+                console.log("the cart has been merged! and the data is: ",mergeResponse.data);
+
+            }
             notifySuccess("User Verified SuccessFully!");
-            navigate("/")
+            navigate(redirect);
 
         } catch (error) {
             console.error("Internal server Error: ", error?.response?.data || error.message);

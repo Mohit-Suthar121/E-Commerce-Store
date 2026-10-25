@@ -79,6 +79,7 @@ const Profile = () => {
     const { register, handleSubmit, formState: { errors } } = useForm();
 
     return (
+        
         <div className="w-full  bg-[#060606] text-neutral-200 flex flex-col font-sans selection:bg-emerald-500/30">
             <Navbar/>
 
@@ -219,7 +220,7 @@ const Profile = () => {
                                 </div>
 
                                 <div className="h-11 px-4 rounded-xl text-sm bg-neutral-900/40 border border-neutral-800/80 text-neutral-300 flex items-center justify-between group select-none">
-                                    <span className="truncate">{userDetails.email}</span>
+                                    <span className="truncate">{userDetails.email || "Not Logged in"}</span>
                                     <div className="flex items-center gap-1.5 bg-neutral-800/80 border border-neutral-700/50 px-2.5 py-1 rounded-md text-[11px] font-medium text-neutral-400">
                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

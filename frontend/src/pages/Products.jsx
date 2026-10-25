@@ -9,6 +9,7 @@ import { Rings } from 'react-loader-spinner';
 // import { useProductStore } from '../store/product.store';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import NoProductsFound from '../components/NoProductsFound';
 
 const Products = () => {
     const getProductsPerPage = () => {
@@ -209,9 +210,10 @@ const Products = () => {
 
 
 
-                {!isLoading && <div className="right-section flex-1 flex flex-col gap-4 justify-start w-full lg:w-fit ">
+                {(!isLoading && data?.products.length>0)?<div className="right-section flex-1 flex flex-col gap-4 justify-start w-full lg:w-fit ">
 
                     <div className={`cards flex flex-col items-center md:grid md:place-items-center md:grid-cols-2 md:gap-2 md:items-center md:justify-center lg:grid lg:grid-cols-3 2xl:grid-cols-4 gap-4 `}>
+                    
 
                         {data?.products?.map((product) => <ProductCard stock={product?.stock} name={product?.name} price={product?.price} brandName={product?.brandName} category={product?.category} productDesc={product?.productDesc} image={product?.images[0]?.url} key={product._id} onClick={()=>{handleShowProduct(product?._id)}}/>)}
 
@@ -233,7 +235,8 @@ const Products = () => {
                         </button>
                     </div>
 
-                </div>}
+                </div>:<NoProductsFound onReset={handleResetFilters} />}
+                
 
 
                 {isLoading && <div className="loader-div flex-1 h-full flex justify-center items-center">

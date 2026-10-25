@@ -9,10 +9,12 @@ import { API } from '../api/axiosInstance';
 import { useUser } from "../hooks/useCurrentUser.js"
 import OrderSummaryCard from '../components/OrderSummaryCard';
 import { useCart } from '../hooks/useCart.js';
+import NotLoggedInWarning from '../components/NotLoggedInWarning.jsx';
 
 
 const Cart = () => {
     const deleteProductFromCart = useCartStore((state) => state.GuestDeleteProductFromCart);
+    const [showLoggedInWarning, setShowLoggedInWarning] = useState(false);
     const { user } = useUser();
     const navigate = useNavigate();
 
@@ -35,7 +37,7 @@ const Cart = () => {
 
 
 
-    const {items:productsInCart,isLoading} = useCart();
+    const { items: productsInCart, isLoading } = useCart();
     // const productsInCart = user ? serverCartItems : guestCartItems;
     console.log("the productsInCart finally are: ", productsInCart)
 
@@ -43,6 +45,15 @@ const Cart = () => {
     return (
         <div className='w-full h-screen flex flex-col'>
             <Navbar />
+
+            {showLoggedInWarning && <div className="fixed w-screen h-screen backdrop-blur-2xl flex justify-center items-center z-100 ">
+                <NotLoggedInWarning parentPage={'/checkout'} setShowLoggedInWarning={setShowLoggedInWarning}/>
+            </div>}
+
+          
+
+
+
 
             {!isLoading && productsInCart?.length > 0 && (
                 <div className="maincontent w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-4 sm:p-8 lg:p-12">
@@ -86,7 +97,7 @@ const Cart = () => {
 
                             {/* Right Column: Order Summary Anchor */}
                             <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">
-                                <OrderSummaryCard />
+                                <OrderSummaryCard setShowLoggedInWarning={setShowLoggedInWarning} />
                             </div>
 
                         </div>
@@ -109,9 +120,9 @@ const Cart = () => {
 
                         <button className="start-shopping text-sm text-black font-semibold px-6 py-3 rounded-lg bg-white border border-neutral-800 cursor-pointer active:scale-95 hover:brightness-90  ">Start Shopping</button>
                     </div>
-
                 </div>
             </div>}
+
 
             {isLoading && <div className="w-5 h-5 border-2 border-neutral-400 border-t-black rounded-full animate-spin" />}
 
@@ -119,6 +130,8 @@ const Cart = () => {
 
         </div>
     )
+
+
 }
 
 export default Cart

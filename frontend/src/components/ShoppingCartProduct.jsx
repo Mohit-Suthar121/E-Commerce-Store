@@ -24,9 +24,7 @@ const ShoppingCartProduct = ({
     const guestProductsInCart = useCartStore((state)=>state.guestProductsInCart);
     const {user} = useUser();
     const queryClient = useQueryClient();
-    // const {guestCartItems} = useCart();
 
-    // console.log("the guest cart items are: ",guestCartItems);
     console.log("the guest cart items which is in the store are: ",guestProductsInCart)
 
 
@@ -69,7 +67,7 @@ const ShoppingCartProduct = ({
         const timer = setTimeout(async () => {
             const data = { quantity: newQuantity }
             try {
-                const response = await API.patch(`/v1/cart/product/${id}/update-quantity`, data);
+                await API.patch(`/v1/cart/product/${id}/update-quantity`, data);
                 notifySuccess("Quantity updated successfully!");
             } catch (error) {
                 queryClient.invalidateQueries(["serverCart"])
