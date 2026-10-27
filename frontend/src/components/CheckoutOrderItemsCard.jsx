@@ -93,10 +93,10 @@ const CheckoutOrderItemsCard = ({ items = [] }) => {
                 {items.map((item) => (
                     <CheckoutItemRow
                         key={item._id}
-                        name={item.product.name}
-                        price={item.product.price}
+                        name={item.product?.name}
+                        price={item.product?.price}
                         quantity={item.quantity}
-                        image={item.product.images[0].url}
+                        image={item.product?.images[0].url}
                     />
                 ))}
             </div>

@@ -8,6 +8,7 @@ import AddressForm from '../components/AddressForm'
 import FinalSelectedAddressCard from '../components/FinalSelectedAddressCard'
 import CheckoutOrderItemsCard from '../components/CheckoutOrderItemsCard'
 import { useUser } from '../hooks/useCurrentUser'
+import { useCart } from '../hooks/useCart'
 
 const CheckoutPage = () => {
     const [addNewAddress, setAddNewAddress] = useState(false)
@@ -17,14 +18,13 @@ const CheckoutPage = () => {
     const setAddresses = useCartStore((state) => state.setAddresses);
     const addresses = useCartStore((state) => state.addresses);
     const updateAddress = useCartStore((state) => state.updateAddress);
-    const guestProductsInCart = useCartStore((state) => state.guestProductsInCart);
     const setCurrentAddress = useCartStore((state)=>state.setCurrentAddress);
     const currentAddress = useCartStore((state)=>state.currentAddress);
     const [selectedAddress, setSelectedAddress] = useState(null);
-    
+    const {items} = useCart();
     const {user} = useUser();
-    console.log("the products is cart", guestProductsInCart)
 
+    
     useEffect(() => {
         const initialSelectedAddress = addresses.find((add) => add?.isDefault)
         console.log("the initial selected product is: ", initialSelectedAddress)
@@ -291,7 +291,7 @@ const CheckoutPage = () => {
                         <div className='flex flex-col gap-4' >
 
                             <FinalSelectedAddressCard address={finalSelectedAddress} onChange={() => { setFinalSelectedAddress(null) }} />
-                            <CheckoutOrderItemsCard items={guestProductsInCart} />
+                            <CheckoutOrderItemsCard items={items} />
                         </div>
 
 

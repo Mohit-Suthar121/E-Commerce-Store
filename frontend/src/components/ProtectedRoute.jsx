@@ -8,6 +8,7 @@ const ProtectedRoute = ({children,redirectTo}) => {
 
   const {isLoading,user} = useUser();
   if(isLoading) return <FullPageLoader/>
+  
   if(!user) return <Navigate to={authPath('/login',{},redirectTo)} replace  />
   return children;
   

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import DeleteIcon from '../icons/DeleteIcon'
+import React, { useState, useEffect, useRef } from 'react';
+import DeleteIcon from '../icons/DeleteIcon';
 import { useCartStore } from '../store/cart.store';
 import { notifyFailure, notifySuccess } from '../utils/Toastify';
 import { API } from '../api/axiosInstance';
@@ -21,12 +21,31 @@ const ShoppingCartProduct = ({
     const timerRef = useRef(null);
     const totalPrice = price * quantity;
     const GuestsetQuantity = useCartStore((state) => state.GuestsetQuantity);
-    const guestProductsInCart = useCartStore((state)=>state.guestProductsInCart);
-    const {user} = useUser();
+    const { user } = useUser();
     const queryClient = useQueryClient();
 
-    console.log("the guest cart items which is in the store are: ",guestProductsInCart)
+    // Price change animation tracking
+    const prevTotalPriceRef = useRef(totalPrice);
+    const [priceAnimClass, setPriceAnimClass] = useState('');
+    const [priceColorClass, setPriceColorClass] = useState('text-emerald-400');
 
+    useEffect(() => {
+        if (totalPrice > prevTotalPriceRef.current) {
+            setPriceAnimClass('animate-price-up');
+            setPriceColorClass('text-emerald-400');
+        } else if (totalPrice < prevTotalPriceRef.current) {
+            setPriceAnimClass('animate-price-down');
+            setPriceColorClass('text-rose-400');
+        }
+        prevTotalPriceRef.current = totalPrice;
+
+        const timer = setTimeout(() => {
+            setPriceAnimClass('');
+            setPriceColorClass('text-emerald-400');
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [totalPrice]);
 
     // Standardized Indian Rupee (₹) Formatter
     const formatCurrency = (amount) => {
@@ -37,64 +56,83 @@ const ShoppingCartProduct = ({
         }).format(amount);
     };
 
-    
     const handleIncrease = () => {
-
         if (quantity >= stock) return;
-        updateQuantity(quantity+1);
-    }
+        updateQuantity(quantity + 1);
+    };
 
     const handleDecrease = () => {
         if (quantity <= 1) return;
-        updateQuantity(quantity-1);
-    }
+        updateQuantity(quantity - 1);
+    };
 
     const updateQuantity = (newQuantity) => {
         // for guest user: 
-        if (!user){
-            GuestsetQuantity(id,newQuantity);
+        if (!user) {
+            GuestsetQuantity(id, newQuantity);
             return;
         }
 
-        queryClient.setQueryData(["serverCart"],(old)=> old?.map((item)=>item?.product?._id===id?{...item,quantity:newQuantity}:item))
+        queryClient.setQueryData(["serverCart"], (old) => 
+            old?.map((item) => item?.product?._id === id ? { ...item, quantity: newQuantity } : item)
+        );
 
-        debouncedUpdate(id,newQuantity);        
-    }
+        debouncedUpdate(id, newQuantity);        
+    };
 
-    const debouncedUpdate = (id,newQuantity)=>{
+
+    const debouncedUpdate = (id, newQuantity) => {
         if (timerRef.current) clearTimeout(timerRef.current);
         
         const timer = setTimeout(async () => {
-            const data = { quantity: newQuantity }
+            const data = { quantity: newQuantity };
             try {
                 await API.patch(`/v1/cart/product/${id}/update-quantity`, data);
                 notifySuccess("Quantity updated successfully!");
             } catch (error) {
-                queryClient.invalidateQueries(["serverCart"])
+                queryClient.invalidateQueries(["serverCart"]);
                 console.error("Couldn't update the quantity!", error?.response?.data || error);
                 notifyFailure(error?.response?.data || error);
             }
-        }, 500)
+        }, 500);
 
         timerRef.current = timer;
-    }   
+    };   
 
     useEffect(() => {
         return () => {
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
             }
-        }
-    }, [])
+        };
+    }, []);
 
     return (
         <div
             onClick={onClick}
-            className="w-full rounded-2xl p-4 sm:p-5 bg-[#09090b] border border-neutral-800/80 hover:border-neutral-700/80 hover:bg-[#0c0c0e] transition-all duration-200 cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg"
+            className="w-full rounded-2xl p-4 sm:p-5 bg-[#09090b] border border-neutral-800/80 hover:border-neutral-700/80 hover:bg-[#0c0c0e] transition-all duration-200 cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg relative overflow-hidden"
         >
+            {/* Inline keyframes for upward / downward price motion */}
+            <style>{`
+                @keyframes slideUp {
+                    0% { transform: translateY(10px); opacity: 0.3; }
+                    100% { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes slideDown {
+                    0% { transform: translateY(-10px); opacity: 0.3; }
+                    100% { transform: translateY(0); opacity: 1; }
+                }
+                .animate-price-up {
+                    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                .animate-price-down {
+                    animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+            `}</style>
+
             {/* Left Side: Larger Thumbnail & Details */}
             <div className="flex items-center gap-4.5 w-full sm:w-auto flex-1 min-w-0">
-                {/* Enlarged Image Container (w-20 sm:w-22) */}
+                {/* Enlarged Image Container */}
                 <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-neutral-950 border border-neutral-800/80 p-2 flex items-center justify-center shrink-0 group-hover:scale-[1.03] transition-transform duration-200 overflow-hidden shadow-inner">
                     <img className="max-w-full max-h-full object-contain rounded-xl" src={image} alt={name} />
                 </div>
@@ -155,9 +193,9 @@ const ShoppingCartProduct = ({
                 </div>
 
                 {/* Subtotal Display */}
-                <div className="flex flex-col items-start sm:items-end min-w-[85px]">
+                <div className="flex flex-col items-start sm:items-end min-w-[85px] overflow-hidden">
                     <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">Subtotal</span>
-                    <span className="font-mono text-base text-emerald-400 font-bold tracking-tight">
+                    <span className={`inline-block font-mono text-base font-bold tracking-tight transition-colors duration-300 ${priceAnimClass} ${priceColorClass}`}>
                         {formatCurrency(totalPrice)}
                     </span>
                 </div>
@@ -176,7 +214,7 @@ const ShoppingCartProduct = ({
                 </button>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default ShoppingCartProduct
+export default ShoppingCartProduct;

@@ -1,74 +1,64 @@
-import React, { useState } from 'react'
-import { useCartStore } from '../store/cart.store';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { API } from '../api/axiosInstance';
 import { useUser } from '../hooks/useCurrentUser';
+import { useCart } from '../hooks/useCart';
 
-const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handlePayNow,setShowLoggedInWarning }) => {
+const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handlePayNow, setShowLoggedInWarning }) => {
 
-
-    const guestProductsInCart = useCartStore((state) => state.guestProductsInCart);
     const [shippingCost, setShippingCost] = useState(0);
     const navigate = useNavigate();
-    const {user} = useUser();
-    let subTotal = 0;
-    console.log("the products with id and quantity are: ",guestProductsInCart);
-    const ids = guestProductsInCart.map((p)=>p.productId);
+    const { user } = useUser();
+    const { items, isLoading } = useCart();
 
-    const fetchProducts = async () => {
-        const response = await API.get("/v1/cart/products");
-        console.log("the response is: ", response.data)
-        return response.data.products;
+    const { subTotal, gstPrice, totalAmount } = useMemo(() => {
+        let sub = 0;
+        let gst=0;
 
-    }
+        if (items?.length > 0) {
+            items.forEach((p) => {
+                sub += p.quantity * p.product.price;
+            });
+        }
 
-    // for guest products
-    const fetchProductsByIds = async () => {
-        const response = await API.post("/v1/product/get-products-by-ids", {productIds:ids});
-        // const guestProductsInCart = response.data.products;
-        const productsWithQuantity = response.data.products.map((p) => {
-            const cartItem = {
-                product: p,
-                quantity: guestProductsInCart.find((product) => product.productId === p._id.toString()).quantity
-            }
-            return cartItem
-        })
-        console.log("the guest Products are: ", productsWithQuantity);
-        return productsWithQuantity;
-    }
-
-    const { data: serverProducts } = useQuery({
-        queryKey: ["serverOrders"],
-        queryFn: fetchProducts,
-        enabled: !!user,
-    })
-
-    const { data: guestProducts } = useQuery({
-        queryKey: ["guestOrders", ids],
-        queryFn: fetchProductsByIds,
-        enabled: !user,
-    })
-    const cartProducts = user ? serverProducts : guestProducts;
-    const productsInCart = cartProducts || [];
-
-
-
-    if (productsInCart?.length > 0) {
-
-        productsInCart.forEach((p) => {
-            subTotal += p.quantity * p.product.price;
+        items.forEach((p) => {
+            gst += p.product.price * p.quantity * p.product.gstRate / 100;
         });
-    }
 
-    console.log("the products in cart are: ", productsInCart)
-    // const gstPrice = subTotal * gstPercentage / 100;
-    let gstPrice = 0;
+        
+        const total = sub + gst;
 
-    productsInCart.forEach((p) => {
-        gstPrice += p.product.price * p.quantity * p.product.gstRate / 100
-    })
-    const totalAmount = subTotal + gstPrice;
+        return {subTotal:sub,gstPrice:gst,totalAmount:total};
+
+
+    }, [items])
+
+
+
+
+
+    // Price change animation tracking
+    const prevTotalRef = useRef(totalAmount);
+    const [priceAnimClass, setPriceAnimClass] = useState('');
+    const [priceColorClass, setPriceColorClass] = useState('text-white');
+
+    useEffect(() => {
+        if (totalAmount > prevTotalRef.current) {
+            setPriceAnimClass('animate-price-up');
+            setPriceColorClass('text-emerald-400');
+        } else if (totalAmount < prevTotalRef.current) {
+            setPriceAnimClass('animate-price-down');
+            setPriceColorClass('text-rose-400');
+        }
+        prevTotalRef.current = totalAmount;
+
+        const timer = setTimeout(() => {
+            setPriceAnimClass('');
+            setPriceColorClass('text-white');
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [totalAmount]);
+
 
 
     // Standardized Indian Rupee (₹) Formatter
@@ -80,16 +70,30 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handl
         }).format(amount);
     };
 
-    const handleCheckout=()=>{
-        if(user) navigate('/checkout');
+    const handleCheckout = () => {
+        if (user) navigate('/checkout');
         else setShowLoggedInWarning(true);
-    }
-
-
-
+    };
 
     return (
-        <div className="w-full max-w-md bg-[#09090b] border border-neutral-800/80 rounded-2xl p-6 flex flex-col justify-between gap-6 shadow-xl">
+        <div className="w-full max-w-md bg-[#09090b] border border-neutral-800/80 rounded-2xl p-6 flex flex-col justify-between gap-6 shadow-xl relative overflow-hidden">
+            {/* Inline keyframes for upward / downward price motion */}
+            <style>{`
+                @keyframes slideUp {
+                    0% { transform: translateY(12px); opacity: 0.3; }
+                    100% { transform: translateY(0); opacity: 1; }
+                }
+                @keyframes slideDown {
+                    0% { transform: translateY(-12px); opacity: 0.3; }
+                    100% { transform: translateY(0); opacity: 1; }
+                }
+                .animate-price-up {
+                    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                .animate-price-down {
+                    animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+            `}</style>
 
             {/* Header */}
             <div className="flex items-center justify-between border-b border-neutral-800/60 pb-4">
@@ -97,7 +101,7 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handl
                     Order Summary
                 </h2>
                 <span className="text-xs font-mono text-neutral-500 bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded-full">
-                    {productsInCart.length} {productsInCart.length === 1 ? 'item' : 'items'}
+                    {items.length} {items.length === 1 ? 'item' : 'items'}
                 </span>
             </div>
 
@@ -143,35 +147,39 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handl
                     <span className="text-base font-semibold text-white">Total Amount</span>
                     <span className="text-[11px] text-neutral-500 font-mono">Includes all applicable taxes</span>
                 </div>
-                <span className="text-2xl font-bold font-mono text-white tracking-tight">
-                    {formatCurrency(totalAmount)}
-                </span>
+                <div className="overflow-hidden py-1">
+                    <span className={`inline-block text-2xl font-bold font-mono tracking-tight transition-colors duration-300 ${priceAnimClass} ${priceColorClass}`}>
+                        {formatCurrency(totalAmount)}
+                    </span>
+                </div>
             </div>
 
             {/* Primary Action Button */}
-            {isCartButton ? <button
-                type="button"
-                disabled={isDisabledButton}
-                onClick={handleCheckout}
-                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
-            >
-                <span>Proceed to Checkout</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                </svg>
-            </button> : <button
-                type="button"
-                disabled={isDisabledButton}
-                onClick={handlePayNow}
-                className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
-            >
-                <span>Pay Now!</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                </svg>
-            </button>}
-
-
+            {isCartButton ? (
+                <button
+                    type="button"
+                    disabled={isDisabledButton}
+                    onClick={handleCheckout}
+                    className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
+                >
+                    <span>Proceed to Checkout</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                    </svg>
+                </button>
+            ) : (
+                <button
+                    type="button"
+                    disabled={isDisabledButton}
+                    onClick={handlePayNow}
+                    className="w-full py-3.5 px-4 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-xl text-sm transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2 mt-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:hover:bg-emerald-500 disabled:shadow-none"
+                >
+                    <span>Pay Now!</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                    </svg>
+                </button>
+            )}
 
             {/* Trust Badges / Perks Section */}
             <div className="other-info flex flex-col gap-2.5 pt-4 border-t border-neutral-900 text-xs text-neutral-400">
@@ -196,9 +204,8 @@ const OrderSummaryCard = ({ isDisabledButton = false, isCartButton = true, handl
                     <span>Encrypted & secure checkout</span>
                 </div>
             </div>
-
         </div>
-    )
-}
+    );
+};
 
 export default OrderSummaryCard;
