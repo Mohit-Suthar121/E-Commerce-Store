@@ -53,20 +53,6 @@ export const useCartStore = create(
             })),
 
 
-
-
-
-
-            // this address part should not stay here, only the cart things should stay here
-            currentAddress:null,
-            addresses:[],
-            setAddresses:(newAddresses)=>set({addresses:newAddresses}),
-            updateAddress:(id,data)=>set((state)=>({
-                addresses:state.addresses.map((address)=>address?._id===id?{...address,...data}:address)
-            })),
-            setCurrentAddress:(address)=>set({currentAddress:address})
-
-
             
         })),
 

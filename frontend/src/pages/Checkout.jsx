@@ -9,6 +9,7 @@ import FinalSelectedAddressCard from '../components/FinalSelectedAddressCard'
 import CheckoutOrderItemsCard from '../components/CheckoutOrderItemsCard'
 import { useUser } from '../hooks/useCurrentUser'
 import { useCart } from '../hooks/useCart'
+import { useAddresses } from '../hooks/useAddresses'
 
 const CheckoutPage = () => {
     const [addNewAddress, setAddNewAddress] = useState(false)
@@ -16,60 +17,23 @@ const CheckoutPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [finalSelectedAddress, setFinalSelectedAddress] = useState(null);
     const setAddresses = useCartStore((state) => state.setAddresses);
-    const addresses = useCartStore((state) => state.addresses);
-    const updateAddress = useCartStore((state) => state.updateAddress);
-    const setCurrentAddress = useCartStore((state)=>state.setCurrentAddress);
-    const currentAddress = useCartStore((state)=>state.currentAddress);
+    const { addresses, handleAddNewAddress, handleDeleteAddress, handleEditAddress, isLoading: isAddressLoading } = useAddresses();
+    const setCurrentAddress = useCartStore((state) => state.setCurrentAddress);
+    const currentAddress = useCartStore((state) => state.currentAddress);
     const [selectedAddress, setSelectedAddress] = useState(null);
-    const {items} = useCart();
-    const {user} = useUser();
+    const { items } = useCart();
+    const { user } = useUser();
 
-    
+
     useEffect(() => {
-        const initialSelectedAddress = addresses.find((add) => add?.isDefault)
+        const initialSelectedAddress = addresses?.find((add) => add?.isDefault)
         console.log("the initial selected product is: ", initialSelectedAddress)
         console.log("all the addresses are: ", addresses)
         if (initialSelectedAddress) {
             setSelectedAddress(initialSelectedAddress._id);
-            setCurrentAddress(initialSelectedAddress);
         }
     }, [addresses])
 
-
-    const fetchAddresses = async () => {
-        try {
-            const response = await API.get("/v1/user/addresses/get-all-addresses");
-            console.log("the received addresses are", response.data.addresses);
-            setAddresses(response.data.addresses);
-        } catch (error) {
-            console.error("error fetching the addresses", error?.response?.data || error);
-        }
-    }
-
-    const handleAddNewAddress = async (data) => {
-        try {
-            setIsLoading(true);
-            const newData = {
-                name: data.firstName + " " + data.lastName,
-                email: data.email,
-                phoneNo: data.phoneNo,
-                street: data.street,
-                city: data.city,
-                zipCode: data.zipCode,
-                state: data.state
-            }
-            const response = await API.post("/v1/user/addresses/add-address", newData);
-            console.log("address added successfully!", response.data);
-            setAddNewAddress(false)
-            setAddresses(response.data.addresses)
-            notifySuccess("address added successfully")
-        } catch (error) {
-            console.error("couldn't add address!", error?.response?.data || error);
-            notifyFailure(error?.response?.data)
-        } finally {
-            setIsLoading(false);
-        }
-    }
 
     const getInitialData = (id) => {
         const data = addresses.find((address) => address?._id === id);
@@ -79,46 +43,13 @@ const CheckoutPage = () => {
         else return null
     }
 
-    const handleDeleteAddress = async (id) => {
-        try {
-            const response = await API.delete(`/v1/user/addresses/delete-address/${id}`);
-            setAddresses(response.data.addresses);
-            notifySuccess("address deleted successfully!");``
-            console.log("the deletable address's id is: ", id)
-            console.log("the left address in the cart are: ", addresses);
-        } catch (error) {
-            console.error("couldn't delete address", error?.response?.data || error);
-            notifyFailure(error?.response?.data || error)
-        }
-    }
 
     const getFinalAddress = (id) => {
         const selectedAddress = addresses.find((address) => address?._id === id);
         return selectedAddress ? selectedAddress : null;
     }
 
-    useEffect(() => {
-        fetchAddresses()
-    }, [])
 
-    const handleEditAddress = async (data, addressId) => {
-        try {
-            setIsLoading(true)
-            const payload = { ...data, name: data.firstName + " " + data.lastName };
-            delete payload.firstName;
-            delete payload.lastName;
-            const response = await API.patch(`/v1/user/addresses/edit-address/${addressId}`, payload);
-            updateAddress(addressId, payload);
-            console.log("the address updated successfully!")
-            notifySuccess("address updated successfully!")
-        } catch (error) {
-            console.error("counldn't update the address", error?.response?.data || error);
-            notifyFailure(error?.response?.data || error)
-        } finally {
-            setIsLoading(false);
-            setIsEditingAddress(null)
-        }
-    }
 
 
     const loadRazorpayScript = () => {
@@ -138,7 +69,7 @@ const CheckoutPage = () => {
 
     // while checking out, we will send the addressId to the backend, so that it easily access, which order is this and all that
     const handlePayNow = async () => {
-        if(!finalSelectedAddress) return;
+        if (!finalSelectedAddress) return;
         const isLoaded = await loadRazorpayScript();
         if (!isLoaded) {
             notifyFailure("Razorpay SDK failed to load. Check your connection");
@@ -146,7 +77,7 @@ const CheckoutPage = () => {
         }
 
         try {
-            
+
             const addressId = finalSelectedAddress?._id;
             const response = await API.post("/v1/payment/create-order", { addressId });
             const order = response.data.order;
@@ -196,10 +127,10 @@ const CheckoutPage = () => {
 
     }
 
-    const handleFinalizeAddress = async()=>{
+    const handleFinalizeAddress = async () => {
         const finalizedAddress = getFinalAddress(selectedAddress);
-        console.log("the finalized address is: ",finalizedAddress)
-        if(!finalizedAddress) {
+        console.log("the finalized address is: ", finalizedAddress)
+        if (!finalizedAddress) {
             console.log("if is running");
             return;
         }
@@ -208,9 +139,9 @@ const CheckoutPage = () => {
         setCurrentAddress(finalizedAddress);
     }
 
-    useEffect(()=>{
-        console.log("the current selected address is: ",currentAddress)
-    },[currentAddress])
+    useEffect(() => {
+        console.log("the current selected address is: ", currentAddress)
+    }, [currentAddress])
 
     return (
         <div className="w-full min-h-screen bg-black text-neutral-200 flex justify-center items-start p-6 sm:p-10 lg:p-12">
@@ -218,7 +149,6 @@ const CheckoutPage = () => {
             {/* Main Checkout Grid Container */}
             <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                {/* Left Column: Address Management Section */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
 
                     {!addNewAddress && !isEditingAddress && !finalSelectedAddress ? (
@@ -240,7 +170,7 @@ const CheckoutPage = () => {
 
                             {/* Saved Addresses Scroll List */}
                             <div className="address-div flex flex-col gap-3.5 w-full max-h-[520px] overflow-y-auto p-1.5 scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent p-5">
-                                {addresses.map((address) => <AddressCard
+                                {addresses?.map((address) => <AddressCard
                                     key={address?._id}
                                     id={address?._id}
                                     setSelectedAddress={setSelectedAddress}
@@ -290,7 +220,7 @@ const CheckoutPage = () => {
                     ) : !addNewAddress && !isEditingAddress && finalSelectedAddress ? (
                         <div className='flex flex-col gap-4' >
 
-                            <FinalSelectedAddressCard address={finalSelectedAddress} onChange={() => { setFinalSelectedAddress(null) }} />
+                            <FinalSelectedAddressCard address={finalSelectedAddress}  onBack={()=>{setFinalSelectedAddress(null)}} />
                             <CheckoutOrderItemsCard items={items} />
                         </div>
 
@@ -320,6 +250,7 @@ const CheckoutPage = () => {
                     }
 
                 </div>
+
 
                 {/* Right Column: Order Summary Card Sticky Anchor */}
                 <div className="lg:col-span-5 w-full flex justify-center lg:justify-end lg:sticky lg:top-10">

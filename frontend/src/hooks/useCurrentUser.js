@@ -8,15 +8,20 @@ const fetchUser = async () => {
     return response.data;
 }
 
+
 export const useUser = () => {
 
     const { data, isLoading } = useQuery({
         queryKey: ["user"],
         queryFn: fetchUser,
+        staleTime:5 *60 *1000,
         retry: false,
     })
+
+    
+
     return {
-        user:data?.user,
+        user: data?.user,
         isLoading
     }
 

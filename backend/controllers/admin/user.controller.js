@@ -23,6 +23,7 @@ export const getUsers = async (req, res) => {
         }
 
         const users = await User.find(query).limit(limit).skip(skip);
+        console.log("request was successfully received and the users are:! " ,users);
         return res.status(200).json({
             message: "users fetched successfully!",
             totalPages,

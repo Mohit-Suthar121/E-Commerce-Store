@@ -1,22 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import UserInfoCard from '../components/UserInfoCard'
-import { Outlet } from 'react-router-dom'
 import AdminPaginationController from '../components/AdminPaginationController';
-import { API } from '../api/axiosInstance';
-import { useAdminUsersStore } from '../store/users.store';
 import NoUsersFoundCard from '../components/NoUsersFoundCard';
 import { Rings } from 'react-loader-spinner';
+import { useAdminUsers } from '../hooks/admin/useAdminUsers';
+import FullPageLoader from '../components/FullPageLoader';
 
 const AdminShowUsersPage = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isLoading, setIsLoading] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [inputValue, setInputValue] = useState("");
     const timerRef = useRef();
-    const currentUsers = useAdminUsersStore((state) => state.currentUsers);
-    const setCurrentUsers = useAdminUsersStore((state) => state.setCurrentUsers);
+    const { currentUsers, isFetchingUsers: isLoading, totalPages } = useAdminUsers({ currentPage, searchValue });
+    console.log("the current Users are", currentUsers);
 
     const handleNextPage = () => {
         if (currentPage === totalPages) return;
@@ -27,20 +24,6 @@ const AdminShowUsersPage = () => {
         if (currentPage === 1) return;
         setCurrentPage((state) => state - 1);
     };
-
-    async function fetchUsers() {
-        try {
-            setIsLoading(true)
-            const response = await API.get(`/v1/admin/users/get-all-users?limit=12&page=${currentPage}&search=${searchValue}`);
-            setCurrentUsers(response.data.users);
-            console.log("The response is: ", response.data);
-
-        } catch (error) {
-            console.error("some error occured:", error)
-        } finally {
-            setIsLoading(false);
-        }
-    }
 
 
     async function handleChange(e) {
@@ -55,12 +38,12 @@ const AdminShowUsersPage = () => {
 
     }
 
-    useEffect(() => {
-        fetchUsers();
-    }, [currentPage, searchValue])
+    if(isLoading) return <FullPageLoader/>;
+
 
     return (
-        <div className="flex-1 flex flex-col gap-5 p-5 bg-[#060606] text-neutral-200 font-sans antialiased select-none ">
+
+      <div className="flex-1 flex flex-col gap-5 p-5 bg-[#060606] text-neutral-200 font-sans antialiased select-none ">
 
             <div className="flex flex-col w-full pl-1 border-b border-neutral-900 pb-4">
                 <h2 className="text-xl font-bold tracking-tight text-neutral-100">
@@ -89,15 +72,15 @@ const AdminShowUsersPage = () => {
                 </div>
             </div>
 
-            {currentUsers.length == 0 && !isLoading ? <NoUsersFoundCard /> : !isLoading && <div className="users-section flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 gap-2 w-full flex-1 min-h-0 overflow-y-auto scrollbar-gutter-stable scrollbar-design">
-                {currentUsers.map((user) =>
-                 <UserInfoCard
-                    profilePicture={user?.profilePic?.url}
-                    username={user?.name}
-                    email={user?.email}
-                    position={user?.role}
-                    key={user?._id}
-                />)}
+            {currentUsers?.length == 0 && !isLoading ? <NoUsersFoundCard /> : !isLoading && <div className="users-section flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 gap-2 w-full flex-1 min-h-0 overflow-y-auto scrollbar-gutter-stable scrollbar-design">
+                {currentUsers?.map((user) =>
+                    <UserInfoCard
+                        profilePicture={user?.profilePic?.url}
+                        username={user?.name}
+                        email={user?.email}
+                        position={user?.role}
+                        key={user?._id}
+                    />)}
 
                 {/* <UserInfoCard
                     profilePicture={""}
@@ -116,10 +99,10 @@ const AdminShowUsersPage = () => {
 
 
             </div>}
-           
 
-           {isLoading && <div className=" flex flex-1 justify-center items-center ">
-                 <Rings
+
+            {isLoading && <div className=" flex flex-1 justify-center items-center ">
+                <Rings
                     visible={true}
                     height="80"
                     width="80"

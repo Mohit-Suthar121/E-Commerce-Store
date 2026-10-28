@@ -7,10 +7,12 @@ import HomeHamburgerContent from './HomeHamburgerContent'
 import DashboardHamburgerContent from './DashboardHamburgerContent'
 import fullLogo from '../assets/FullLogo.jpg'
 import { useUser } from '../hooks/useCurrentUser'
+import { useCart } from '../hooks/useCart'
 
 const Navbar = () => {
     const [showMenu, setShowMenu] = useState(false);
     const {user} = useUser();
+    const {items} = useCart();
     const location = useLocation();
     console.log("the user is: ",user);
     return (
@@ -72,9 +74,9 @@ const Navbar = () => {
                     <Link to={"/cart"} >
                         <div className="cart cursor-pointer flex relative w-8 h-8 justify-center items-center text-neutral-400 hover:text-neutral-100 transition-colors">
 
-                            <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 border border-[#060606] flex justify-center items-center text-[9px] text-white font-black shadow-sm">
-                                1
-                            </div>
+                            {items.length>0&&<div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 border border-[#060606] flex justify-center items-center text-[9px] text-white font-black shadow-sm">
+                                {items.length}
+                            </div>}
                             <CartLogo className="w-5 h-5 font-bold" currentColor="currentColor" />
                         </div>
                     </Link>

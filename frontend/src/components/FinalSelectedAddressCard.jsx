@@ -3,9 +3,9 @@ import React from 'react'
 // UI-only component. Just displays the currently selected address.
 // Expected props:
 // - address: the selected address object { name, email, phoneNo, street, city, state, zipCode }
-// - onChange: () => void  -> go back to address selection (optional)
+// - onBack: () => void    -> go back to the previous step (optional)
 
-const FinalSelectedAddressCard = ({ address = null, onChange}) => {
+const FinalSelectedAddressCard = ({ address = null,  onBack }) => {
     if (!address) return null
 
     return (
@@ -30,7 +30,7 @@ const FinalSelectedAddressCard = ({ address = null, onChange}) => {
                 {/* Decorative glow */}
                 <div className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full bg-emerald-500/10 blur-3xl" />
 
-                {/* Top row: icon + name + confirmed badge */}
+                {/* Top row: icon + name + confirmed badge + actions */}
                 <div className="relative flex items-start justify-between gap-4 p-6 border-b border-neutral-800/80">
                     <div className="flex items-start gap-4">
                         <div className="shrink-0 w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
@@ -50,13 +50,21 @@ const FinalSelectedAddressCard = ({ address = null, onChange}) => {
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={onChange}
-                        className="shrink-0 text-xs font-mono text-neutral-400 hover:text-emerald-400 border border-neutral-800 hover:border-emerald-500/40 rounded-xl px-3 py-2 transition-colors cursor-pointer"
-                    >
-                        Change
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2 shrink-0">
+                        {onBack && (
+                            <button
+                                type="button"
+                                onClick={onBack}
+                                className="text-xs font-mono text-neutral-400 hover:text-neutral-200 border border-neutral-800 hover:border-neutral-700 rounded-xl px-3 py-2 transition-colors cursor-pointer flex items-center gap-1.5"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                                </svg>
+                                Back
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Details grid */}
