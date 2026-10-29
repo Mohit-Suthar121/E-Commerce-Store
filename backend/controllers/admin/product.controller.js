@@ -226,3 +226,17 @@ export const deleteProduct = async (req, res) => {
         })
     }
 }
+
+export const countProducts = async(req,res)=>{
+    try {
+        const productCount = await Product.countDocuments();
+        return res.status(200).json({
+            message:"Product's count found successfully!",
+            productCount
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message:"Internal server error",
+        })
+    }
+}

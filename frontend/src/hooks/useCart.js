@@ -12,6 +12,7 @@ export const useCart = () => {
 
     const guestProductsInCart = useCartStore((state) => state.guestProductsInCart);
     const ids = guestProductsInCart.map((p) => p.productId);
+    
     const fetchCart = async () => {
         const response = await API.get("/v1/cart/get-cart");
         console.log("the cart is: ", response.data.cart);

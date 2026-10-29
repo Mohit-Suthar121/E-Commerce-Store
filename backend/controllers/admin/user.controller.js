@@ -38,3 +38,19 @@ export const getUsers = async (req, res) => {
         })
     }
 }
+
+
+export const countUsers = async(req,res)=>{
+    try {
+        const userCount = await User.countDocuments();
+        return res.status(200).json({
+            message:"users counted Successfully!",
+            userCount
+
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message:"Internal Server Error",
+        })
+    }
+}

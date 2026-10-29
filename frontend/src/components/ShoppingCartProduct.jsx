@@ -110,7 +110,7 @@ const ShoppingCartProduct = ({
     return (
         <div
             onClick={onClick}
-            className="w-full rounded-2xl p-4 sm:p-5 bg-[#09090b] border border-neutral-800/80 hover:border-neutral-700/80 hover:bg-[#0c0c0e] transition-all duration-200 cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg relative overflow-hidden"
+            className="w-full rounded-2xl shrink-0 p-4 sm:p-5 bg-[#09090b] border border-neutral-800/80 hover:border-neutral-700/80 hover:bg-[#0c0c0e] transition-all duration-200 cursor-pointer group flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 shadow-lg relative overflow-hidden"
         >
             {/* Inline keyframes for upward / downward price motion */}
             <style>{`

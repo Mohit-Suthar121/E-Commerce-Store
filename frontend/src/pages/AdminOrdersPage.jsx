@@ -70,34 +70,34 @@ const AdminOrdersPage = () => {
                     </thead>
 
                     <tbody className="divide-y divide-neutral-900/60">
-                        {orders.map((order) => (
-                            <tr onClick={()=>{setOrderDetails(order)}} key={order._id} className="cursor-pointer hover:bg-neutral-950/40 transition-colors duration-150 group">
+                        {orders?.map((order) => (
+                            <tr onClick={()=>{setOrderDetails(order)}} key={order?._id} className="cursor-pointer hover:bg-neutral-950/40 transition-colors duration-150 group">
 
                                 <td className="px-5 py-4 text-xs font-mono text-neutral-400 group-hover:text-neutral-200 transition-colors">
-                                    #{order._id}
+                                    #{order?._id}
                                 </td>
 
                                 <td className="px-5 py-4 text-sm font-medium text-neutral-200 truncate max-w-50">
-                                    {order.user.email}
+                                    {order?.user?.email}
                                 </td>
 
                                 <td className="px-5 py-4 text-sm font-medium text-neutral-400">
                                     <span className="text-neutral-600 font-mono text-xs mr-0.5">x</span>
-                                    {order.orderedItems.length}
+                                    {order?.orderedItems?.length}
                                 </td>
 
                                 <td className="px-5 py-4 text-sm font-bold font-mono text-neutral-200">
-                                    ₹{order.totalAmount.toLocaleString()}
+                                    ₹{order?.totalAmount?.toLocaleString()}
                                 </td>
 
                                 <td className="px-5 py-4 text-center">
                                     <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wide uppercase border ${statusConfig[order.paymentInfo.status] || "bg-neutral-800 text-neutral-400 border-neutral-700"}`}>
-                                        {order.paymentInfo.status}
+                                        {order?.paymentInfo.status}
                                     </span>
                                 </td>
 
                                 <td className="px-5 py-4 text-xs font-medium font-mono text-neutral-500 text-right">
-                                    {formatDate(order.createdAt)}
+                                    {formatDate(order?.createdAt)}
                                 </td>
 
                             </tr>
@@ -107,8 +107,8 @@ const AdminOrdersPage = () => {
                 </table>
             </div>
 
-            {orders.map((order) => (
-                <OrderInfoCardMobileScreen key={order._id} onClick={()=>{setOrderDetails(order)}} orderId={order._id} userGmail={order.user.email} itemsCount={order.orderedItems.length} totalPrice={order.totalAmount} paymentStatus={order.status} fulfillmentDate={order.date} />
+            {orders?.map((order) => (
+                <OrderInfoCardMobileScreen key={order?._id} onClick={()=>{setOrderDetails(order)}} orderId={order?._id} userGmail={order?.user?.email} itemsCount={order?.orderedItems.length} totalPrice={order?.totalAmount} paymentStatus={order?.status} fulfillmentDate={order?.date} />
 
             ))}
 
